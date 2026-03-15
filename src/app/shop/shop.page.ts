@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ToastController } from '@ionic/angular';
 import {
   IonHeader,
   IonToolbar,
@@ -67,7 +68,10 @@ export class ShopPage {
     upper: this.maxPrice,
   };
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private toastController: ToastController,
+  ) {}
 
   get filteredProducts(): ProductItem[] {
     let products = this.allProducts.filter((item) => {
@@ -134,7 +138,7 @@ export class ShopPage {
     this.router.navigate(['/tabs/item', itemId]);
   }
 
-  addToCart(item: ProductItem, event: Event): void {
+  async addToCart(item: ProductItem, event: Event): Promise<void> {
     event.stopPropagation();
 
     const cartRaw = localStorage.getItem('cart-items');
@@ -148,5 +152,17 @@ export class ShopPage {
     }
 
     localStorage.setItem('cart-items', JSON.stringify(cartItems));
+    await this.presentBookingToast(item.name);
+  }
+
+  private async presentBookingToast(itemName: string): Promise<void> {
+    const toast = await this.toastController.create({
+      message: `${itemName} has been added to your bookings.`,
+      duration: 1800,
+      color: 'success',
+      position: 'top',
+    });
+
+    await toast.present();
   }
 }

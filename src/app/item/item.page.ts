@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { IonContent, IonButton } from '@ionic/angular/standalone';
+import { ToastController } from '@ionic/angular';
 import { FooterComponent } from '../footer/footer.component';
 import { CATEGORY_SECTIONS, findProductById, getDiscountPercent, ProductItem } from '../shared/product-catalog';
 import { Subscription } from 'rxjs';
@@ -24,6 +25,7 @@ export class ItemPage implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
+    private toastController: ToastController,
   ) {}
 
   ngOnInit(): void {
@@ -79,7 +81,7 @@ export class ItemPage implements OnInit {
     this.router.navigate(['/tabs/item', itemId]);
   }
 
-  addToCart(item: ProductItem): void {
+  async addToCart(item: ProductItem): Promise<void> {
     const cartRaw = localStorage.getItem('cart-items');
     const cartItems = cartRaw ? JSON.parse(cartRaw) as Array<{ id: number; qty: number }> : [];
     const existingItem = cartItems.find((cartItem) => cartItem.id === item.id);
@@ -91,11 +93,23 @@ export class ItemPage implements OnInit {
     }
 
     localStorage.setItem('cart-items', JSON.stringify(cartItems));
+    await this.presentBookingToast(item.name);
   }
 
-  addRecommendedToCart(item: ProductItem, event: Event): void {
+  async addRecommendedToCart(item: ProductItem, event: Event): Promise<void> {
     event.stopPropagation();
-    this.addToCart(item);
+    await this.addToCart(item);
+  }
+
+  private async presentBookingToast(itemName: string): Promise<void> {
+    const toast = await this.toastController.create({
+      message: `${itemName} has been added to your bookings.`,
+      duration: 1800,
+      color: 'success',
+      position: 'top',
+    });
+
+    await toast.present();
   }
 
   private buildGallery(item: ProductItem): string[] {

@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonContent, IonButton } from '@ionic/angular/standalone';
+import { ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { FooterComponent } from '../footer/footer.component';
 import { CATEGORY_SECTIONS, CategorySection, getDiscountPercent, ProductItem } from '../shared/product-catalog';
@@ -42,7 +43,10 @@ export class HomePage implements OnInit, OnDestroy {
   currentSlideIndex = 0;
   private carouselTimer: ReturnType<typeof setInterval> | null = null;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private toastController: ToastController,
+  ) {}
 
   ngOnInit(): void {
     this.startAutoplay();
@@ -86,7 +90,7 @@ export class HomePage implements OnInit, OnDestroy {
     this.router.navigate(['/tabs/shop']);
   }
 
-  addToCart(item: ProductItem, event: Event): void {
+  async addToCart(item: ProductItem, event: Event): Promise<void> {
     event.stopPropagation();
 
     const cartRaw = localStorage.getItem('cart-items');
@@ -100,6 +104,18 @@ export class HomePage implements OnInit, OnDestroy {
     }
 
     localStorage.setItem('cart-items', JSON.stringify(cartItems));
+    await this.presentBookingToast(item.name);
+  }
+
+  private async presentBookingToast(itemName: string): Promise<void> {
+    const toast = await this.toastController.create({
+      message: `${itemName} has been added to your bookings.`,
+      duration: 1800,
+      color: 'success',
+      position: 'top',
+    });
+
+    await toast.present();
   }
 
   pauseAutoplay(): void {
