@@ -1,0 +1,132 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>All Trips</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <section class="shop-hero">
+    <div class="shop-hero-inner">
+      <h1>All Trips</h1>
+      <p>Browse our hand-picked travel packages — safaris, beach retreats, city escapes and adventure tours across Africa.</p>
+    </div>
+  </section>
+
+  <section class="shop-content ion-padding">
+    <div class="filters-header">
+      <h2>Browse Packages</h2>
+      <ion-button fill="clear" color="medium" (click)="clearFilters()">Reset Filters</ion-button>
+    </div>
+
+    <ion-searchbar
+      placeholder="Search trips, destinations, or experiences…"
+      [(ngModel)]="searchTerm"
+      show-clear-button="focus"
+      class="search-field">
+    </ion-searchbar>
+
+    <div class="filters-grid">
+      <ion-item lines="none" class="filter-item">
+        <ion-label>Destination Type</ion-label>
+        <ion-select [(ngModel)]="selectedCategory" interface="popover">
+          @for (category of categories; track category) {
+            <ion-select-option [value]="category">{{ category === 'all' ? 'All Types' : category }}</ion-select-option>
+          }
+        </ion-select>
+      </ion-item>
+
+      <ion-item lines="none" class="filter-item">
+        <ion-label>Sort</ion-label>
+        <ion-select [(ngModel)]="sortBy" interface="popover">
+          <ion-select-option value="featured">Featured</ion-select-option>
+          <ion-select-option value="price-asc">Price: Low to High</ion-select-option>
+          <ion-select-option value="price-desc">Price: High to Low</ion-select-option>
+          <ion-select-option value="name-asc">Name: A-Z</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item lines="none" class="filter-item">
+        <ion-label>Special Offers</ion-label>
+        <ion-toggle [(ngModel)]="discountedOnly"></ion-toggle>
+      </ion-item>
+    </div>
+
+    <div class="range-wrap">
+      <div class="range-head">
+        <span>Price Range</span>
+        <strong>{{ formatRand(priceRange.lower) }} - {{ formatRand(priceRange.upper) }}</strong>
+      </div>
+      <ion-range [(ngModel)]="priceRange" dualKnobs="true" [min]="0" [max]="maxPrice" [step]="10"></ion-range>
+    </div>
+
+    <div class="quick-row">
+      <ion-chip outline="true" (click)="setQuickFilter('all')">All Trips</ion-chip>
+      <ion-chip outline="true" (click)="setQuickFilter('under-500')">Under R15,000</ion-chip>
+      <ion-chip outline="true" (click)="setQuickFilter('discounts')">Special Offers</ion-chip>
+    </div>
+
+    <div class="view-row">
+      <span>{{ filteredProducts.length }} {{ filteredProducts.length === 1 ? 'trip' : 'trips' }} found</span>
+      <ion-segment [(ngModel)]="viewMode" value="grid">
+        <ion-segment-button value="grid">Grid</ion-segment-button>
+        <ion-segment-button value="compact">Compact</ion-segment-button>
+      </ion-segment>
+    </div>
+
+    @if (filteredProducts.length === 0) {
+      <div class="empty-state">
+        <p>No trips match your filters. Try adjusting your search or resetting the filters.</p>
+      </div>
+    } @else {
+      <div class="products-grid" [class.compact]="viewMode === 'compact'">
+        @for (item of filteredProducts; track item.id) {
+          <article class="product-card" (click)="openItem(item.id)">
+            @if (item.originalPrice && item.originalPrice > item.price) {
+              <span class="discount-badge">Special Offer</span>
+            }
+
+            <div class="product-image-wrap">
+              <img [src]="item.image" [alt]="item.name" class="product-image" loading="lazy" />
+              @if (item.duration) {
+                <span class="product-duration">{{ item.duration }}</span>
+              }
+            </div>
+
+            <div class="product-info">
+              <p class="category-tag">{{ item.category }}</p>
+              <h3>{{ item.name }}</h3>
+              @if (item.location) {
+                <p class="product-location">📍 {{ item.location }}</p>
+              }
+              <p class="desc">{{ item.description }}</p>
+
+              @if (item.benefits && item.benefits.length) {
+                <ul class="product-benefits">
+                  @for (benefit of item.benefits.slice(0, 2); track benefit) {
+                    <li>✓ {{ benefit }}</li>
+                  }
+                </ul>
+              }
+
+              <div class="price-row">
+                <div>
+                  <span class="from-label">From</span>
+                  <strong class="trip-price">{{ formatRand(item.price) }}</strong>
+                  <span class="per-label">/ person</span>
+                </div>
+                @if (item.originalPrice && item.originalPrice > item.price) {
+                  <span class="old-price">{{ formatRand(item.originalPrice) }}</span>
+                }
+              </div>
+
+              <ion-button size="small" shape="round" color="primary" expand="block"
+                (click)="openItem(item.id); $event.stopPropagation()">
+                View Package
+              </ion-button>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </section>
+</ion-content>

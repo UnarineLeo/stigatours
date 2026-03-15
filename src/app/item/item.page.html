@@ -1,0 +1,137 @@
+<ion-content [fullscreen]="true">
+  <section class="item-hero">
+    <div class="item-hero-inner">
+      <h1>Trip Details</h1>
+      <p>Everything included — prices, highlights, and what's in your package.</p>
+    </div>
+  </section>
+
+  @if (product) {
+    <section class="item-shell">
+      <a routerLink="/tabs/home" class="back-link">← Back to Trips</a>
+
+      <article class="item-layout">
+        <div class="image-wrap">
+          @if (product.originalPrice && product.originalPrice > product.price) {
+            <span class="discount-badge">Special Offer</span>
+          }
+
+          <img [src]="selectedImage" [alt]="product.name" class="item-image" (click)="expandImage()" />
+
+          <button type="button" class="expand-btn" (click)="expandImage()" aria-label="Expand image">⤢</button>
+
+          <div class="thumb-row">
+            @for (image of galleryImages; track image) {
+              <button
+                type="button"
+                class="thumb-btn"
+                [class.active]="image === selectedImage"
+                (click)="selectImage(image)">
+                <img [src]="image" [alt]="product.name + ' view'" />
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="item-content">
+          <p class="item-category">{{ product.category }}</p>
+          <h1>{{ product.name }}</h1>
+
+          @if (product.location) {
+            <p class="item-location">📍 {{ product.location }}</p>
+          }
+
+          <div class="trip-meta">
+            @if (product.duration) {
+              <div class="meta-chip">
+                <span class="meta-icon">🗓️</span>
+                <span>{{ product.duration }}</span>
+              </div>
+            }
+            @if (product.groupSize) {
+              <div class="meta-chip">
+                <span class="meta-icon">👥</span>
+                <span>{{ product.groupSize }}</span>
+              </div>
+            }
+          </div>
+
+          <p class="item-description">{{ product.description }}</p>
+
+          <div class="price-row">
+            <div class="price-block">
+              <span class="price-from">From</span>
+              <p class="item-price">{{ formatRand(product.price) }}</p>
+              <span class="price-per">per person</span>
+            </div>
+            @if (product.originalPrice && product.originalPrice > product.price) {
+              <div class="was-price-block">
+                <span class="was-label">Was</span>
+                <p class="item-original-price">{{ formatRand(product.originalPrice) }}</p>
+              </div>
+            }
+          </div>
+
+          @if (product.benefits && product.benefits.length) {
+            <div class="package-includes">
+              <h2>What's Included</h2>
+              <ul class="benefits-list">
+                @for (benefit of product.benefits; track benefit) {
+                  <li class="benefit-item">
+                    <span class="check-icon">✓</span>
+                    <span>{{ benefit }}</span>
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+
+          <div class="book-actions">
+            <ion-button color="primary" shape="round" expand="block" (click)="addToCart(product)">
+              Book This Trip
+            </ion-button>
+            <ion-button fill="outline" shape="round" expand="block" routerLink="/tabs/shop">
+              Browse All Trips
+            </ion-button>
+          </div>
+        </div>
+      </article>
+
+      <section class="recommended">
+        <h2>You Might Also Like</h2>
+        <div class="recommended-grid">
+          @for (item of recommendedItems; track item.id) {
+            <article class="rec-card" (click)="openRecommendedItem(item.id)">
+              <div class="rec-image-wrap">
+                <img [src]="item.image" [alt]="item.name" class="rec-image" />
+                @if (item.duration) {
+                  <span class="rec-duration">{{ item.duration }}</span>
+                }
+              </div>
+              <div class="rec-info">
+                <p class="rec-category">{{ item.category }}</p>
+                <h3>{{ item.name }}</h3>
+                @if (item.location) {
+                  <p class="rec-location">📍 {{ item.location }}</p>
+                }
+                <div class="rec-footer">
+                  <p class="rec-price">{{ formatRand(item.price) }} <span>/ person</span></p>
+                  <ion-button size="small" fill="outline" shape="round" (click)="addRecommendedToCart(item, $event)">Book</ion-button>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      </section>
+    </section>
+
+    @if (isImageExpanded) {
+      <div class="image-overlay" (click)="closeExpandedImage()">
+        <button type="button" class="close-overlay" (click)="closeExpandedImage()" aria-label="Close image">✕</button>
+        <img [src]="selectedImage" [alt]="product.name" class="expanded-image" (click)="$event.stopPropagation()" />
+      </div>
+    }
+  }
+
+  <app-footer></app-footer>
+</ion-content>

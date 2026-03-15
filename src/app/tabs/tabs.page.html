@@ -1,0 +1,78 @@
+<ion-header>
+  <ion-toolbar>
+    <!-- Logo/Brand - Always visible -->
+    <ion-buttons slot="start">
+      <ion-button routerLink="/tabs/home" class="brand-button">
+        <img src="assets/icon/favicon.ico" alt="Africa Trips Logo" class="brand-logo">
+        <span class="brand-text">Africa Trips</span>
+      </ion-button>
+    </ion-buttons>
+
+    <!-- Desktop Navigation -->
+
+    <!-- Desktop Actions -->
+    <ion-buttons slot="end" class="desktop-actions">
+      <ion-button fill="clear" routerLink="/tabs/home" routerLinkActive="active-tab" [routerLinkActiveOptions]="{ exact: true }" class="nav-link">Home</ion-button>
+      <ion-button fill="clear" routerLink="/tabs/shop" routerLinkActive="active-tab" [routerLinkActiveOptions]="{ exact: true }" class="nav-link">Trips</ion-button>
+      <ion-button fill="clear" routerLink="/tabs/cart" routerLinkActive="active-tab" [routerLinkActiveOptions]="{ exact: true }" class="nav-link">Bookings</ion-button>
+      <ion-button fill="clear" routerLink="/tabs/contact-us" routerLinkActive="active-tab" [routerLinkActiveOptions]="{ exact: true }" class="nav-link">Contact Us</ion-button>
+      <ion-button class="login-btn">
+        Login
+      </ion-button>
+      <ion-button color="primary" fill="solid" shape="round" class="profile-btn">
+        Register
+      </ion-button>
+    </ion-buttons>
+
+    <!-- Mobile Menu Button -->
+    <ion-buttons slot="end" class="mobile-nav">
+      <ion-button (click)="toggleMenu()">
+        <ion-icon slot="icon-only" [name]="menuOpen ? 'close' : 'menu'"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <!-- Mobile Menu Dropdown -->
+  <div class="mobile-menu" [class.open]="menuOpen">
+    <ion-list>
+      <ion-item button routerLink="/tabs/home" routerLinkActive="active-mobile-tab" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">
+        <ion-icon slot="start" name="home-outline"></ion-icon>
+        <ion-label>Home</ion-label>
+      </ion-item>
+
+      <ion-item button routerLink="/tabs/shop" routerLinkActive="active-mobile-tab" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">
+        <ion-icon slot="start" name="airplane-outline"></ion-icon>
+        <ion-label>Trips</ion-label>
+      </ion-item>
+      
+      <ion-item button routerLink="/tabs/cart" routerLinkActive="active-mobile-tab" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">
+        <ion-icon slot="start" name="calendar-outline"></ion-icon>
+        <ion-label>Bookings</ion-label>
+      </ion-item>
+      
+      <ion-item button routerLink="/tabs/contact-us" routerLinkActive="active-mobile-tab" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">
+        <ion-icon slot="start" name="mail-outline"></ion-icon>
+        <ion-label>Contact Us</ion-label>
+      </ion-item>
+      
+      <ion-item button (click)="closeMenu()">
+        <ion-icon slot="start" name="log-in-outline"></ion-icon>
+        <ion-label>Login</ion-label>
+      </ion-item>
+
+      <ion-item button (click)="closeMenu()">
+        <ion-icon slot="start" name="person-add-outline"></ion-icon>
+        <ion-label>Register</ion-label>
+      </ion-item>
+    </ion-list>
+  </div>
+</ion-header>
+
+<ion-tabs>
+  <ion-tab-bar slot="bottom" style="display: none;">
+    <ion-tab-button tab="home"></ion-tab-button>
+    <ion-tab-button tab="shop"></ion-tab-button>
+    <ion-tab-button tab="cart"></ion-tab-button>
+    <ion-tab-button tab="contact-us"></ion-tab-button>
+  </ion-tab-bar>
+</ion-tabs>

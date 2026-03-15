@@ -1,0 +1,1 @@
+Welcome to the Stiga Tours repository! This project is a tourism web app built with Ionic and Angular — showcasing African travel packages including safaris, beach retreats, adventures and city escapes.

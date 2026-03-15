@@ -1,0 +1,29 @@
+:host {
+  display: block;
+}
+
+.orders-hero {
+  background: linear-gradient(135deg, #2a5ea2 0%, #2d5a7b 60%, #216880 100%);
+  color: #fff;
+  padding: 64px 20px 54px;
+}
+
+.orders-hero-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.orders-hero-inner h1 {
+  margin: 0 0 14px;
+  font-size: 2.35rem;
+  line-height: 1.2;
+}
+
+.orders-hero-inner p {
+  margin: 0 auto;
+  max-width: 760px;
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.94);
+}

@@ -1,0 +1,73 @@
+.modal-header ion-toolbar {
+  --background: #ffffff;
+  --color: #0f172a;
+}
+
+.modal-content {
+  --background: #ffffff;
+}
+
+.auth-shell {
+  padding: 18px 18px 22px;
+}
+
+.auth-subtitle {
+  margin: 0 0 14px;
+  color: #64748b;
+}
+
+.field-item {
+  --background: #f8fafc;
+  --padding-start: 12px;
+  --inner-padding-end: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.row-end {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.link-btn {
+  --color: #1e40af;
+  text-transform: none;
+}
+
+.primary-btn {
+  --background: #1e40af;
+  --background-hover: #1e3a8a;
+  --color: #ffffff;
+  --border-radius: 10px;
+  height: 44px;
+  text-transform: none;
+  font-weight: 600;
+  margin: 8px 0 10px;
+}
+
+.google-btn {
+  --color: #334155;
+  --border-color: #cbd5e1;
+  --border-radius: 10px;
+  height: 44px;
+  text-transform: none;
+  font-weight: 600;
+}
+
+.auth-footer {
+  margin-top: 14px;
+  display: block;
+  text-align: center;
+  color: #64748b;
+}
+
+.inline-link {
+  border: 0;
+  background: transparent;
+  color: #1e40af;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}

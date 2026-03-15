@@ -1,0 +1,113 @@
+<ion-content [fullscreen]="true">
+  <section
+    class="hero-carousel"
+    aria-label="Featured trips"
+    aria-roledescription="carousel"
+    (mouseenter)="pauseAutoplay()"
+    (mouseleave)="resumeAutoplay()"
+    (focusin)="pauseAutoplay()"
+    (focusout)="resumeAutoplay()">
+    @for (slide of heroSlides; track slide.title; let i = $index) {
+      <article class="hero-slide" [class.active]="i === currentSlideIndex">
+        <div class="hero-content">
+          <h1>{{ slide.title }}</h1>
+          <p>{{ slide.subtitle }}</p>
+          <ion-button shape="round" color="primary" (click)="openTrips()">{{ slide.cta }}</ion-button>
+        </div>
+      </article>
+    }
+
+    <button class="nav-btn prev" type="button" (click)="prevSlide()" aria-label="Previous slide">‹</button>
+    <button class="nav-btn next" type="button" (click)="nextSlide()" aria-label="Next slide">›</button>
+
+    <p class="slide-status" aria-live="polite">
+      {{ currentSlideIndex + 1 }} / {{ heroSlides.length }}
+    </p>
+
+    <div class="dots">
+      @for (slide of heroSlides; track slide.title; let i = $index) {
+        <button
+          type="button"
+          class="dot"
+          [class.active]="i === currentSlideIndex"
+          (click)="goToSlide(i)"
+          [attr.aria-current]="i === currentSlideIndex"
+          [attr.aria-label]="'Go to slide ' + (i + 1)"></button>
+      }
+    </div>
+  </section>
+
+  <section class="trips-section">
+    <div class="trips-header">
+      <h2>Featured Trips</h2>
+      <p class="trips-subtitle">Hand-picked packages with everything included — just show up and explore.</p>
+    </div>
+
+    @for (category of categorySections; track category.name) {
+      <div class="category-block">
+        <h3 class="category-label">
+          <span class="category-icon">
+            @if (category.name === 'Safari') { 🦁 }
+            @else if (category.name === 'Adventure') { 🌊 }
+            @else if (category.name === 'Beach') { 🏖️ }
+            @else { 🏙️ }
+          </span>
+          {{ category.name }}
+        </h3>
+        <div class="trip-grid">
+          @for (item of category.items; track item.id) {
+            <article
+              class="trip-card"
+              role="button"
+              tabindex="0"
+              (click)="openItem(item.id)"
+              (keydown.enter)="openItem(item.id)"
+              (keydown.space)="openItem(item.id)">
+              @if (item.originalPrice && item.originalPrice > item.price) {
+                <span class="discount-badge">Special Offer</span>
+              }
+              <div class="trip-image-wrap">
+                <img [src]="item.image" [alt]="item.name" class="trip-image" loading="lazy" />
+                @if (item.duration) {
+                  <span class="duration-badge">{{ item.duration }}</span>
+                }
+              </div>
+              <div class="trip-info">
+                <p class="trip-location">📍 {{ item.location }}</p>
+                <h3 class="trip-name">{{ item.name }}</h3>
+                <p class="trip-desc">{{ item.description }}</p>
+
+                @if (item.benefits && item.benefits.length) {
+                  <ul class="benefits-list">
+                    @for (benefit of item.benefits.slice(0, 3); track benefit) {
+                      <li>✓ {{ benefit }}</li>
+                    }
+                    @if (item.benefits.length > 3) {
+                      <li class="more-benefits">+ {{ item.benefits.length - 3 }} more included</li>
+                    }
+                  </ul>
+                }
+
+                <div class="trip-footer">
+                  <div class="price-block">
+                    <span class="price-label">From</span>
+                    <span class="trip-price">{{ formatRand(item.price) }}</span>
+                    <span class="price-unit">per person</span>
+                    @if (item.originalPrice && item.originalPrice > item.price) {
+                      <span class="trip-original-price">{{ formatRand(item.originalPrice) }}</span>
+                    }
+                  </div>
+                  <ion-button size="small" shape="round" color="primary" (click)="openItem(item.id); $event.stopPropagation()">
+                    View Package
+                  </ion-button>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      </div>
+    }
+  </section>
+
+  <app-footer></app-footer>
+</ion-content>
