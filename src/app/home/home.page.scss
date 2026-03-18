@@ -239,6 +239,24 @@
   font-weight: 500;
 }
 
+.trip-dates {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  color: #5b6b79;
+  font-weight: 500;
+}
+
+.trip-availability {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  color: #059669;
+  font-weight: 600;
+}
+
+.trip-availability.low-stock {
+  color: #d97706;
+}
+
 .trip-name {
   margin: 0 0 10px;
   font-size: 1.2rem;

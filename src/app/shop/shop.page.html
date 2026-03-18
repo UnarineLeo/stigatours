@@ -98,6 +98,12 @@
               @if (item.location) {
                 <p class="product-location">📍 {{ item.location }}</p>
               }
+              @if (item.dateFrom && item.dateTo) {
+                <p class="product-dates">📅 {{ item.dateFrom | date:'MMM d' }} - {{ item.dateTo | date:'MMM d, yyyy' }}</p>
+              }
+              @if (item.ticketsLeft !== undefined) {
+                <p class="product-availability" [class.low-stock]="item.ticketsLeft <= 3">🎫 {{ item.ticketsLeft }} of {{ item.groupSize }} spots left</p>
+              }
               <p class="desc">{{ item.description }}</p>
 
               @if (item.benefits && item.benefits.length) {

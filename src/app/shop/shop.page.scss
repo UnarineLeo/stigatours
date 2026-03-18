@@ -202,6 +202,24 @@
   color: #6b7280;
 }
 
+.product-dates {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  color: #5b6b79;
+  font-weight: 500;
+}
+
+.product-availability {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  color: #059669;
+  font-weight: 600;
+}
+
+.product-availability.low-stock {
+  color: #d97706;
+}
+
 .desc {
   margin: 0 0 10px;
   color: #64748b;

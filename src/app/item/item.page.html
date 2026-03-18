@@ -48,10 +48,16 @@
                 <span>{{ product.duration }}</span>
               </div>
             }
-            @if (product.groupSize) {
+            @if (product.dateFrom && product.dateTo) {
               <div class="meta-chip">
-                <span class="meta-icon">👥</span>
-                <span>{{ product.groupSize }}</span>
+                <span class="meta-icon">📅</span>
+                <span>{{ product.dateFrom | date:'MMM d' }} - {{ product.dateTo | date:'MMM d, yyyy' }}</span>
+              </div>
+            }
+            @if (product.ticketsLeft !== undefined) {
+              <div class="meta-chip" [class.low-stock]="product.ticketsLeft <= 3">
+                <span class="meta-icon">🎫</span>
+                <span>{{ product.ticketsLeft }} of {{ product.groupSize }} spots left</span>
               </div>
             }
           </div>
@@ -113,6 +119,12 @@
                 <h3>{{ item.name }}</h3>
                 @if (item.location) {
                   <p class="rec-location">📍 {{ item.location }}</p>
+                }
+                @if (item.dateFrom && item.dateTo) {
+                  <p class="rec-dates">📅 {{ item.dateFrom | date:'MMM d' }} - {{ item.dateTo | date:'MMM d, yyyy' }}</p>
+                }
+                @if (item.ticketsLeft !== undefined) {
+                  <p class="rec-availability" [class.low-stock]="item.ticketsLeft <= 3">🎫 {{ item.ticketsLeft }} spots left</p>
                 }
                 <div class="rec-footer">
                   <p class="rec-price">{{ formatRand(item.price) }} <span>/ person</span></p>

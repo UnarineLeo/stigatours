@@ -7,9 +7,12 @@ export interface ProductItem {
   category: string;
   originalPrice?: number;
   duration?: string;
-  groupSize?: string;
+  groupSize?: number;
+  ticketsLeft?: number;
   benefits?: string[];
   location?: string;
+  dateFrom?: string;
+  dateTo?: string;
 }
 
 export interface CategorySection {
@@ -32,7 +35,10 @@ export const CATEGORY_SECTIONS: CategorySection[] = [
         category: 'Safari',
         location: 'Kruger National Park, South Africa',
         duration: '5 days / 4 nights',
-        groupSize: '2 – 12 people',
+        groupSize: 12,
+        ticketsLeft: 8,
+        dateFrom: '2026-05-15',
+        dateTo: '2026-05-20',
         benefits: [
           '3 guided game drives daily (morning, afternoon & night)',
           '4 nights en-suite bush lodge accommodation',
@@ -52,7 +58,10 @@ export const CATEGORY_SECTIONS: CategorySection[] = [
         category: 'Safari',
         location: 'Okavango Delta, Botswana',
         duration: '5 days / 4 nights',
-        groupSize: '2 – 8 people',
+        groupSize: 8,
+        ticketsLeft: 5,
+        dateFrom: '2026-06-10',
+        dateTo: '2026-06-15',
         benefits: [
           'Guided mokoro canoe safaris through the delta',
           'Daily bush walks with experienced trackers',
@@ -78,7 +87,10 @@ export const CATEGORY_SECTIONS: CategorySection[] = [
         category: 'Adventure',
         location: 'Victoria Falls, Zimbabwe / Zambia',
         duration: '6 days / 5 nights',
-        groupSize: '4 – 16 people',
+        groupSize: 16,
+        ticketsLeft: 11,
+        dateFrom: '2026-07-01',
+        dateTo: '2026-07-07',
         benefits: [
           'Guided walking tour of Victoria Falls viewpoints',
           'White water rafting on Grade 4 & 5 Zambezi rapids',
@@ -103,7 +115,10 @@ export const CATEGORY_SECTIONS: CategorySection[] = [
         category: 'Beach',
         location: 'Zanzibar Island, Tanzania',
         duration: '7 days / 6 nights',
-        groupSize: '2 – 10 people',
+        groupSize: 10,
+        ticketsLeft: 6,
+        dateFrom: '2026-08-20',
+        dateTo: '2026-08-27',
         benefits: [
           '6 nights beachfront villa accommodation',
           'Guided snorkelling excursion at coral reef',
@@ -129,7 +144,10 @@ export const CATEGORY_SECTIONS: CategorySection[] = [
         category: 'City & Coast',
         location: 'Cape Town, South Africa',
         duration: '4 days / 3 nights',
-        groupSize: '2 – 20 people',
+        groupSize: 20,
+        ticketsLeft: 14,
+        dateFrom: '2026-04-10',
+        dateTo: '2026-04-14',
         benefits: [
           'Table Mountain cable car return ticket',
           'Full-day guided Cape Winelands tour with tastings',

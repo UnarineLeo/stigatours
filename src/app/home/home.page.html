@@ -74,6 +74,12 @@
               </div>
               <div class="trip-info">
                 <p class="trip-location">📍 {{ item.location }}</p>
+                @if (item.dateFrom && item.dateTo) {
+                  <p class="trip-dates">📅 {{ item.dateFrom | date:'MMM d' }} - {{ item.dateTo | date:'MMM d, yyyy' }}</p>
+                }
+                @if (item.ticketsLeft !== undefined) {
+                  <p class="trip-availability" [class.low-stock]="item.ticketsLeft <= 3">🎫 {{ item.ticketsLeft }} of {{ item.groupSize }} spots left</p>
+                }
                 <h3 class="trip-name">{{ item.name }}</h3>
                 <p class="trip-desc">{{ item.description }}</p>
 
