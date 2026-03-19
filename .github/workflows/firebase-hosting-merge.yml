@@ -24,12 +24,28 @@ jobs:
             echo "::error::Missing GitHub secret FIREBASE_SERVICE_ACCOUNT_STIGATOURS"
             exit 1
           fi
+      - name: Validate Firebase service account project and identity
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_STIGATOURS }}
+        run: |
+          node -e "
+          const sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT || '{}');
+          if (!sa.project_id || sa.project_id !== 'stigatours') {
+            console.error('::error::Service account project_id must be stigatours. Found: ' + (sa.project_id || '<missing>'));
+            process.exit(1);
+          }
+          if (!sa.client_email) {
+            console.error('::error::Service account client_email is missing.');
+            process.exit(1);
+          }
+          console.log('Using service account: ' + sa.client_email);
+          "
       - run: npm ci && npm run build
       - name: Write Firebase service account file
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_STIGATOURS }}
         run: |
-          cat > firebase-service-account.json << 'EOF'
-          ${{ secrets.FIREBASE_SERVICE_ACCOUNT_STIGATOURS }}
-          EOF
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > firebase-service-account.json
       - name: Deploy Firestore rules and indexes
         run: npx firebase-tools deploy --only firestore:rules,firestore:indexes --project stigatours
         env:
