@@ -5,6 +5,7 @@ name: Deploy to Firebase Hosting on merges
 on:
   push:
     branches:
+      - main
       - master
 jobs:
   build_and_deploy:
@@ -24,9 +25,21 @@ jobs:
             exit 1
           fi
       - run: npm ci && npm run build
+      - name: Write Firebase service account file
+        run: |
+          cat > firebase-service-account.json << 'EOF'
+          ${{ secrets.FIREBASE_SERVICE_ACCOUNT_STIGATOURS }}
+          EOF
+      - name: Deploy Firestore rules and indexes
+        run: npx firebase-tools deploy --only firestore:rules,firestore:indexes --project stigatours
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/firebase-service-account.json
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_STIGATOURS }}
           channelId: live
-          projectId: ecommerce-template-260304
+          projectId: stigatours
+      - name: Clean up credentials file
+        if: always()
+        run: rm -f firebase-service-account.json
