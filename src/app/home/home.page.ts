@@ -4,7 +4,7 @@ import { IonContent, IonButton } from '@ionic/angular/standalone';
 import { ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { FooterComponent } from '../footer/footer.component';
-import { CATEGORY_SECTIONS, CategorySection, getDiscountPercent, ProductItem } from '../shared/product-catalog';
+import { CategorySection, getCategorySections, getDiscountPercent, ProductItem } from '../shared/product-catalog';
 
 interface HeroSlide {
   title: string;
@@ -38,7 +38,7 @@ export class HomePage implements OnInit, OnDestroy {
     },
   ];
 
-  readonly categorySections: CategorySection[] = CATEGORY_SECTIONS;
+  categorySections: CategorySection[] = [];
 
   currentSlideIndex = 0;
   private carouselTimer: ReturnType<typeof setInterval> | null = null;
@@ -49,6 +49,7 @@ export class HomePage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.categorySections = getCategorySections();
     this.startAutoplay();
   }
 

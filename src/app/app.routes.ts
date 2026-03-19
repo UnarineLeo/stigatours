@@ -33,4 +33,12 @@ export const routes: Routes = [
     path: 'item/:id',
     loadComponent: () => import('./item/item.page').then((m) => m.ItemPage)
   },
+  {
+    path: 'admin-login',
+    loadComponent: () => import('./admin-login/admin-login.page').then((m) => m.AdminLoginPage)
+  },
+  {
+    path: 'admin-portal',
+    loadComponent: () => import('./admin-portal/admin-portal.page').then((m) => m.AdminPortalPage)
+  },
 ];

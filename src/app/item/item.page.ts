@@ -4,7 +4,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { IonContent, IonButton } from '@ionic/angular/standalone';
 import { ToastController } from '@ionic/angular';
 import { FooterComponent } from '../footer/footer.component';
-import { CATEGORY_SECTIONS, findProductById, getDiscountPercent, ProductItem } from '../shared/product-catalog';
+import { findProductById, getAllProducts, getDiscountPercent, ProductItem } from '../shared/product-catalog';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -122,10 +122,7 @@ export class ItemPage implements OnInit {
   }
 
   private getRecommended(currentItem: ProductItem): ProductItem[] {
-    const allProducts = CATEGORY_SECTIONS.reduce((all: ProductItem[], section) => {
-      all.push(...section.items);
-      return all;
-    }, []);
+    const allProducts = getAllProducts();
 
     const sameCategory = allProducts.filter(
       (item) => item.category === currentItem.category && item.id !== currentItem.id

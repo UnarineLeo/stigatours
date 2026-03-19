@@ -201,6 +201,15 @@
   box-shadow: 0 14px 24px -22px rgba(15, 23, 42, 0.62);
 }
 
+.checkout-email-field {
+  --background: #f8fafc;
+  --padding-start: 12px;
+  --inner-padding-end: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
 @media (max-width: 900px) {
   .cart-layout {
     grid-template-columns: 1fr;

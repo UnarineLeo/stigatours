@@ -20,7 +20,7 @@ import {
   IonChip,
   IonToggle,
 } from '@ionic/angular/standalone';
-import { CATEGORY_SECTIONS, getDiscountPercent, ProductItem } from '../shared/product-catalog';
+import { getAllProducts, getCategorySections, getDiscountPercent, ProductItem } from '../shared/product-catalog';
 
 type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'name-asc';
 type ViewMode = 'grid' | 'compact';
@@ -51,11 +51,8 @@ type ViewMode = 'grid' | 'compact';
   ],
 })
 export class ShopPage {
-  readonly allProducts: ProductItem[] = CATEGORY_SECTIONS.reduce((all: ProductItem[], section) => {
-    all.push(...section.items);
-    return all;
-  }, []);
-  readonly categories = ['all', ...CATEGORY_SECTIONS.map((section) => section.name)];
+  readonly allProducts: ProductItem[] = getAllProducts();
+  readonly categories = ['all', ...getCategorySections().map((section) => section.name)];
   readonly maxPrice = Math.ceil(Math.max(...this.allProducts.map((item) => item.price)));
 
   searchTerm = '';

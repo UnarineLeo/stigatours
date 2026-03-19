@@ -1,8 +1,11 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonButton } from '@ionic/angular/standalone';
+import { ToastController } from '@ionic/angular';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonItem, IonLabel, IonInput } from '@ionic/angular/standalone';
 import { findProductById, ProductItem } from '../shared/product-catalog';
+import { appendCheckoutRecords, CheckoutRecord } from '../shared/admin-storage';
 
 interface StoredCartItem {
   id: number;
@@ -19,10 +22,13 @@ interface CartItem {
   templateUrl: 'cart.page.html',
   styleUrls: ['cart.page.scss'],
   standalone: true,
-  imports: [CommonModule, RouterLink, IonHeader, IonToolbar, IonTitle, IonContent, IonButton],
+  imports: [CommonModule, FormsModule, RouterLink, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonItem, IonLabel, IonInput],
 })
 export class CartPage {
   cartItems: CartItem[] = [];
+  checkoutEmail = '';
+
+  constructor(private toastController: ToastController) {}
 
   ionViewWillEnter(): void {
     this.loadCart();
@@ -57,6 +63,37 @@ export class CartPage {
   clearCart(): void {
     localStorage.removeItem('cart-items');
     this.loadCart();
+  }
+
+  async confirmBooking(): Promise<void> {
+    const email = this.checkoutEmail.trim();
+    const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    if (!isEmailValid) {
+      await this.presentToast('Please enter a valid email address.', 'warning');
+      return;
+    }
+
+    if (this.cartItems.length === 0) {
+      await this.presentToast('No trips in your bookings.', 'warning');
+      return;
+    }
+
+    const bookedAt = new Date().toISOString();
+    const checkoutRecords: CheckoutRecord[] = this.cartItems.map((item) => ({
+      id: `${item.product.id}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      userEmail: email,
+      tripBooked: item.product.name,
+      amountPaid: this.getItemTotal(item),
+      qty: item.qty,
+      bookedAt,
+    }));
+
+    appendCheckoutRecords(checkoutRecords);
+    this.clearCart();
+    this.checkoutEmail = '';
+
+    await this.presentToast('Booking confirmed successfully.', 'success');
   }
 
   private updateQty(itemId: number, delta: number): void {
@@ -104,5 +141,16 @@ export class CartPage {
 
   private writeStoredCart(items: StoredCartItem[]): void {
     localStorage.setItem('cart-items', JSON.stringify(items));
+  }
+
+  private async presentToast(message: string, color: 'success' | 'warning'): Promise<void> {
+    const toast = await this.toastController.create({
+      message,
+      duration: 1800,
+      color,
+      position: 'top',
+    });
+
+    await toast.present();
   }
 }

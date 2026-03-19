@@ -1,0 +1,127 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Admin Portal</ion-title>
+    <ion-button slot="end" fill="clear" (click)="logout()">Logout</ion-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <section class="admin-shell">
+    <ion-segment [(ngModel)]="activeTab" value="events" class="admin-tabs">
+      <ion-segment-button value="events">Add Event</ion-segment-button>
+      <ion-segment-button value="checkouts">Checkout Details</ion-segment-button>
+    </ion-segment>
+
+    @if (activeTab === 'events') {
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Add New Event</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="form-grid">
+            <ion-item lines="none" class="field-item">
+              <ion-label position="stacked">Event Name</ion-label>
+              <ion-input [(ngModel)]="form.name" placeholder="Kruger Safari Adventure"></ion-input>
+            </ion-item>
+
+            <ion-item lines="none" class="field-item">
+              <ion-label position="stacked">Category</ion-label>
+              <ion-select [(ngModel)]="form.category" interface="popover" placeholder="Select category">
+                @for (category of categories; track category) {
+                  <ion-select-option [value]="category">{{ category }}</ion-select-option>
+                }
+              </ion-select>
+            </ion-item>
+
+            <ion-item lines="none" class="field-item">
+              <ion-label position="stacked">Price</ion-label>
+              <ion-input type="number" [(ngModel)]="form.price" placeholder="15999"></ion-input>
+            </ion-item>
+
+            <ion-item lines="none" class="field-item">
+              <ion-label position="stacked">Original Price (Optional)</ion-label>
+              <ion-input type="number" [(ngModel)]="form.originalPrice" placeholder="18500"></ion-input>
+            </ion-item>
+
+            <ion-item lines="none" class="field-item">
+              <ion-label position="stacked">Location</ion-label>
+              <ion-input [(ngModel)]="form.location" placeholder="Cape Town, South Africa"></ion-input>
+            </ion-item>
+
+            <ion-item lines="none" class="field-item">
+              <ion-label position="stacked">Duration</ion-label>
+              <ion-input [(ngModel)]="form.duration" placeholder="4 days / 3 nights"></ion-input>
+            </ion-item>
+
+            <ion-item lines="none" class="field-item">
+              <ion-label position="stacked">Group Size</ion-label>
+              <ion-input type="number" [(ngModel)]="form.groupSize" placeholder="20"></ion-input>
+            </ion-item>
+
+            <ion-item lines="none" class="field-item">
+              <ion-label position="stacked">Tickets Left</ion-label>
+              <ion-input type="number" [(ngModel)]="form.ticketsLeft" placeholder="14"></ion-input>
+            </ion-item>
+
+            <ion-item lines="none" class="field-item">
+              <ion-label position="stacked">Date From</ion-label>
+              <ion-input type="date" [(ngModel)]="form.dateFrom"></ion-input>
+            </ion-item>
+
+            <ion-item lines="none" class="field-item">
+              <ion-label position="stacked">Date To</ion-label>
+              <ion-input type="date" [(ngModel)]="form.dateTo"></ion-input>
+            </ion-item>
+          </div>
+
+          <ion-item lines="none" class="field-item">
+            <ion-label position="stacked">Description</ion-label>
+            <ion-textarea [(ngModel)]="form.description" rows="4" placeholder="Describe the event..."></ion-textarea>
+          </ion-item>
+
+          <ion-item lines="none" class="field-item">
+            <ion-label position="stacked">Benefits (one per line)</ion-label>
+            <ion-textarea [(ngModel)]="form.benefitsText" rows="4" placeholder="Guided game drives&#10;Airport transfer"></ion-textarea>
+          </ion-item>
+
+          <div class="upload-box">
+            <label for="event-image" class="upload-label">Upload Event Image</label>
+            <input id="event-image" type="file" accept="image/*" (change)="onImageSelected($event)" />
+            @if (imagePreview) {
+              <img [src]="imagePreview" alt="Event preview" class="image-preview" />
+            }
+          </div>
+
+          <ion-button expand="block" shape="round" color="primary" (click)="addEvent()">
+            Add Event
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+    }
+
+    @if (activeTab === 'checkouts') {
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Checkout Records</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          @if (checkoutRecords.length === 0) {
+            <p class="empty-state">No checkout records yet.</p>
+          } @else {
+            <div class="checkout-list">
+              @for (record of checkoutRecords; track record.id) {
+                <article class="checkout-item">
+                  <p><strong>User Email:</strong> {{ record.userEmail }}</p>
+                  <p><strong>Trip Booked:</strong> {{ record.tripBooked }}</p>
+                  <p><strong>Amount Paid:</strong> {{ formatRand(record.amountPaid) }}</p>
+                  <p><strong>Guests:</strong> {{ record.qty }}</p>
+                  <p><strong>Booked At:</strong> {{ record.bookedAt | date:'MMM d, y, h:mm a' }}</p>
+                </article>
+              }
+            </div>
+          }
+        </ion-card-content>
+      </ion-card>
+    }
+  </section>
+</ion-content>

@@ -1,0 +1,41 @@
+<ion-header class="modal-header">
+  <ion-toolbar>
+    <ion-title>Admin Log In</ion-title>
+    <ion-button slot="end" fill="clear" routerLink="/tabs/home">Back</ion-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="modal-content">
+  <div class="auth-shell">
+    <p class="auth-subtitle">Access the Stiga Tours admin portal.</p>
+
+    <ion-item lines="none" class="field-item">
+      <ion-label position="stacked">Email Address</ion-label>
+      <ion-input type="email" [(ngModel)]="email" placeholder="admin@example.com"></ion-input>
+    </ion-item>
+
+    <ion-item lines="none" class="field-item">
+      <ion-label position="stacked">Password</ion-label>
+      <ion-input type="password" [(ngModel)]="password" placeholder="Enter your password"></ion-input>
+    </ion-item>
+
+    <div class="row-end">
+      <ion-button fill="clear" size="small" class="link-btn" (click)="forgotPassword()">
+        Forgot password?
+      </ion-button>
+    </div>
+
+    <ion-button expand="block" class="primary-btn" (click)="login()">
+      Log In
+    </ion-button>
+
+    <ion-button expand="block" fill="outline" class="google-btn" (click)="continueWithGoogle()">
+      Continue with Google
+    </ion-button>
+
+    <ion-text class="auth-footer">
+      New to Stiga Tours?
+      <button type="button" class="inline-link" (click)="openRegister()">Create an account</button>
+    </ion-text>
+  </div>
+</ion-content>

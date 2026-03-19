@@ -68,7 +68,16 @@
       </div>
 
       <div class="confirm-footer">
-        <ion-button expand="block" shape="round" color="primary">Confirm Booking</ion-button>
+        <ion-item lines="none" class="checkout-email-field">
+          <ion-label position="stacked">User Email</ion-label>
+          <ion-input
+            type="email"
+            [(ngModel)]="checkoutEmail"
+            placeholder="traveller@example.com">
+          </ion-input>
+        </ion-item>
+
+        <ion-button expand="block" shape="round" color="primary" (click)="confirmBooking()">Confirm Booking</ion-button>
       </div>
     }
   </section>

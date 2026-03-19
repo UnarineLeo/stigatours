@@ -20,6 +20,8 @@ export interface CategorySection {
   items: ProductItem[];
 }
 
+const ADMIN_EVENTS_KEY = 'admin-events';
+
 export const CATEGORY_SECTIONS: CategorySection[] = [
   {
     name: 'Safari',
@@ -171,7 +173,76 @@ for (const section of CATEGORY_SECTIONS) {
 
 const PRODUCT_INDEX = new Map<number, ProductItem>(productEntries);
 
+function readAdminEvents(): ProductItem[] {
+  if (typeof window === 'undefined') {
+    return [];
+  }
+
+  const raw = localStorage.getItem(ADMIN_EVENTS_KEY);
+  if (!raw) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as ProductItem[];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveAdminEvent(item: ProductItem): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const events = readAdminEvents();
+  events.push(item);
+  localStorage.setItem(ADMIN_EVENTS_KEY, JSON.stringify(events));
+}
+
+export function getCategorySections(): CategorySection[] {
+  const baseSections = CATEGORY_SECTIONS.map((section) => ({
+    name: section.name,
+    items: [...section.items],
+  }));
+
+  const adminEvents = readAdminEvents();
+  for (const event of adminEvents) {
+    const existingSection = baseSections.find((section) => section.name === event.category);
+    if (existingSection) {
+      existingSection.items.push(event);
+      continue;
+    }
+
+    baseSections.push({
+      name: event.category,
+      items: [event],
+    });
+  }
+
+  return baseSections;
+}
+
+export function getAllProducts(): ProductItem[] {
+  return getCategorySections().reduce((all: ProductItem[], section) => {
+    all.push(...section.items);
+    return all;
+  }, []);
+}
+
+export function getNextProductId(): number {
+  const allProducts = getAllProducts();
+  const maxId = allProducts.reduce((max, item) => Math.max(max, item.id), 0);
+  return maxId + 1;
+}
+
 export function findProductById(id: number): ProductItem | undefined {
+  if (typeof window !== 'undefined') {
+    const allProducts = getAllProducts();
+    return allProducts.find((item) => item.id === id);
+  }
+
   return PRODUCT_INDEX.get(id);
 }
 
