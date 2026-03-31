@@ -41,21 +41,9 @@ jobs:
           console.log('Using service account: ' + sa.client_email);
           "
       - run: npm ci && npm run build
-      - name: Write Firebase service account file
-        env:
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_STIGATOURS }}
-        run: |
-          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > firebase-service-account.json
-      - name: Deploy Firestore rules and indexes
-        run: npx firebase-tools deploy --only firestore:rules,firestore:indexes --project stigatours
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/firebase-service-account.json
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_STIGATOURS }}
           channelId: live
           projectId: stigatours
-      - name: Clean up credentials file
-        if: always()
-        run: rm -f firebase-service-account.json
