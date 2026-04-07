@@ -1,0 +1,163 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Legal</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <section class="legal-hero">
+    <div class="legal-hero-inner">
+      <p class="eyebrow">Policies</p>
+      <h1>
+        {{
+          activeView === 'terms'
+            ? 'Terms of Service'
+            : activeView === 'privacy'
+              ? 'Privacy Policy'
+              : 'POPIA Notice'
+        }}
+      </h1>
+      <p>
+        Please review the information below carefully. By using Stiga Tours, you agree to these terms and policies.
+      </p>
+    </div>
+  </section>
+
+  <section class="legal-shell">
+    <div class="legal-tabs-row">
+
+      <ion-segment
+        class="legal-tabs"
+        [value]="activeView"
+        (ionChange)="onTabChange($event.detail.value)">
+        <ion-segment-button value="back">
+          Back
+        </ion-segment-button>
+        <ion-segment-button value="terms">
+          Terms of Service
+        </ion-segment-button>
+        
+        <ion-segment-button value="privacy">
+          Privacy Policy
+        </ion-segment-button>
+        <ion-segment-button value="popia">
+          POPIA
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+
+    @if (activeView === 'terms') {
+      <article class="legal-card" aria-label="Terms of Service">
+        <h2>Terms of Service</h2>
+        <p class="meta">Effective date: {{ effectiveDate }}</p>
+
+        <h3>1. Platform Scope</h3>
+        <p>
+          Stiga Tours is a travel platform for browsing, booking, and managing tours and related travel experiences.
+          Trip availability, schedules, and inclusions may vary by destination, season, and supplier.
+        </p>
+
+        <h3>2. User Responsibilities</h3>
+        <p>
+          You are responsible for providing accurate traveller details, valid travel documents, and reviewing booking
+          conditions, departure times, and cancellation terms before payment.
+        </p>
+
+        <h3>3. Accuracy Disclaimer</h3>
+        <p>
+          We work to keep listings accurate and current, but prices, itineraries, and supplier requirements can change
+          without notice. Always confirm key travel details before finalizing your trip.
+        </p>
+
+        <h3>4. Acceptable Use</h3>
+        <p>
+          You agree not to misuse the platform, interfere with service availability, or submit false information.
+        </p>
+
+        <h3>5. Limitation of Liability</h3>
+        <p>
+          Stiga Tours is not liable for disruptions caused by third-party providers, weather events, visa issues,
+          transport delays, or other circumstances beyond our reasonable control.
+        </p>
+      </article>
+    }
+
+    @if (activeView === 'privacy') {
+      <article class="legal-card" aria-label="Privacy Policy">
+        <h2>Privacy Policy</h2>
+        <p class="meta">Effective date: {{ effectiveDate }}</p>
+
+        <h3>1. Information We Collect</h3>
+        <p>
+          We may collect account details, traveller profile data, booking preferences, payment-related references,
+          support messages, and platform usage data needed to deliver travel services.
+        </p>
+
+        <h3>2. How We Use Information</h3>
+        <p>
+          We use your data to process bookings, communicate trip updates, provide customer support, improve user
+          experience, and keep the platform secure.
+        </p>
+
+        <h3>3. Booking and Service Delivery</h3>
+        <p>
+          Your information may be shared with relevant travel partners only where needed to deliver booked services,
+          including accommodation, transport, tour operations, or support requests.
+        </p>
+
+        <h3>4. Data Sharing</h3>
+        <p>
+          We do not sell personal data. We only share information when required for service delivery, legal compliance,
+          or with your explicit consent.
+        </p>
+
+        <h3>5. Contact</h3>
+        <p>
+          For privacy questions, contact support through the official channels listed in the app.
+        </p>
+      </article>
+    }
+
+    @if (activeView === 'popia') {
+      <article class="legal-card" aria-label="POPIA Notice">
+        <h2>POPIA Notice</h2>
+        <p class="meta">Effective date: {{ effectiveDate }}</p>
+
+        <h3>1. Purpose</h3>
+        <p>
+          This notice explains how Stiga Tours processes personal information in accordance with South Africa's
+          Protection of Personal Information Act (POPIA).
+        </p>
+
+        <h3>2. Information Processed</h3>
+        <p>
+          We process account details, traveller information, booking activity, payment references, and support
+          communications required to deliver travel services and improve service quality.
+        </p>
+
+        <h3>3. Lawful Basis and Use</h3>
+        <p>
+          Personal information is processed to provide requested services, maintain platform security, comply with
+          legal obligations, and support legitimate operational needs.
+        </p>
+
+        <h3>4. Data Subject Rights</h3>
+        <p>
+          You may request access, correction, deletion, or restriction of personal information, and you may object to
+          certain processing where applicable under POPIA.
+        </p>
+
+        <h3>5. Retention and Safeguards</h3>
+        <p>
+          We retain personal information only as long as necessary for legitimate business or legal purposes and apply
+          reasonable technical and organizational safeguards to protect that information.
+        </p>
+
+        <h3>6. Contact</h3>
+        <p>
+          For POPIA-related requests or concerns, contact support through the official channels listed in the app.
+        </p>
+      </article>
+    }
+  </section>
+</ion-content>

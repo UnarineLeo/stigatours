@@ -6,16 +6,31 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
+  <section class="admin-hero">
+    <div class="admin-hero-inner">
+      <p class="eyebrow">Admin</p>
+      <h1>Manage The Portal</h1>
+      <p class="hero-subtitle">Create new events, keep inventory accurate, and review checkout activity in one place.</p>
+    </div>
+  </section>
+
   <section class="admin-shell">
-    <ion-segment [(ngModel)]="activeTab" value="events" class="admin-tabs">
-      <ion-segment-button value="events">Add Event</ion-segment-button>
-      <ion-segment-button value="checkouts">Checkout Details</ion-segment-button>
-    </ion-segment>
+    <div class="tabs-top-wrap">
+      <ion-segment [(ngModel)]="activeTab" value="events" class="admin-tabs">
+        <ion-segment-button value="events">Add Event</ion-segment-button>
+        <ion-segment-button value="checkouts">Checkout Details</ion-segment-button>
+      </ion-segment>
+    </div>
+
+    <section class="admin-main">
 
     @if (activeTab === 'events') {
-      <ion-card>
+      <ion-card class="admin-card">
         <ion-card-header>
-          <ion-card-title>Add New Event</ion-card-title>
+          <div class="section-head">
+            <ion-card-title>Add New Event</ion-card-title>
+            <p class="section-subtitle">Create a polished listing with accurate pricing, availability, and travel details.</p>
+          </div>
         </ion-card-header>
         <ion-card-content>
           <div class="form-grid">
@@ -63,14 +78,42 @@
               <ion-input type="number" [(ngModel)]="form.ticketsLeft" placeholder="14"></ion-input>
             </ion-item>
 
-            <ion-item lines="none" class="field-item">
+            <ion-item lines="none" class="field-item date-item">
               <ion-label position="stacked">Date From</ion-label>
-              <ion-input type="date" [(ngModel)]="form.dateFrom"></ion-input>
+              <ion-input
+                [value]="form.dateFrom"
+                readonly
+                placeholder="Select start date">
+              </ion-input>
+              <ion-button id="open-date-from" fill="clear" size="small" class="pick-date-btn">Pick Date</ion-button>
+              <ion-modal trigger="open-date-from" [keepContentsMounted]="true">
+                <ng-template>
+                  <ion-datetime
+                    id="dateFromPicker"
+                    presentation="date"
+                    [(ngModel)]="form.dateFrom">
+                  </ion-datetime>
+                </ng-template>
+              </ion-modal>
             </ion-item>
 
-            <ion-item lines="none" class="field-item">
+            <ion-item lines="none" class="field-item date-item">
               <ion-label position="stacked">Date To</ion-label>
-              <ion-input type="date" [(ngModel)]="form.dateTo"></ion-input>
+              <ion-input
+                [value]="form.dateTo"
+                readonly
+                placeholder="Select end date">
+              </ion-input>
+              <ion-button id="open-date-to" fill="clear" size="small" class="pick-date-btn">Pick Date</ion-button>
+              <ion-modal trigger="open-date-to" [keepContentsMounted]="true">
+                <ng-template>
+                  <ion-datetime
+                    id="dateToPicker"
+                    presentation="date"
+                    [(ngModel)]="form.dateTo">
+                  </ion-datetime>
+                </ng-template>
+              </ion-modal>
             </ion-item>
           </div>
 
@@ -92,17 +135,22 @@
             }
           </div>
 
-          <ion-button expand="block" shape="round" color="primary" (click)="addEvent()">
-            Add Event
-          </ion-button>
+          <div class="actions-row">
+            <ion-button expand="block" shape="round" color="primary" (click)="addEvent()">
+              Publish Event
+            </ion-button>
+          </div>
         </ion-card-content>
       </ion-card>
     }
 
     @if (activeTab === 'checkouts') {
-      <ion-card>
+      <ion-card class="admin-card">
         <ion-card-header>
-          <ion-card-title>Checkout Records</ion-card-title>
+          <div class="section-head">
+            <ion-card-title>Checkout Records</ion-card-title>
+            <p class="section-subtitle">Monitor completed bookings and payment activity in real time.</p>
+          </div>
         </ion-card-header>
         <ion-card-content>
           @if (checkoutRecords.length === 0) {
@@ -123,5 +171,6 @@
         </ion-card-content>
       </ion-card>
     }
+    </section>
   </section>
 </ion-content>

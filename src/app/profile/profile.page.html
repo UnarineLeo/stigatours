@@ -10,12 +10,41 @@
       <p class="eyebrow">Account</p>
       <h1>Manage Your Profile</h1>
       <p class="hero-subtitle">
-        Update your personal details, keep your password secure, and manage your saved address.
+        Update your personal details, keep your password secure, and refine your academic interests.
       </p>
     </div>
   </section>
 
   <section class="profile-shell">
+    @if (shouldShowEmailVerificationBanner()) {
+      <section class="email-verification-banner" role="status" aria-live="polite">
+        <div class="banner-copy">
+          <h2>Verify Your Email Address</h2>
+          <p>
+            Your account was created with email and password. Please verify your email to secure your profile and unlock full access.
+          </p>
+        </div>
+
+        <div class="banner-actions">
+          <button
+            type="button"
+            class="btn secondary"
+            [disabled]="isSendingVerificationEmail"
+            (click)="resendVerificationEmail()">
+            {{ isSendingVerificationEmail ? 'Sending...' : 'Resend Verification Email' }}
+          </button>
+
+          <button
+            type="button"
+            class="btn primary"
+            [disabled]="isCheckingVerificationStatus"
+            (click)="refreshEmailVerificationStatus()">
+            {{ isCheckingVerificationStatus ? 'Checking...' : 'I Have Verified' }}
+          </button>
+        </div>
+      </section>
+    }
+
     <aside class="tab-nav" aria-label="Profile sections">
       <button
         type="button"
@@ -24,19 +53,35 @@
         (click)="setTab('personal')">
         Personal Details
       </button>
+      @if (!isGoogleUser) {
+        <button
+          type="button"
+          class="tab-link"
+          [class.active]="activeTab === 'password'"
+          (click)="setTab('password')">
+          Change Password
+        </button>
+      }
       <button
         type="button"
         class="tab-link"
-        [class.active]="activeTab === 'password'"
-        (click)="setTab('password')">
-        Change Password
+        [class.active]="activeTab === 'highSchoolSubjects'"
+        (click)="setTab('highSchoolSubjects')">
+        Your Trips
       </button>
       <button
         type="button"
         class="tab-link"
-        [class.active]="activeTab === 'address'"
-        (click)="setTab('address')">
-        Address
+        [class.active]="activeTab === 'documents'"
+        (click)="setTab('documents')">
+        Document Upload
+      </button>
+      <button
+        type="button"
+        class="tab-link"
+        [class.active]="activeTab === 'account'"
+        (click)="setTab('account')">
+        Account Settings
       </button>
     </aside>
 
@@ -44,89 +89,456 @@
       @if (activeTab === 'personal') {
         <section class="panel">
           <h2>Personal Details</h2>
-          <p class="panel-subtitle">Keep your personal information up to date.</p>
+          <p class="panel-subtitle">
+            @if (isGoogleUser) {
+              These details come from your Google account and cannot be edited here.
+            } @else {
+              Keep your personal information up to date.
+            }
+          </p>
 
           <div class="form-grid">
             <label class="field">
               <span>First Name</span>
-              <input type="text" value="Leo" />
+              <div class="input-with-copy">
+                <input
+                  type="text"
+                  [value]="profile.firstName"
+                  [readOnly]="isGoogleUser"
+                  [class.readonly]="isGoogleUser"
+                  (input)="onProfileInputChange('firstName', $event)" />
+                <button
+                  type="button"
+                  class="copy-icon-btn"
+                  (click)="copyProfileField('firstName', 'First name')"
+                  aria-label="Copy first name"
+                  title="Copy first name">
+                </button>
+              </div>
             </label>
             <label class="field">
               <span>Last Name</span>
-              <input type="text" value="Unarine" />
+              <div class="input-with-copy">
+                <input
+                  type="text"
+                  [value]="profile.lastName"
+                  [readOnly]="isGoogleUser"
+                  [class.readonly]="isGoogleUser"
+                  (input)="onProfileInputChange('lastName', $event)" />
+                <button
+                  type="button"
+                  class="copy-icon-btn"
+                  (click)="copyProfileField('lastName', 'Last name')"
+                  aria-label="Copy last name"
+                  title="Copy last name">
+                </button>
+              </div>
             </label>
             <label class="field full">
               <span>Email Address</span>
-              <input type="email" value="leo@example.com" />
+              <div class="input-with-copy">
+                <input
+                  type="email"
+                  [value]="profile.email"
+                  [readOnly]="isGoogleUser"
+                  [class.readonly]="isGoogleUser"
+                  (input)="onProfileInputChange('email', $event)" />
+                <button
+                  type="button"
+                  class="copy-icon-btn"
+                  (click)="copyProfileField('email', 'Email address')"
+                  aria-label="Copy email address"
+                  title="Copy email address">
+                </button>
+              </div>
             </label>
             <label class="field full">
-              <span>Phone Number</span>
-              <input type="tel" value="+27 71 000 0000" />
+              <span>Cellphone Number <span class="required">*</span></span>
+              <div class="input-with-copy">
+                <input
+                  type="tel"
+                  autocomplete="tel-national"
+                  inputmode="tel"
+                  placeholder="e.g. 082 123 4567"
+                  [value]="profile.phone"
+                  required
+                  aria-required="true"
+                  (input)="onProfileInputChange('phone', $event)" />
+                <button
+                  type="button"
+                  class="copy-icon-btn"
+                  (click)="copyProfileField('phone', 'Cellphone number')"
+                  aria-label="Copy cellphone number"
+                  title="Copy cellphone number">
+                </button>
+              </div>
+            </label>
+            <label class="field full">
+              <span>SA ID Number/ Passport Number <span class="required">*</span></span>
+              <div class="input-with-copy">
+                <input
+                  type="text"
+                  placeholder="13-digit ID number or passport number"
+                  inputmode="numeric"
+                  maxlength="13"
+                  minlength="10"
+                  pattern="[0-9]{10,13}"
+                  [value]="profile.saIdNumber"
+                  required
+                  aria-required="true"
+                  (input)="onProfileInputChange('saIdNumber', $event)" />
+                <button
+                  type="button"
+                  class="copy-icon-btn"
+                  (click)="copyProfileField('saIdNumber', 'SA ID number')"
+                  aria-label="Copy SA ID number"
+                  title="Copy SA ID number">
+                </button>
+              </div>
+            </label>
+            <label class="field full">
+              <span>Street Address <span class="required">*</span></span>
+              <div class="street-address-autocomplete">
+                <input
+                  #streetAddressInput
+                  type="text"
+                  autocomplete="off"
+                  aria-autocomplete="list"
+                  [attr.aria-expanded]="showStreetAddressSuggestions"
+                  placeholder="Start typing your address"
+                  [value]="profile.streetAddress"
+                  required
+                  aria-required="true"
+                  (input)="onStreetAddressInput($event)"
+                  (focus)="onStreetAddressFocus()"
+                  (blur)="onStreetAddressBlur()" />
+
+                <button
+                  type="button"
+                  class="copy-icon-btn"
+                  (click)="copyProfileField('streetAddress', 'Street address')"
+                  aria-label="Copy street address"
+                  title="Copy street address">
+                </button>
+
+                @if (showStreetAddressSuggestions && streetAddressSuggestions.length > 0) {
+                  <ul class="street-address-suggestions" role="listbox" aria-label="Address suggestions">
+                    @for (suggestion of streetAddressSuggestions; track suggestion.placeId) {
+                      <li>
+                        <button
+                          type="button"
+                          class="street-address-option"
+                          (mousedown)="$event.preventDefault()"
+                          (click)="selectStreetAddressSuggestion(suggestion.placeId)">
+                          <span class="street-address-main">{{ suggestion.primaryText }}</span>
+                          <span class="street-address-secondary">{{ suggestion.secondaryText }}</span>
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+            </label>
+            <label class="field">
+              <span>City/Town <span class="required">*</span></span>
+              <div class="input-with-copy">
+                <input
+                  type="text"
+                  autocomplete="address-level2"
+                  placeholder="City or town"
+                  [value]="profile.cityTown"
+                  required
+                  aria-required="true"
+                  (input)="onProfileInputChange('cityTown', $event)" />
+                <button
+                  type="button"
+                  class="copy-icon-btn"
+                  (click)="copyProfileField('cityTown', 'City/Town')"
+                  aria-label="Copy city or town"
+                  title="Copy city or town">
+                </button>
+              </div>
+            </label>
+            <label class="field">
+              <span>Province <span class="required">*</span></span>
+              <div class="input-with-copy">
+                <input
+                  type="text"
+                  autocomplete="address-level1"
+                  placeholder="Province"
+                  [value]="profile.provinceAddress"
+                  required
+                  aria-required="true"
+                  (input)="onProfileInputChange('provinceAddress', $event)" />
+                <button
+                  type="button"
+                  class="copy-icon-btn"
+                  (click)="copyProfileField('provinceAddress', 'Province')"
+                  aria-label="Copy province"
+                  title="Copy province">
+                </button>
+              </div>
+            </label>
+            <label class="field">
+              <span>Postal Code <span class="required">*</span></span>
+              <div class="input-with-copy">
+                <input
+                  type="text"
+                  autocomplete="postal-code"
+                  inputmode="numeric"
+                  placeholder="Postal code"
+                  [value]="profile.postalCode"
+                  required
+                  aria-required="true"
+                  (input)="onProfileInputChange('postalCode', $event)" />
+                <button
+                  type="button"
+                  class="copy-icon-btn"
+                  (click)="copyProfileField('postalCode', 'Postal code')"
+                  aria-label="Copy postal code"
+                  title="Copy postal code">
+                </button>
+              </div>
+            </label>
+            <label class="field">
+              <span>Date of Birth <span class="required">*</span></span>
+              <input
+                type="date"
+                [value]="profile.dateOfBirth"
+                required
+                aria-required="true"
+                (click)="openDatePicker($event)"
+                (focus)="openDatePicker($event)"
+                (input)="onProfileInputChange('dateOfBirth', $event)" />
+            </label>
+            <label class="field">
+              <span>Gender <span class="required">*</span></span>
+              <select
+                [value]="profile.gender"
+                required
+                aria-required="true"
+                (change)="onProfileInputChange('gender', $event)">
+                <option value="">Select gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+                <option value="prefer-not-to-say">Prefer not to say</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Nationality <span class="required">*</span></span>
+              <select
+                [value]="profile.nationality"
+                required
+                aria-required="true"
+                (change)="onProfileInputChange('nationality', $event)">
+                <option value="">Select nationality</option>
+                <option value="south-african">South African</option>
+                <option value="other">Other</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Race <span class="required">*</span></span>
+              <select
+                [value]="profile.race"
+                required
+                aria-required="true"
+                (change)="onProfileInputChange('race', $event)">
+                <option value="">Select race</option>
+                <option value="black-african">Black African</option>
+                <option value="coloured">Coloured</option>
+                <option value="indian-asian">Indian/Asian</option>
+                <option value="white">White</option>
+                <option value="other">Other</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Disability Status <span class="required">*</span></span>
+              <select
+                [value]="profile.disabilityStatus"
+                required
+                aria-required="true"
+                (change)="onProfileInputChange('disabilityStatus', $event)">
+                <option value="">Select disability status</option>
+                <option value="no-disability">No disability</option>
+                <option value="mobility">Mobility impairment</option>
+                <option value="visual">Visual impairment</option>
+                <option value="hearing">Hearing impairment</option>
+                <option value="learning">Learning disability</option>
+                <option value="chronic-illness">Chronic illness</option>
+                <option value="mental-health">Mental health condition</option>
+                <option value="other">Other</option>
+              </select>
             </label>
           </div>
 
           <div class="actions">
-            <button type="button" class="btn primary">Save Changes</button>
+            <button
+              type="button"
+              class="btn primary"
+              [disabled]="isSavingProfile || !canSaveProfile()"
+              (click)="saveProfileChanges()">
+              {{ isSavingProfile ? 'Saving...' : 'Save Changes' }}
+            </button>
           </div>
         </section>
       }
 
-      @if (activeTab === 'password') {
+      @if (activeTab === 'password' && !isGoogleUser) {
         <section class="panel">
           <h2>Change Password</h2>
           <p class="panel-subtitle">Use a strong password that you do not reuse elsewhere.</p>
 
+          <section class="password-policy-card" aria-live="polite">
+            <h3>Password Policy</h3>
+            <p>Your new password must include all of the following:</p>
+            <ul>
+              <li [class.met]="passwordPolicyStatus.minLength">
+                At least 6 characters
+              </li>
+              <li [class.met]="passwordPolicyStatus.hasUppercase">
+                At least 1 uppercase letter
+              </li>
+              <li [class.met]="passwordPolicyStatus.hasLowercase">
+                At least 1 lowercase letter
+              </li>
+              <li [class.met]="passwordPolicyStatus.hasSpecialCharacter">
+                At least 1 special character
+              </li>
+            </ul>
+          </section>
+
           <div class="form-grid one-column">
             <label class="field full">
               <span>Current Password</span>
-              <input type="password" placeholder="Enter current password" />
+              <input
+                type="password"
+                autocomplete="current-password"
+                placeholder="Enter current password"
+                [value]="passwordForm.currentPassword"
+                (input)="onPasswordInputChange('currentPassword', $event)" />
             </label>
             <label class="field full">
               <span>New Password</span>
-              <input type="password" placeholder="Enter new password" />
+              <input
+                type="password"
+                autocomplete="new-password"
+                placeholder="Enter new password"
+                [value]="passwordForm.newPassword"
+                (input)="onPasswordInputChange('newPassword', $event)" />
             </label>
             <label class="field full">
               <span>Confirm New Password</span>
-              <input type="password" placeholder="Confirm new password" />
+              <input
+                type="password"
+                autocomplete="new-password"
+                placeholder="Confirm new password"
+                [value]="passwordForm.confirmNewPassword"
+                (input)="onPasswordInputChange('confirmNewPassword', $event)" />
             </label>
           </div>
 
           <div class="actions">
-            <button type="button" class="btn primary">Update Password</button>
+            <button
+              type="button"
+              class="btn primary"
+              [disabled]="isUpdatingPassword || !canUpdatePassword()"
+              (click)="updatePasswordFromForm()">
+              {{ isUpdatingPassword ? 'Updating...' : 'Update Password' }}
+            </button>
           </div>
         </section>
       }
 
-      @if (activeTab === 'address') {
+      @if (activeTab === 'highSchoolSubjects') {
         <section class="panel">
-          <h2>Address</h2>
-          <p class="panel-subtitle">Keep your delivery address up to date.</p>
+          <h2>Your Trips</h2>
+          <p class="panel-subtitle">You have no trips yet.</p>
+        </section>
+      }
 
-          <div class="form-grid">
-            <label class="field full">
-              <span>Street Address</span>
-              <input type="text" placeholder="123 Main Street" />
-            </label>
-            <label class="field">
-              <span>City</span>
-              <input type="text" placeholder="Cape Town" />
-            </label>
-            <label class="field">
-              <span>Province</span>
-              <input type="text" placeholder="Western Cape" />
-            </label>
-            <label class="field">
-              <span>Postal Code</span>
-              <input type="text" placeholder="8001" />
-            </label>
-            <label class="field">
-              <span>Country</span>
-              <input type="text" placeholder="South Africa" />
-            </label>
+      @if (activeTab === 'documents') {
+        <section class="panel">
+          <h2>Document Upload</h2>
+          <p class="panel-subtitle">
+            Upload your documents (Max 1MB). Use the following format: [YourName]_[DocumentType].pdf (e.g. JaneDoe_ID.pdf)
+          </p>
+
+          <div class="document-grid">
+            @for (requirement of requiredDocuments; track requirement.key) {
+              <label class="field full document-card">
+                <span>
+                  {{ requirement.label }}
+                  @if (requirement.key === requiredDocumentKey) {
+                    <span class="required">*</span>
+                  }
+                </span>
+                <p class="document-helper">{{ requirement.helperText }}</p>
+                <input
+                  type="file"
+                  [accept]="requirement.accept"
+                  (change)="onDocumentFileChange(requirement.key, $event)" />
+
+                @if (getSelectedDocumentName(requirement.key)) {
+                  <p class="document-file-name">Selected: {{ getSelectedDocumentName(requirement.key) }}</p>
+                }
+
+                @if (hasUploadedDocument(requirement.key)) {
+                  <a
+                    class="document-link"
+                    [href]="getUploadedDocumentUrl(requirement.key)"
+                    target="_blank"
+                    rel="noopener noreferrer">
+                    View uploaded file
+                  </a>
+                }
+              </label>
+            }
           </div>
 
           <div class="actions">
-            <button type="button" class="btn primary">Save Address</button>
+            <button type="button" class="btn primary" [disabled]="isUploadingDocuments || !canUploadRequiredDocuments()" (click)="uploadRequiredDocuments()">
+              {{ isUploadingDocuments ? (isFinalizingDocumentUpload ? 'Finalizing...' : 'Uploading...') : 'Upload Documents' }}
+            </button>
+          </div>
+
+          <!-- <div class="actions">
+            <button type="button" class="btn secondary" (click)="debugSupabaseConnection()">
+              Log Supabase Buckets
+            </button>
+          </div> -->
+        </section>
+      }
+
+      @if (activeTab === 'account') {
+        <section class="panel account-panel">
+          <h2>Account Settings</h2>
+          <p class="panel-subtitle">Manage your active session or permanently remove your account.</p>
+
+          <div class="account-actions-grid">
+            <article class="account-action-card">
+              <h3>Logout</h3>
+              <p>Sign out from this device and return to the guest profile view.</p>
+              <button
+                type="button"
+                class="btn secondary"
+                [disabled]="isDeletingAccount"
+                (click)="logoutFromAccountSettings()">
+                Logout
+              </button>
+            </article>
+
+            <!-- <article class="account-action-card danger">
+              <h3>Delete Account</h3>
+              <p>Permanently delete your account and profile data. This cannot be undone.</p>
+              <button
+                type="button"
+                class="btn danger"
+                [disabled]="isDeletingAccount"
+                (click)="deleteAccountFromAccountSettings()">
+                {{ isDeletingAccount ? 'Deleting...' : 'Delete Account' }}
+              </button>
+            </article> -->
           </div>
         </section>
       }

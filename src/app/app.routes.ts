@@ -30,6 +30,18 @@ export const routes: Routes = [
     loadComponent: () => import('./profile/profile.page').then((m) => m.ProfilePage)
   },
   {
+    path: 'login',
+    loadComponent: () => import('./login-modal/login-modal.component').then((m) => m.LoginModalComponent)
+  },
+  {
+    path: 'register',
+    loadComponent: () => import('./register-modal/register-modal.component').then((m) => m.RegisterModalComponent)
+  },
+  {
+    path: 'legal',
+    loadComponent: () => import('./legal/legal.page').then((m) => m.LegalPage)
+  },
+  {
     path: 'item/:id',
     loadComponent: () => import('./item/item.page').then((m) => m.ItemPage)
   },

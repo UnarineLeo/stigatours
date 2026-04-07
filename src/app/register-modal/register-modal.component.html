@@ -38,32 +38,6 @@
       </ion-item>
     </div>
 
-    <ion-item lines="none" class="field-item">
-      <ion-label position="stacked">Current Study Level</ion-label>
-      <ion-select [(ngModel)]="currentStudyLevel" interface="popover" placeholder="Select your current level">
-        @for (level of studyLevels; track level.value) {
-          <ion-select-option [value]="level.value">
-            {{ level.label }}
-          </ion-select-option>
-        }
-      </ion-select>
-    </ion-item>
-
-    <ion-item lines="none" class="field-item">
-      <ion-label position="stacked">Interests</ion-label>
-      <ion-select
-        [(ngModel)]="interests"
-        interface="popover"
-        [multiple]="true"
-        placeholder="Select your interests">
-        @for (interest of interestOptions; track interest.value) {
-          <ion-select-option [value]="interest.value">
-            {{ interest.label }}
-          </ion-select-option>
-        }
-      </ion-select>
-    </ion-item>
-
     <ion-button expand="block" class="primary-btn" (click)="register()">
       Create Account
     </ion-button>

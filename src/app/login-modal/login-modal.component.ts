@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonHeader, IonToolbar, IonTitle, IonButton, IonItem, IonLabel, IonInput, IonText } from '@ionic/angular/standalone';
-import { ModalController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-login-modal',
@@ -25,7 +25,11 @@ export class LoginModalComponent {
   }
 
   login() {
-    this.modalController.dismiss({ action: 'login', email: this.email });
+    this.modalController.dismiss({
+      action: 'login',
+      email: this.email,
+      password: this.password,
+    });
   }
 
   continueWithGoogle() {

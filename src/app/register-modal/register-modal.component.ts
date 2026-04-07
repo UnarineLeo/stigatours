@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonHeader, IonToolbar, IonTitle, IonButton, IonItem, IonLabel, IonInput, IonSelect, IonSelectOption, IonText } from '@ionic/angular/standalone';
-import { ModalController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular/standalone';
 import { INTEREST_OPTIONS, STUDY_LEVELS } from '../shared/app-data';
 
 @Component({
@@ -37,6 +37,7 @@ export class RegisterModalComponent {
         firstName: this.firstName,
         surname: this.surname,
         email: this.email,
+        password: this.password,
         currentStudyLevel: this.currentStudyLevel,
         interests: this.interests
       }

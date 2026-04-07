@@ -51,9 +51,9 @@ type ViewMode = 'grid' | 'compact';
   ],
 })
 export class ShopPage {
-  readonly allProducts: ProductItem[] = getAllProducts();
-  readonly categories = ['all', ...getCategorySections().map((section) => section.name)];
-  readonly maxPrice = Math.ceil(Math.max(...this.allProducts.map((item) => item.price)));
+  allProducts: ProductItem[] = [];
+  categories: string[] = ['all'];
+  maxPrice = 0;
 
   searchTerm = '';
   selectedCategory = 'all';
@@ -68,7 +68,13 @@ export class ShopPage {
   constructor(
     private router: Router,
     private toastController: ToastController,
-  ) {}
+  ) {
+    this.refreshCatalog();
+  }
+
+  ionViewWillEnter(): void {
+    this.refreshCatalog();
+  }
 
   get filteredProducts(): ProductItem[] {
     let products = this.allProducts.filter((item) => {
@@ -161,5 +167,16 @@ export class ShopPage {
     });
 
     await toast.present();
+  }
+
+  private refreshCatalog(): void {
+    this.allProducts = getAllProducts();
+    this.categories = ['all', ...getCategorySections().map((section) => section.name)];
+    this.maxPrice = Math.ceil(Math.max(...this.allProducts.map((item) => item.price)));
+
+    this.priceRange = {
+      lower: 0,
+      upper: this.maxPrice,
+    };
   }
 }

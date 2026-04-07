@@ -12,7 +12,7 @@ import {
   IonInput,
   IonText,
 } from '@ionic/angular/standalone';
-import { ToastController } from '@ionic/angular';
+import { AuthService } from '../services/auth.service';
 import { setAdminAuthenticated } from '../shared/admin-storage';
 
 @Component({
@@ -40,41 +40,45 @@ export class AdminLoginPage {
 
   constructor(
     private router: Router,
-    private toastController: ToastController,
+    private authService: AuthService,
   ) {}
 
   async login(): Promise<void> {
     if (!this.email.trim() || !this.password.trim()) {
-      await this.presentToast('Please enter email and password.', 'warning');
+      await this.authService.presentToast('Please enter email and password.');
       return;
     }
 
+    await this.authService.loginFireAuth({
+      email: this.email.trim(),
+      password: this.password,
+    });
+
     setAdminAuthenticated(true);
     localStorage.setItem('admin-email', this.email.trim());
-    await this.presentToast('Admin login successful.', 'success');
     await this.router.navigate(['/admin-portal']);
   }
 
   async forgotPassword(): Promise<void> {
-    await this.presentToast('Password reset is not enabled in this demo.', 'warning');
+    if (!this.email.trim()) {
+      await this.authService.presentToast('Enter your email address to reset your password.');
+      return;
+    }
+
+    this.authService.forgotPassword(this.email.trim());
   }
 
   async continueWithGoogle(): Promise<void> {
-    await this.presentToast('Google sign-in is not enabled in this demo.', 'warning');
+    await this.authService.googleSignIn();
+    setAdminAuthenticated(true);
+    const currentEmail = this.authService.userEmail?.trim();
+    if (currentEmail) {
+      localStorage.setItem('admin-email', currentEmail);
+    }
+    await this.router.navigate(['/admin-portal']);
   }
 
   async openRegister(): Promise<void> {
-    await this.presentToast('Registration is not enabled in the admin portal.', 'warning');
-  }
-
-  private async presentToast(message: string, color: 'success' | 'warning' | 'danger'): Promise<void> {
-    const toast = await this.toastController.create({
-      message,
-      duration: 1800,
-      color,
-      position: 'top',
-    });
-
-    await toast.present();
+    await this.router.navigate(['/register']);
   }
 }
