@@ -14,12 +14,22 @@ export const routes: Routes = [
     loadComponent: () => import('./home/home.page').then((m) => m.HomePage)
   },
   {
+    path: 'trips',
+    loadComponent: () => import('./trips/trips.page').then((m) => m.TripsPage)
+  },
+  {
     path: 'shop',
-    loadComponent: () => import('./shop/shop.page').then((m) => m.ShopPage)
+    redirectTo: '/tabs/trips',
+    pathMatch: 'full'
+  },
+  {
+    path: 'bookings',
+    loadComponent: () => import('./bookings/bookings.page').then((m) => m.BookingsPage)
   },
   {
     path: 'cart',
-    loadComponent: () => import('./cart/cart.page').then((m) => m.CartPage)
+    redirectTo: '/tabs/bookings',
+    pathMatch: 'full'
   },
   {
     path: 'orders',

@@ -5,26 +5,26 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <section class="cart-hero">
-    <div class="cart-hero-inner">
+  <section class="bookings-hero">
+    <div class="bookings-hero-inner">
       <h1>Your Bookings</h1>
       <p>Review your selected trips, adjust guests, and continue to confirm your booking.</p>
     </div>
   </section>
 
-  <section class="cart-shell">
+  <section class="bookings-shell">
     <h2>Booking Summary</h2>
 
-    @if (cartItems.length === 0) {
+    @if (bookingItems.length === 0) {
       <div class="empty-state">
         <p>No trips booked yet.</p>
         <ion-button routerLink="/tabs/home" shape="round">Browse Trips</ion-button>
       </div>
     } @else {
-      <div class="cart-layout">
-        <div class="cart-items">
-          @for (item of cartItems; track item.product.id) {
-            <article class="cart-item">
+      <div class="bookings-layout">
+        <div class="booking-items">
+          @for (item of bookingItems; track item.product.id) {
+            <article class="booking-item">
               <img [src]="item.product.image" [alt]="item.product.name" class="item-image" />
 
               <div class="item-meta">
@@ -57,13 +57,13 @@
           <h3>Total</h3>
           <div class="summary-row">
             <span>Subtotal</span>
-            <strong>{{ formatRand(getCartSubtotal()) }}</strong>
+            <strong>{{ formatRand(getBookingSubtotal()) }}</strong>
           </div>
           <div class="summary-row muted">
             <span>Deposit</span>
             <span>10% required at booking</span>
           </div>
-          <ion-button expand="block" fill="clear" color="medium" (click)="clearCart()">Clear Bookings</ion-button>
+          <ion-button expand="block" fill="clear" color="medium" (click)="clearBookings()">Clear Bookings</ion-button>
         </aside>
       </div>
 
@@ -81,4 +81,6 @@
       </div>
     }
   </section>
+
+  <app-footer></app-footer>
 </ion-content>

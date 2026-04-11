@@ -6,44 +6,45 @@ import { ToastController } from '@ionic/angular';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonItem, IonLabel, IonInput } from '@ionic/angular/standalone';
 import { findProductById, ProductItem } from '../shared/product-catalog';
 import { appendCheckoutRecords, CheckoutRecord } from '../shared/admin-storage';
+import { FooterComponent } from '../footer/footer.component';
 
-interface StoredCartItem {
+interface StoredBookingItem {
   id: number;
   qty: number;
 }
 
-interface CartItem {
+interface BookingItem {
   product: ProductItem;
   qty: number;
 }
 
 @Component({
-  selector: 'app-cart',
-  templateUrl: 'cart.page.html',
-  styleUrls: ['cart.page.scss'],
+  selector: 'app-bookings',
+  templateUrl: 'bookings.page.html',
+  styleUrls: ['bookings.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonItem, IonLabel, IonInput],
+  imports: [CommonModule, FormsModule, RouterLink, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonItem, IonLabel, IonInput, FooterComponent],
 })
-export class CartPage {
-  cartItems: CartItem[] = [];
+export class BookingsPage {
+  bookingItems: BookingItem[] = [];
   checkoutEmail = '';
 
   constructor(private toastController: ToastController) {}
 
   ionViewWillEnter(): void {
-    this.loadCart();
+    this.loadBookings();
   }
 
   formatRand(amount: number): string {
     return `R${amount.toLocaleString('en-ZA', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
   }
 
-  getItemTotal(item: CartItem): number {
+  getItemTotal(item: BookingItem): number {
     return item.product.price * item.qty;
   }
 
-  getCartSubtotal(): number {
-    return this.cartItems.reduce((sum, item) => sum + this.getItemTotal(item), 0);
+  getBookingSubtotal(): number {
+    return this.bookingItems.reduce((sum, item) => sum + this.getItemTotal(item), 0);
   }
 
   incrementQty(itemId: number): void {
@@ -55,14 +56,14 @@ export class CartPage {
   }
 
   removeItem(itemId: number): void {
-    const stored = this.readStoredCart().filter((item) => item.id !== itemId);
-    this.writeStoredCart(stored);
-    this.loadCart();
+    const stored = this.readStoredBookings().filter((item) => item.id !== itemId);
+    this.writeStoredBookings(stored);
+    this.loadBookings();
   }
 
-  clearCart(): void {
+  clearBookings(): void {
     localStorage.removeItem('cart-items');
-    this.loadCart();
+    this.loadBookings();
   }
 
   async confirmBooking(): Promise<void> {
@@ -74,13 +75,13 @@ export class CartPage {
       return;
     }
 
-    if (this.cartItems.length === 0) {
+    if (this.bookingItems.length === 0) {
       await this.presentToast('No trips in your bookings.', 'warning');
       return;
     }
 
     const bookedAt = new Date().toISOString();
-    const checkoutRecords: CheckoutRecord[] = this.cartItems.map((item) => ({
+    const checkoutRecords: CheckoutRecord[] = this.bookingItems.map((item) => ({
       id: `${item.product.id}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       userEmail: email,
       tripBooked: item.product.name,
@@ -90,14 +91,14 @@ export class CartPage {
     }));
 
     appendCheckoutRecords(checkoutRecords);
-    this.clearCart();
+    this.clearBookings();
     this.checkoutEmail = '';
 
     await this.presentToast('Booking confirmed successfully.', 'success');
   }
 
   private updateQty(itemId: number, delta: number): void {
-    const stored = this.readStoredCart();
+    const stored = this.readStoredBookings();
     const target = stored.find((item) => item.id === itemId);
 
     if (!target) {
@@ -107,13 +108,13 @@ export class CartPage {
     target.qty += delta;
 
     const filtered = stored.filter((item) => item.qty > 0);
-    this.writeStoredCart(filtered);
-    this.loadCart();
+    this.writeStoredBookings(filtered);
+    this.loadBookings();
   }
 
-  private loadCart(): void {
-    const stored = this.readStoredCart();
-    const mapped: CartItem[] = [];
+  private loadBookings(): void {
+    const stored = this.readStoredBookings();
+    const mapped: BookingItem[] = [];
 
     for (const item of stored) {
       const product = findProductById(item.id);
@@ -122,24 +123,24 @@ export class CartPage {
       }
     }
 
-    this.cartItems = mapped;
+    this.bookingItems = mapped;
   }
 
-  private readStoredCart(): StoredCartItem[] {
+  private readStoredBookings(): StoredBookingItem[] {
     const cartRaw = localStorage.getItem('cart-items');
     if (!cartRaw) {
       return [];
     }
 
     try {
-      const parsed = JSON.parse(cartRaw) as StoredCartItem[];
+      const parsed = JSON.parse(cartRaw) as StoredBookingItem[];
       return Array.isArray(parsed) ? parsed : [];
     } catch {
       return [];
     }
   }
 
-  private writeStoredCart(items: StoredCartItem[]): void {
+  private writeStoredBookings(items: StoredBookingItem[]): void {
     localStorage.setItem('cart-items', JSON.stringify(items));
   }
 

@@ -4,12 +4,17 @@ import { IonContent, IonButton } from '@ionic/angular/standalone';
 import { ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { FooterComponent } from '../footer/footer.component';
-import { CategorySection, getCategorySections, getDiscountPercent, ProductItem } from '../shared/product-catalog';
+import { getCategorySections, getDiscountPercent, ProductItem } from '../shared/product-catalog';
 
 interface HeroSlide {
   title: string;
   subtitle: string;
   cta: string;
+}
+
+interface MonthSection {
+  name: string;
+  items: ProductItem[];
 }
 
 @Component({
@@ -38,7 +43,7 @@ export class HomePage implements OnInit, OnDestroy {
     },
   ];
 
-  categorySections: CategorySection[] = [];
+  monthSections: MonthSection[] = [];
 
   currentSlideIndex = 0;
   private carouselTimer: ReturnType<typeof setInterval> | null = null;
@@ -49,7 +54,7 @@ export class HomePage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.categorySections = getCategorySections();
+    this.monthSections = this.buildMonthSections();
     this.startAutoplay();
   }
 
@@ -88,7 +93,7 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   openTrips(): void {
-    this.router.navigate(['/tabs/shop']);
+    this.router.navigate(['/tabs/trips']);
   }
 
   async addToCart(item: ProductItem, event: Event): Promise<void> {
@@ -141,5 +146,56 @@ export class HomePage implements OnInit, OnDestroy {
   private restartAutoplay(): void {
     this.pauseAutoplay();
     this.startAutoplay();
+  }
+
+  private buildMonthSections(): MonthSection[] {
+    const allItems: ProductItem[] = [];
+    for (const section of getCategorySections()) {
+      allItems.push(...section.items);
+    }
+    const monthMap = new Map<string, ProductItem[]>();
+
+    for (const item of allItems) {
+      if (!item.dateFrom) {
+        const noDateItems = monthMap.get('No Date') ?? [];
+        noDateItems.push(item);
+        monthMap.set('No Date', noDateItems);
+        continue;
+      }
+
+      const startDate = new Date(item.dateFrom);
+      if (Number.isNaN(startDate.getTime())) {
+        const noDateItems = monthMap.get('No Date') ?? [];
+        noDateItems.push(item);
+        monthMap.set('No Date', noDateItems);
+        continue;
+      }
+
+      const monthName = startDate.toLocaleString('en-US', {
+        month: 'long',
+        year: 'numeric',
+      });
+
+      const monthItems = monthMap.get(monthName) ?? [];
+      monthItems.push(item);
+      monthMap.set(monthName, monthItems);
+    }
+
+    const sortedEntries = Array.from(monthMap.entries()).sort(([a], [b]) => {
+      if (a === 'No Date') {
+        return 1;
+      }
+
+      if (b === 'No Date') {
+        return -1;
+      }
+
+      return new Date(a).getTime() - new Date(b).getTime();
+    });
+
+    return sortedEntries.map(([name, items]) => ({
+      name,
+      items,
+    }));
   }
 }

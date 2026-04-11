@@ -21,14 +21,16 @@ import {
   IonToggle,
 } from '@ionic/angular/standalone';
 import { getAllProducts, getCategorySections, getDiscountPercent, ProductItem } from '../shared/product-catalog';
+import { FooterComponent } from '../footer/footer.component';
+
 
 type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'name-asc';
 type ViewMode = 'grid' | 'compact';
 
 @Component({
-  selector: 'app-shop',
-  templateUrl: 'shop.page.html',
-  styleUrls: ['shop.page.scss'],
+  selector: 'app-trips',
+  templateUrl: 'trips.page.html',
+  styleUrls: ['trips.page.scss'],
   standalone: true,
   imports: [
     CommonModule,
@@ -48,9 +50,10 @@ type ViewMode = 'grid' | 'compact';
     IonButton,
     IonChip,
     IonToggle,
+    FooterComponent,
   ],
 })
-export class ShopPage {
+export class TripsPage {
   allProducts: ProductItem[] = [];
   categories: string[] = ['all'];
   maxPrice = 0;

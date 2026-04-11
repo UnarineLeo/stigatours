@@ -61,6 +61,7 @@ export class TabsPage {
   private async presentLoginModal() {
     const modal = await this.modalController.create({
       component: LoginModalComponent,
+      cssClass: 'auth-modal',
     });
 
     await modal.present();
@@ -96,6 +97,7 @@ export class TabsPage {
   private async presentRegisterModal() {
     const modal = await this.modalController.create({
       component: RegisterModalComponent,
+      cssClass: 'auth-modal',
     });
 
     await modal.present();

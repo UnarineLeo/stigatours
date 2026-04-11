@@ -2,25 +2,25 @@
   display: block;
 }
 
-.shop-hero {
+.trips-hero {
   background: linear-gradient(135deg, #2a5ea2 0%, #2d5a7b 60%, #216880 100%);
   color: #fff;
   padding: 64px 20px 54px;
 }
 
-.shop-hero-inner {
+.trips-hero-inner {
   max-width: 900px;
   margin: 0 auto;
   text-align: center;
 }
 
-.shop-hero-inner h1 {
+.trips-hero-inner h1 {
   margin: 0 0 14px;
   font-size: 2.35rem;
   line-height: 1.2;
 }
 
-.shop-hero-inner p {
+.trips-hero-inner p {
   margin: 0 auto;
   max-width: 760px;
   font-size: 1.05rem;
@@ -28,22 +28,22 @@
   color: rgba(255, 255, 255, 0.94);
 }
 
-.shop-content h2 {
+.trips-content h2 {
   margin: 0 0 10px;
 }
 
-.shop-content {
+.trips-content {
   max-width: 1080px;
   margin: -24px auto 24px;
 }
 
-.shop-content p {
+.trips-content p {
   margin: 0;
   color: #475569;
   line-height: 1.65;
 }
 
-.shop-content.ion-padding {
+.trips-content.ion-padding {
   border: 1px solid #e2e8f0;
   border-radius: 16px;
   background: #fff;
@@ -307,15 +307,15 @@
 }
 
 @media (max-width: 768px) {
-  .shop-hero {
+  .trips-hero {
     padding: 48px 16px 40px;
   }
 
-  .shop-hero-inner h1 {
+  .trips-hero-inner h1 {
     font-size: 1.95rem;
   }
 
-  .shop-content {
+  .trips-content {
     margin: -14px 0 16px;
   }
 

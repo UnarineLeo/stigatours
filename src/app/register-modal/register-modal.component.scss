@@ -1,6 +1,23 @@
 .modal-header ion-toolbar {
   --background: #ffffff;
   --color: #0f172a;
+  --border-style: none;
+  --min-height: 64px;
+}
+
+.close-btn {
+  --color: #111827;
+  --color-hover: #111827;
+  --color-focused: #111827;
+  --color-activated: #111827;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  font-weight: 700;
+  text-transform: none;
+}
+
+.close-btn::part(native) {
+  text-shadow: none;
 }
 
 .modal-content {
@@ -8,12 +25,72 @@
 }
 
 .auth-shell {
+  min-height: 100%;
   padding: 18px 18px 22px;
 }
 
-.auth-subtitle {
-  margin: 0 0 14px;
+.auth-hero {
+  padding: 18px 8px 16px;
+  text-align: center;
+}
+
+.auth-kicker {
+  margin: 0 0 8px;
   color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.auth-hero h2 {
+  margin: 0 0 10px;
+  font-size: 1.55rem;
+  line-height: 1.15;
+  color: #0f172a;
+  letter-spacing: -0.03em;
+}
+
+.auth-subtitle {
+  margin: 0 auto;
+  max-width: 36ch;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.auth-pills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.auth-pills span {
+  padding: 6px 10px;
+  border: 1px solid #d7dbe3;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #475569;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.auth-card {
+  padding: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 22px;
+  // background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 22px 44px -30px rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(14px);
+}
+
+.card-topline {
+  width: 72px;
+  height: 4px;
+  margin: 0 auto 14px;
+  border-radius: 999px;
+  background: #cbd5e1;
 }
 
 .grid-two {
@@ -24,31 +101,44 @@
 
 .field-item {
   --background: #f8fafc;
-  --padding-start: 12px;
-  --inner-padding-end: 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  margin-bottom: 10px;
+  --padding-start: 14px;
+  --inner-padding-end: 14px;
+  --min-height: 56px;
+  border: 1px solid #d9e3ed;
+  border-radius: 16px;
+  margin-bottom: 12px;
+}
+
+.field-item ion-label {
+  color: #475569;
+  font-weight: 600;
+}
+
+.field-item ion-input {
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  --color: #0f172a;
 }
 
 .primary-btn {
-  --background: #1e40af;
-  --background-hover: #1e3a8a;
+  --background: #111827;
+  --background-hover: #1f2937;
   --color: #ffffff;
-  --border-radius: 10px;
-  height: 44px;
+  --border-radius: 16px;
+  height: 48px;
   text-transform: none;
-  font-weight: 600;
+  font-weight: 700;
   margin: 8px 0 10px;
 }
 
 .google-btn {
-  --color: #334155;
+  --color: #111827;
   --border-color: #cbd5e1;
-  --border-radius: 10px;
-  height: 44px;
+  --border-radius: 16px;
+  height: 48px;
   text-transform: none;
-  font-weight: 600;
+  font-weight: 700;
+  --background: #ffffff;
 }
 
 .auth-footer {
@@ -61,15 +151,41 @@
 .inline-link {
   border: 0;
   background: transparent;
-  color: #1e40af;
+  color: #111827;
   font-weight: 600;
   cursor: pointer;
   padding: 0;
 }
 
 @media (max-width: 680px) {
+  .auth-shell {
+    padding: 14px 14px 18px;
+  }
+
+  .auth-hero {
+    padding: 12px 4px 14px;
+  }
+
+  .auth-hero h2 {
+    font-size: 1.35rem;
+  }
+
+  .auth-card {
+    padding: 14px;
+    border-radius: 18px;
+  }
+
   .grid-two {
     grid-template-columns: 1fr;
     gap: 0;
+  }
+
+  .field-item {
+    --min-height: 52px;
+  }
+
+  .primary-btn,
+  .google-btn {
+    height: 46px;
   }
 }

@@ -1,61 +1,24 @@
 <ion-content [fullscreen]="true">
-  <section
-    class="hero-carousel"
-    aria-label="Featured trips"
-    aria-roledescription="carousel"
-    (mouseenter)="pauseAutoplay()"
-    (mouseleave)="resumeAutoplay()"
-    (focusin)="pauseAutoplay()"
-    (focusout)="resumeAutoplay()">
-    @for (slide of heroSlides; track slide.title; let i = $index) {
-      <article class="hero-slide" [class.active]="i === currentSlideIndex">
-        <div class="hero-content">
-          <h1>{{ slide.title }}</h1>
-          <p>{{ slide.subtitle }}</p>
-          <ion-button shape="round" color="primary" (click)="openTrips()">{{ slide.cta }}</ion-button>
-        </div>
-      </article>
-    }
+  
 
-    <button class="nav-btn prev" type="button" (click)="prevSlide()" aria-label="Previous slide">‹</button>
-    <button class="nav-btn next" type="button" (click)="nextSlide()" aria-label="Next slide">›</button>
-
-    <p class="slide-status" aria-live="polite">
-      {{ currentSlideIndex + 1 }} / {{ heroSlides.length }}
-    </p>
-
-    <div class="dots">
-      @for (slide of heroSlides; track slide.title; let i = $index) {
-        <button
-          type="button"
-          class="dot"
-          [class.active]="i === currentSlideIndex"
-          (click)="goToSlide(i)"
-          [attr.aria-current]="i === currentSlideIndex"
-          [attr.aria-label]="'Go to slide ' + (i + 1)"></button>
-      }
+  <section class="shop-hero">
+    <div class="shop-hero-inner">
+      <h1>Discover Amazing Destinations</h1>
+      <p>Hand-picked packages with everything included — just show up and explore.</p>
     </div>
   </section>
 
   <section class="trips-section">
-    <div class="trips-header">
-      <h2>Featured Trips</h2>
-      <p class="trips-subtitle">Hand-picked packages with everything included — just show up and explore.</p>
-    </div>
+    
 
-    @for (category of categorySections; track category.name) {
+    @for (month of monthSections; track month.name) {
       <div class="category-block">
         <h3 class="category-label">
-          <span class="category-icon">
-            @if (category.name === 'Safari') { 🦁 }
-            @else if (category.name === 'Adventure') { 🌊 }
-            @else if (category.name === 'Beach') { 🏖️ }
-            @else { 🏙️ }
-          </span>
-          {{ category.name }}
+          <span class="category-icon">📅</span>
+          {{ month.name }}
         </h3>
         <div class="trip-grid">
-          @for (item of category.items; track item.id) {
+          @for (item of month.items; track item.id) {
             <article
               class="trip-card"
               role="button"
