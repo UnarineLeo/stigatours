@@ -143,11 +143,16 @@
           </div>
         </ion-card-header>
         <ion-card-content>
-          @if (catalogTrips.length === 0) {
+          <label class="field full search-field">
+            <span>Search Trips</span>
+            <input type="text" [(ngModel)]="tripsSearchQuery" placeholder="Search by name, category, location, or date" />
+          </label>
+
+          @if (filteredCatalogTrips.length === 0) {
             <p class="empty-state">No trips are available in the catalog yet.</p>
           } @else {
             <div class="trip-list">
-              @for (trip of catalogTrips; track trip.id) {
+              @for (trip of filteredCatalogTrips; track trip.id) {
                 <article class="trip-item">
                   <img [src]="trip.images?.[0]" [alt]="trip.name" class="trip-image" />
                   <div class="trip-info">
@@ -167,71 +172,71 @@
 
                     @if (editingTripId === trip.id) {
                       <div class="trip-edit-grid">
-                        <ion-item lines="none" class="field-item">
-                          <ion-label position="stacked">Name</ion-label>
-                          <ion-input [(ngModel)]="editForm.name"></ion-input>
-                        </ion-item>
+                        <label class="field">
+                          <span>Name</span>
+                          <input type="text" [(ngModel)]="editForm.name" />
+                        </label>
 
-                        <ion-item lines="none" class="field-item">
-                          <ion-label position="stacked">Category</ion-label>
-                          <ion-input [(ngModel)]="editForm.category"></ion-input>
-                        </ion-item>
+                        <label class="field">
+                          <span>Category</span>
+                          <input type="text" [(ngModel)]="editForm.category" />
+                        </label>
 
-                        <ion-item lines="none" class="field-item">
-                          <ion-label position="stacked">Price</ion-label>
-                          <ion-input type="number" [(ngModel)]="editForm.price"></ion-input>
-                        </ion-item>
+                        <label class="field">
+                          <span>Price</span>
+                          <input type="number" [(ngModel)]="editForm.price" />
+                        </label>
 
-                        <ion-item lines="none" class="field-item">
-                          <ion-label position="stacked">Original Price</ion-label>
-                          <ion-input type="number" [(ngModel)]="editForm.originalPrice"></ion-input>
-                        </ion-item>
+                        <label class="field">
+                          <span>Original Price</span>
+                          <input type="number" [(ngModel)]="editForm.originalPrice" />
+                        </label>
 
-                        <ion-item lines="none" class="field-item">
-                          <ion-label position="stacked">Location</ion-label>
-                          <ion-input [(ngModel)]="editForm.location"></ion-input>
-                        </ion-item>
+                        <label class="field">
+                          <span>Location</span>
+                          <input type="text" [(ngModel)]="editForm.location" />
+                        </label>
 
-                        <ion-item lines="none" class="field-item">
-                          <ion-label position="stacked">Duration</ion-label>
-                          <ion-input [(ngModel)]="editForm.duration"></ion-input>
-                        </ion-item>
+                        <label class="field">
+                          <span>Duration</span>
+                          <input type="text" [(ngModel)]="editForm.duration" />
+                        </label>
 
-                        <ion-item lines="none" class="field-item">
-                          <ion-label position="stacked">Group Size</ion-label>
-                          <ion-input type="number" [(ngModel)]="editForm.groupSize"></ion-input>
-                        </ion-item>
+                        <label class="field">
+                          <span>Group Size</span>
+                          <input type="number" [(ngModel)]="editForm.groupSize" />
+                        </label>
 
-                        <ion-item lines="none" class="field-item">
-                          <ion-label position="stacked">Tickets Left</ion-label>
-                          <ion-input type="number" [(ngModel)]="editForm.ticketsLeft"></ion-input>
-                        </ion-item>
+                        <label class="field">
+                          <span>Tickets Left</span>
+                          <input type="number" [(ngModel)]="editForm.ticketsLeft" />
+                        </label>
 
-                        <ion-item lines="none" class="field-item">
-                          <ion-label position="stacked">Date From</ion-label>
-                          <ion-input [(ngModel)]="editForm.dateFrom" placeholder="YYYY-MM-DD"></ion-input>
-                        </ion-item>
+                        <label class="field">
+                          <span>Date From</span>
+                          <input type="date" [(ngModel)]="editForm.dateFrom" />
+                        </label>
 
-                        <ion-item lines="none" class="field-item">
-                          <ion-label position="stacked">Date To</ion-label>
-                          <ion-input [(ngModel)]="editForm.dateTo" placeholder="YYYY-MM-DD"></ion-input>
-                        </ion-item>
+                        <label class="field">
+                          <span>Date To</span>
+                          <input type="date" [(ngModel)]="editForm.dateTo" />
+                        </label>
                       </div>
 
-                      <ion-item lines="none" class="field-item">
-                        <ion-label position="stacked">Image URL / Data URL</ion-label>
-                        <ion-input [(ngModel)]="editForm.image"></ion-input>
-                      </ion-item>
+                      <label class="field full">
+                        <span>Image URL / Data URL</span>
+                        <input type="text" [(ngModel)]="editForm.image" />
+                      </label>
 
-                      <ion-item lines="none" class="field-item">
-                        <ion-label position="stacked">Description</ion-label>
-                        <ion-textarea [(ngModel)]="editForm.description" rows="3"></ion-textarea>
-                      </ion-item>
+                      <label class="field full">
+                        <span>Description</span>
+                        <textarea [(ngModel)]="editForm.description" rows="3"></textarea>
+                      </label>
 
-                      <ion-item lines="none" class="field-item">
-                        <ion-label position="stacked">Benefits (one per line)</ion-label>
-                        <ion-textarea [(ngModel)]="editForm.benefitsText" rows="3"></ion-textarea>
-                      </ion-item>
+                      <label class="field full">
+                        <span>Benefits (one per line)</span>
+                        <textarea [(ngModel)]="editForm.benefitsText" rows="3"></textarea>
+                      </label>
 
                       <div class="trip-edit-actions">
                         <ion-button size="small" color="primary" (click)="saveTripEdit(trip)">Save Changes</ion-button>
@@ -256,11 +261,16 @@
           </div>
         </ion-card-header>
         <ion-card-content>
-          @if (checkoutRecords.length === 0) {
+          <label class="field full search-field">
+            <span>Search Checkout Details</span>
+            <input type="text" [(ngModel)]="checkoutSearchQuery" placeholder="Search by email, trip, amount, or guests" />
+          </label>
+
+          @if (filteredCheckoutRecords.length === 0) {
             <p class="empty-state">No checkout records yet.</p>
           } @else {
             <div class="checkout-list">
-              @for (record of checkoutRecords; track record.id) {
+              @for (record of filteredCheckoutRecords; track record.id) {
                 <article class="checkout-item">
                   <p><strong>User Email:</strong> {{ record.userEmail }}</p>
                   <p><strong>Trip Booked:</strong> {{ record.tripBooked }}</p>

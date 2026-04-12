@@ -5,14 +5,6 @@ import { Router } from '@angular/router';
 import {
   IonContent,
   IonButton,
-  IonItem,
-  IonLabel,
-  IonInput,
-  IonDatetime,
-  IonModal,
-  IonTextarea,
-  IonSelect,
-  IonSelectOption,
   IonCard,
   IonCardHeader,
   IonCardTitle,
@@ -51,14 +43,6 @@ interface AdminEventForm {
     FormsModule,
     IonContent,
     IonButton,
-    IonItem,
-    IonLabel,
-    IonInput,
-    IonDatetime,
-    IonModal,
-    IonTextarea,
-    IonSelect,
-    IonSelectOption,
     IonCard,
     IonCardHeader,
     IonCardTitle,
@@ -73,6 +57,8 @@ export class AdminPortalPage implements OnInit {
   editingTripId: number | null = null;
   categories: string[] = [];
   eventImages: string[] = [];
+  tripsSearchQuery = '';
+  checkoutSearchQuery = '';
 
   form: AdminEventForm = this.createEmptyForm();
   editForm: AdminEventForm = this.createEmptyForm();
@@ -179,6 +165,50 @@ export class AdminPortalPage implements OnInit {
 
   formatRand(amount: number): string {
     return `R${amount.toLocaleString('en-ZA', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  }
+
+  get filteredCatalogTrips(): ProductItem[] {
+    const query = this.tripsSearchQuery.trim().toLowerCase();
+    if (!query) {
+      return this.catalogTrips;
+    }
+
+    return this.catalogTrips.filter((trip) => {
+      const text = [
+        trip.name,
+        trip.category,
+        trip.location,
+        trip.description,
+        trip.dateFrom,
+        trip.dateTo,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
+      return text.includes(query);
+    });
+  }
+
+  get filteredCheckoutRecords(): CheckoutRecord[] {
+    const query = this.checkoutSearchQuery.trim().toLowerCase();
+    if (!query) {
+      return this.checkoutRecords;
+    }
+
+    return this.checkoutRecords.filter((record) => {
+      const text = [
+        record.userEmail,
+        record.tripBooked,
+        String(record.amountPaid),
+        String(record.qty),
+        record.bookedAt,
+      ]
+        .join(' ')
+        .toLowerCase();
+
+      return text.includes(query);
+    });
   }
 
   startEditTrip(item: ProductItem): void {
