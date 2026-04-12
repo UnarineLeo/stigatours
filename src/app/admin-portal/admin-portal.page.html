@@ -96,7 +96,7 @@
 
             <label class="field">
               <span>Date To</span>
-              <input type="date" [(ngModel)]="form.dateTo" />
+              <input type="date" [(ngModel)]="form.dateTo" [min]="form.dateFrom || null" />
             </label>
           </div>
 
@@ -219,7 +219,7 @@
 
                         <label class="field">
                           <span>Date To</span>
-                          <input type="date" [(ngModel)]="editForm.dateTo" />
+                          <input type="date" [(ngModel)]="editForm.dateTo" [min]="editForm.dateFrom || null" />
                         </label>
                       </div>
 

@@ -97,6 +97,11 @@ export class AdminPortalPage implements OnInit {
       return;
     }
 
+    if (!this.isDateRangeValid(this.form.dateFrom, this.form.dateTo)) {
+      await this.presentToast('Date From must be earlier than Date To.', 'warning');
+      return;
+    }
+
     const eventItem: ProductItem = {
       id: getNextProductId(),
       name: this.form.name.trim(),
@@ -169,11 +174,9 @@ export class AdminPortalPage implements OnInit {
 
   get filteredCatalogTrips(): ProductItem[] {
     const query = this.tripsSearchQuery.trim().toLowerCase();
-    if (!query) {
-      return this.catalogTrips;
-    }
-
-    return this.catalogTrips.filter((trip) => {
+    const filtered = !query
+      ? [...this.catalogTrips]
+      : this.catalogTrips.filter((trip) => {
       const text = [
         trip.name,
         trip.category,
@@ -187,6 +190,17 @@ export class AdminPortalPage implements OnInit {
         .toLowerCase();
 
       return text.includes(query);
+    });
+
+    return filtered.sort((a, b) => {
+      const aTime = this.getTripSortTime(a);
+      const bTime = this.getTripSortTime(b);
+
+      if (aTime !== bTime) {
+        return aTime - bTime;
+      }
+
+      return a.name.localeCompare(b.name);
     });
   }
 
@@ -251,6 +265,11 @@ export class AdminPortalPage implements OnInit {
       return;
     }
 
+    if (!this.isDateRangeValid(this.editForm.dateFrom, this.editForm.dateTo)) {
+      await this.presentToast('Date From must be earlier than Date To.', 'warning');
+      return;
+    }
+
     const updatedItem: ProductItem = {
       ...original,
       name: this.editForm.name.trim(),
@@ -290,6 +309,35 @@ export class AdminPortalPage implements OnInit {
       .filter((line) => line.length > 0);
 
     return lines.length > 0 ? lines : undefined;
+  }
+
+  private isDateRangeValid(dateFrom: string, dateTo: string): boolean {
+    if (!dateFrom || !dateTo) {
+      return true;
+    }
+
+    const from = new Date(dateFrom);
+    const to = new Date(dateTo);
+
+    if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
+      return false;
+    }
+
+    return from.getTime() < to.getTime();
+  }
+
+  private getTripSortTime(trip: ProductItem): number {
+    const rawDate = trip.dateFrom ?? trip.dateTo;
+    if (!rawDate) {
+      return Number.MAX_SAFE_INTEGER;
+    }
+
+    const date = new Date(`${rawDate}T00:00:00`);
+    if (Number.isNaN(date.getTime())) {
+      return Number.MAX_SAFE_INTEGER;
+    }
+
+    return date.getTime();
   }
 
   private readFileAsDataUrl(file: File): Promise<string> {
