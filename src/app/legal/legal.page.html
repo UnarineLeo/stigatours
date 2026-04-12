@@ -30,9 +30,6 @@
         class="legal-tabs"
         [value]="activeView"
         (ionChange)="onTabChange($event.detail.value)">
-        <ion-segment-button value="back">
-          Back
-        </ion-segment-button>
         <ion-segment-button value="terms">
           Terms of Service
         </ion-segment-button>
@@ -160,4 +157,6 @@
       </article>
     }
   </section>
+
+  <app-footer></app-footer>
 </ion-content>

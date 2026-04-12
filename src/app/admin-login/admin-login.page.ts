@@ -14,6 +14,7 @@ import {
 } from '@ionic/angular/standalone';
 import { AuthService } from '../services/auth.service';
 import { setAdminAuthenticated } from '../shared/admin-storage';
+import { FooterComponent } from '../footer/footer.component';
 
 @Component({
   selector: 'app-admin-login',
@@ -32,6 +33,7 @@ import { setAdminAuthenticated } from '../shared/admin-storage';
     IonText,
     FormsModule,
     RouterLink,
+    FooterComponent,
   ],
 })
 export class AdminLoginPage {

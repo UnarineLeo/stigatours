@@ -49,7 +49,8 @@ export const routes: Routes = [
   },
   {
     path: 'legal',
-    loadComponent: () => import('./legal/legal.page').then((m) => m.LegalPage)
+    redirectTo: '/tabs/legal',
+    pathMatch: 'full'
   },
   {
     path: 'item/:id',
