@@ -76,8 +76,14 @@ export class TabsPage {
       return;
     }
 
-    if (data.action === 'forgot-password' && data.email) {
-      this.authService.forgotPassword(data.email);
+    if (data.action === 'forgot-password') {
+      const email = (data.email ?? '').trim();
+      if (!email) {
+        await this.authService.presentToast('Please enter your email address first.');
+        return;
+      }
+
+      this.authService.forgotPassword(email);
       return;
     }
 

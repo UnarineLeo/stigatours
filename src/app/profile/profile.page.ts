@@ -5,25 +5,19 @@ import { AuthService } from '../services/auth.service';
 import { environment } from 'src/environments/environment';
 import { deleteDoc, doc, setDoc } from 'firebase/firestore';
 import { SupabaseStorageService } from '../services/supabase-storage.service';
+import { FooterComponent } from '../footer/footer.component';
 
-type ProfileTab = 'personal' | 'password' | 'highSchoolSubjects' | 'documents' | 'account';
+type ProfileTab = 'personal' | 'password' | 'documents' | 'account';
 
 type RequiredDocumentKey =
   | 'idDocument'
-  | 'matricCertificate'
-  | 'grade11Transcript'
-  | 'grade12MidYearResults';
+  | 'passport';
 
 interface RequiredDocumentRequirement {
   key: RequiredDocumentKey;
   label: string;
   helperText: string;
   accept: string;
-}
-
-interface SubjectMarkEntry {
-  subject: string;
-  mark: number | null;
 }
 
 interface StreetAddressSuggestion {
@@ -42,17 +36,14 @@ interface PasswordForm {
   selector: 'app-profile',
   templateUrl: 'profile.page.html',
   styleUrls: ['profile.page.scss'],
-  imports: [IonHeader, IonToolbar, IonTitle, IonContent],
+  imports: [IonHeader, IonToolbar, IonTitle, IonContent, FooterComponent],
 })
 export class ProfilePage implements OnDestroy, AfterViewInit {
   @ViewChild('streetAddressInput') streetAddressInput?: ElementRef<HTMLInputElement>;
 
   activeTab: ProfileTab = 'personal';
   isGoogleUser = false;
-  minimumSubjects = 7;
   isSavingProfile = false;
-  isSavingSubjects = false;
-  isSavingAcademicInfo = false;
   isUploadingDocuments = false;
   isFinalizingDocumentUpload = false;
   isUpdatingPassword = false;
@@ -139,78 +130,21 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
       accept: '.pdf,.jpg,.jpeg,.png'
     },
     {
-      key: 'matricCertificate',
-      label: 'Matric Certificate',
-      helperText: 'Upload your official Grade 12 certificate.',
-      accept: '.pdf,.jpg,.jpeg,.png'
-    },
-    {
-      key: 'grade11Transcript',
-      label: 'Grade 11 Transcript',
-      helperText: 'Upload your final Grade 11 report/transcript.',
-      accept: '.pdf,.jpg,.jpeg,.png'
-    },
-    {
-      key: 'grade12MidYearResults',
-      label: 'Grade 12 Mid-Year Results',
-      helperText: 'Upload your latest Grade 12 mid-year results.',
+      key: 'passport',
+      label: 'Passport',
+      helperText: 'Upload a clear scan or photo of your passport.',
       accept: '.pdf,.jpg,.jpeg,.png'
     }
   ];
 
   selectedDocumentFiles: Record<RequiredDocumentKey, File | null> = {
     idDocument: null,
-    matricCertificate: null,
-    grade11Transcript: null,
-    grade12MidYearResults: null
+    passport: null
   };
 
   uploadedDocumentUrls: Partial<Record<RequiredDocumentKey, string>> = {};
   uploadedDocumentNames: Partial<Record<RequiredDocumentKey, string>> = {};
   readonly requiredDocumentKey: RequiredDocumentKey = 'idDocument';
-
-  highSchoolSubjectOptions = [
-    'Accounting',
-    'Afrikaans',
-    'Agricultural Management Practices',
-    'Agricultural Sciences',
-    'Agricultural Technology',
-    'Business Studies',
-    'Civil Technology',
-    'Computer Applications Technology',
-    'Consumer Studies',
-    'Dance Studies',
-    'Dramatic Arts',
-    'Economics',
-    'Electrical Technology',
-    'Engineering Graphics and Design',
-    'English',
-    'Geography',
-    'History',
-    'Hospitality Studies',
-    'Information Technology',
-    'isiNdebele',
-    'isiXhosa',
-    'isiZulu',
-    'Life Orientation',
-    'Life Sciences',
-    'Mathematical Literacy',
-    'Mathematics',
-    'Mechanical Technology',
-    'Music',
-    'Physical Sciences',
-    'Religion Studies',
-    'Sepedi',
-    'Sesotho',
-    'Setswana',
-    'siSwati',
-    'Tourism',
-    'Tshivenda',
-    'Xitsonga',
-    'Visual Arts'
-  ];
-
-  subjectEntries: SubjectMarkEntry[] = this.createInitialSubjectRows();
 
   constructor(
     private authService: AuthService,
@@ -524,59 +458,6 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
     }
   }
 
-  addSubjectEntry() {
-    this.subjectEntries = [...this.subjectEntries, { subject: '', mark: null }];
-  }
-
-  removeSubjectEntry(index: number) {
-    if (this.subjectEntries.length <= this.minimumSubjects) {
-      return;
-    }
-
-    this.subjectEntries = this.subjectEntries.filter((_, currentIndex) => currentIndex !== index);
-  }
-
-  onSubjectChange(index: number, event: Event) {
-    const value = (event.target as HTMLSelectElement).value;
-    this.subjectEntries = this.subjectEntries.map((entry, currentIndex) => {
-      if (currentIndex !== index) {
-        return entry;
-      }
-
-      return {
-        ...entry,
-        subject: value
-      };
-    });
-  }
-
-  onMarkChange(index: number, event: Event) {
-    const rawValue = (event.target as HTMLInputElement).value;
-
-    this.subjectEntries = this.subjectEntries.map((entry, currentIndex) => {
-      if (currentIndex !== index) {
-        return entry;
-      }
-
-      if (rawValue.trim() === '') {
-        return {
-          ...entry,
-          mark: null
-        };
-      }
-
-      const parsedMark = Number(rawValue);
-      const sanitizedMark = Number.isFinite(parsedMark)
-        ? parsedMark
-        : null;
-
-      return {
-        ...entry,
-        mark: sanitizedMark
-      };
-    });
-  }
-
   onStreetAddressInput(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.profile = {
@@ -645,77 +526,6 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
     if (googleRef?.maps?.places?.AutocompleteSessionToken) {
       this.streetAddressSessionToken = new googleRef.maps.places.AutocompleteSessionToken();
     }
-  }
-
-  isSubjectDisabled(subject: string, currentIndex: number): boolean {
-    return this.subjectEntries.some((entry, index) => index !== currentIndex && entry.subject === subject);
-  }
-
-  async saveHighSchoolSubjects() {
-    if (!this.userUid) {
-      await this.authService.presentToast('Please sign in to save your subjects.');
-      return;
-    }
-
-    const hasInvalidMark = this.subjectEntries.some((entry) => entry.mark !== null && (entry.mark < 0 || entry.mark > 100));
-    if (hasInvalidMark) {
-      await this.authService.presentToast('Each mark must be between 0 and 100.');
-      return;
-    }
-
-    const completedEntries: Array<{ subject: string; mark: number }> = this.subjectEntries
-      .map((entry) => ({
-        subject: entry.subject.trim(),
-        mark: entry.mark
-      }))
-      .filter((entry): entry is { subject: string; mark: number } =>
-        entry.subject !== ''
-        && this.highSchoolSubjectOptions.includes(entry.subject)
-        && entry.mark !== null
-        && entry.mark >= 0
-        && entry.mark <= 100
-      );
-
-    if (completedEntries.length < this.minimumSubjects) {
-      await this.authService.presentToast('Add at least 7 subjects with marks before saving.');
-      return;
-    }
-
-    const uniqueSubjects = new Set(completedEntries.map((entry) => entry.subject));
-    if (uniqueSubjects.size !== completedEntries.length) {
-      await this.authService.presentToast('Each subject can only be selected once.');
-      return;
-    }
-
-    this.isSavingSubjects = true;
-
-    try {
-      await setDoc(doc(this.authService.db, 'users', this.userUid), {
-        highSchoolSubjects: completedEntries
-      }, { merge: true });
-
-      // Rehydrate from persisted payload so selects keep saved default values.
-      this.subjectEntries = this.buildSubjectEntriesFromSavedData(completedEntries);
-
-      await this.authService.presentToast('Subjects saved successfully.');
-    } catch {
-      await this.authService.presentToast('Could not save subjects right now. Please try again.');
-    } finally {
-      this.isSavingSubjects = false;
-    }
-  }
-
-  canSaveHighSchoolSubjects(): boolean {
-    const hasInvalidMark = this.subjectEntries.some((entry) => entry.mark !== null && (entry.mark < 0 || entry.mark > 100));
-    if (hasInvalidMark) {
-      return false;
-    }
-
-    const completedEntries = this.subjectEntries.filter((entry) =>
-      entry.subject.trim() !== '' && entry.mark !== null && entry.mark >= 0 && entry.mark <= 100
-    );
-
-    return completedEntries.length >= this.minimumSubjects;
   }
 
   canUploadRequiredDocuments(): boolean {
@@ -850,9 +660,7 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
 
       this.selectedDocumentFiles = {
         idDocument: null,
-        matricCertificate: null,
-        grade11Transcript: null,
-        grade12MidYearResults: null
+        passport: null
       };
 
       await this.authService.presentToast('Documents uploaded successfully.');
@@ -864,23 +672,6 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
     }
   }
 
-  async debugSupabaseConnection() {
-    try {
-      console.log('Supabase config:', {
-        url: environment.supabaseUrl,
-        bucket: environment.supabaseStorageBucket
-      });
-
-      const buckets = await this.supabaseStorageService.getExistingBuckets();
-      console.log('Supabase buckets from debug action:', buckets);
-
-      await this.authService.presentToast('Supabase connection check complete. See the console for details.');
-    } catch (error) {
-      console.error('Supabase connection check failed:', error);
-      await this.authService.presentToast('Supabase connection check failed. See the console for details.');
-    }
-  }
-
   ngOnDestroy() {
     this.unsubscribeAuth?.();
   }
@@ -889,32 +680,7 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
     await this.initializeStreetAddressAutocomplete();
   }
 
-  private createInitialSubjectRows(): SubjectMarkEntry[] {
-    return Array.from({ length: this.minimumSubjects }, () => ({ subject: '', mark: null }));
-  }
-
-  private buildSubjectEntriesFromSavedData(entries: SubjectMarkEntry[]): SubjectMarkEntry[] {
-    if (!entries.length) {
-      return this.createInitialSubjectRows();
-    }
-
-    const normalizedEntries = entries
-      .map((entry) => this.parseHighSchoolSubjectEntry(entry))
-      .filter((entry): entry is SubjectMarkEntry => entry !== null);
-
-    if (!normalizedEntries.length) {
-      return this.createInitialSubjectRows();
-    }
-
-    const paddedSubjects = [...normalizedEntries];
-    while (paddedSubjects.length < this.minimumSubjects) {
-      paddedSubjects.push({ subject: '', mark: null });
-    }
-
-    return paddedSubjects;
-  }
-
-  private async loadSavedSubjects(uid: string) {
+  private async loadProfileData(uid: string) {
     try {
       const userData = await this.authService.getUser(uid) as {
         firstName?: string;
@@ -931,7 +697,6 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
         nationality?: string;
         race?: string;
         disabilityStatus?: string;
-        highSchoolSubjects?: SubjectMarkEntry[];
         documents?: Partial<Record<RequiredDocumentKey, string>>;
         documentFileNames?: Partial<Record<RequiredDocumentKey, string>>;
       };
@@ -962,20 +727,8 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
       if (userData.documentFileNames && typeof userData.documentFileNames === 'object') {
         this.uploadedDocumentNames = { ...userData.documentFileNames };
       }
-
-      const savedHighSchoolSubjects: SubjectMarkEntry[] = Array.isArray(userData.highSchoolSubjects)
-        ? userData.highSchoolSubjects.reduce<SubjectMarkEntry[]>((accumulator, entry) => {
-            const parsedEntry = this.parseHighSchoolSubjectEntry(entry);
-            if (parsedEntry) {
-              accumulator.push(parsedEntry);
-            }
-            return accumulator;
-          }, [])
-        : [];
-
-      this.subjectEntries = this.buildSubjectEntriesFromSavedData(savedHighSchoolSubjects);
     } catch {
-      this.subjectEntries = this.createInitialSubjectRows();
+      // Keep the auth-derived defaults if stored profile data is unavailable.
     }
   }
 
@@ -1005,14 +758,13 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
         newPassword: '',
         confirmNewPassword: ''
       };
-      this.subjectEntries = this.createInitialSubjectRows();
       return;
     }
 
     this.userUid = user.uid;
 
     this.isGoogleUser = user.providerData.some((provider) => provider.providerId === 'google.com');
-  this.isEmailVerified = user.emailVerified ?? false;
+    this.isEmailVerified = user.emailVerified ?? false;
 
     const displayName = user.displayName?.trim() ?? '';
     const [firstName = 'User', ...rest] = displayName ? displayName.split(/\s+/) : ['User'];
@@ -1043,7 +795,7 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
       this.activeTab = 'personal';
     }
 
-    await this.loadSavedSubjects(user.uid);
+    await this.loadProfileData(user.uid);
   }
 
   private async initializeStreetAddressAutocomplete(): Promise<boolean> {
@@ -1202,62 +954,6 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
   private isAllowedDocumentType(file: File): boolean {
     const extension = file.name.split('.').pop()?.toLowerCase() ?? '';
     return this.allowedDocumentMimeTypes.has(file.type) || this.allowedDocumentExtensions.has(extension);
-  }
-
-  private resolveSubjectOption(subject: string): string {
-    const normalizedSubject = subject.trim().toLowerCase();
-    const matchedSubject = this.highSchoolSubjectOptions.find(
-      (option) => option.trim().toLowerCase() === normalizedSubject
-    );
-
-    return matchedSubject ?? '';
-  }
-
-  private parseHighSchoolSubjectEntry(entry: unknown): SubjectMarkEntry | null {
-    if (!entry) {
-      return null;
-    }
-
-    if (typeof entry === 'string') {
-      const match = entry.match(/^(.*)\s-\s(\d{1,3})$/);
-      if (!match) {
-        return null;
-      }
-
-      const matchedSubject = this.resolveSubjectOption(match[1]);
-      const parsedMark = Number(match[2]);
-      if (!matchedSubject || !Number.isFinite(parsedMark) || parsedMark < 0 || parsedMark > 100) {
-        return null;
-      }
-
-      return {
-        subject: matchedSubject,
-        mark: parsedMark
-      };
-    }
-
-    if (typeof entry === 'object') {
-      const recordEntry = entry as Record<string, unknown>;
-      const subjectRaw = recordEntry['subject'] ?? recordEntry['name'] ?? recordEntry['title'];
-      const markRaw = recordEntry['mark'] ?? recordEntry['score'] ?? recordEntry['value'];
-
-      if (typeof subjectRaw !== 'string') {
-        return null;
-      }
-
-      const matchedSubject = this.resolveSubjectOption(subjectRaw);
-      const parsedMark = typeof markRaw === 'number' ? markRaw : Number(markRaw);
-      if (!matchedSubject || !Number.isFinite(parsedMark) || parsedMark < 0 || parsedMark > 100) {
-        return null;
-      }
-
-      return {
-        subject: matchedSubject,
-        mark: parsedMark
-      };
-    }
-
-    return null;
   }
 
   private getMissingMandatoryProfileFields(): string[] {

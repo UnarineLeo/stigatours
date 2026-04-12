@@ -13,7 +13,6 @@ import {
   IonText,
 } from '@ionic/angular/standalone';
 import { AuthService } from '../services/auth.service';
-import { setAdminAuthenticated } from '../shared/admin-storage';
 import { FooterComponent } from '../footer/footer.component';
 
 @Component({
@@ -56,8 +55,13 @@ export class AdminLoginPage {
       password: this.password,
     });
 
-    setAdminAuthenticated(true);
-    localStorage.setItem('admin-email', this.email.trim());
+    const isAdmin = await this.authService.isCurrentUserAdmin();
+    if (!isAdmin) {
+      await this.authService.presentToast('This account does not have admin access.');
+      await this.authService.logOut({ redirectTo: '/tabs/admin-login' });
+      return;
+    }
+
     await this.router.navigate(['/tabs/admin-portal']);
   }
 
@@ -72,11 +76,14 @@ export class AdminLoginPage {
 
   async continueWithGoogle(): Promise<void> {
     await this.authService.googleSignIn();
-    setAdminAuthenticated(true);
-    const currentEmail = this.authService.userEmail?.trim();
-    if (currentEmail) {
-      localStorage.setItem('admin-email', currentEmail);
+
+    const isAdmin = await this.authService.isCurrentUserAdmin();
+    if (!isAdmin) {
+      await this.authService.presentToast('This account does not have admin access.');
+      await this.authService.logOut({ redirectTo: '/tabs/admin-login' });
+      return;
     }
+
     await this.router.navigate(['/tabs/admin-portal']);
   }
 

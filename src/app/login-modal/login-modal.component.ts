@@ -21,7 +21,10 @@ export class LoginModalComponent {
   }
 
   forgotPassword() {
-    this.modalController.dismiss({ action: 'forgot-password' });
+    this.modalController.dismiss({
+      action: 'forgot-password',
+      email: this.email?.trim() ?? '',
+    });
   }
 
   login() {

@@ -11,9 +11,10 @@ import {
   IonCardContent,
 } from '@ionic/angular/standalone';
 import { ToastController } from '@ionic/angular';
-import { CheckoutRecord, getCheckoutRecords, isAdminAuthenticated } from '../shared/admin-storage';
+import { CheckoutRecord, getCheckoutRecords } from '../shared/admin-storage';
 import { ProductItem, getAllProducts, getCategorySections, getNextProductId, saveAdminEvent, updateCatalogItem } from '../shared/product-catalog';
 import { FooterComponent } from '../footer/footer.component';
+import { AuthService } from '../services/auth.service';
 
 type AdminTab = 'events' | 'checkouts' | 'trips';
 
@@ -66,19 +67,52 @@ export class AdminPortalPage implements OnInit {
   constructor(
     private router: Router,
     private toastController: ToastController,
+    private authService: AuthService,
   ) {}
 
   ngOnInit(): void {
-    this.guardAccess();
+    void this.initializeAdminPortal();
+  }
+
+  ionViewWillEnter(): void {
+    void this.refreshIfAuthorized();
+  }
+
+  private async initializeAdminPortal(): Promise<void> {
+    const canAccess = await this.canAccessAdminPortal();
+    if (!canAccess) {
+      return;
+    }
+
     this.categories = getCategorySections().map((section) => section.name);
     this.refreshCatalogTrips();
     this.refreshCheckouts();
   }
 
-  ionViewWillEnter(): void {
-    this.guardAccess();
+  private async refreshIfAuthorized(): Promise<void> {
+    const canAccess = await this.canAccessAdminPortal();
+    if (!canAccess) {
+      return;
+    }
+
     this.refreshCatalogTrips();
     this.refreshCheckouts();
+  }
+
+  private async canAccessAdminPortal(): Promise<boolean> {
+    const isLoggedIn = await this.authService.isAuthenticated();
+    if (!isLoggedIn) {
+      await this.router.navigate(['/tabs/admin-login']);
+      return false;
+    }
+
+    const isAdmin = await this.authService.isCurrentUserAdmin();
+    if (!isAdmin) {
+      await this.router.navigate(['/tabs/admin-login']);
+      return false;
+    }
+
+    return true;
   }
 
   async addEvent(): Promise<void> {
@@ -367,12 +401,6 @@ export class AdminPortalPage implements OnInit {
       dateTo: '',
       benefitsText: '',
     };
-  }
-
-  private guardAccess(): void {
-    if (!isAdminAuthenticated()) {
-      this.router.navigate(['/tabs/admin-login']);
-    }
   }
 
   private async presentToast(message: string, color: 'success' | 'warning' | 'danger'): Promise<void> {

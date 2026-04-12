@@ -33,11 +33,9 @@ export class AuthService {
   userName = `Guest`;
   isVerified = false;
   userEmail : string = ''
-  verificationMsg: string = ''
   regVerification = false;
-  userPassword: string = ''
   userId: string = ''
-  loadProfile = false
+  userRole: string = 'user';
 
   db = getFirestore(this.firebaseApp)
 
@@ -48,10 +46,6 @@ export class AuthService {
     authInstance.onAuthStateChanged(async (user) => {
       const isLoggedIn = !!user;
       this.authState.next(isLoggedIn);
-      
-      if (!isLoggedIn) {
-        // await this.router.navigate(['/login']);
-      }
     });
   }
 
@@ -63,7 +57,6 @@ export class AuthService {
     const user = authInstance.currentUser;
     if(!user) 
     {
-      this.loadProfile = true
       await new Promise(resolve => setTimeout(resolve, 500));
       return !!authInstance.currentUser;
     }
@@ -76,13 +69,13 @@ export class AuthService {
 
   private updateUserState(user: any) 
   {
-    this.loadProfile = true
     this.isLoggedIn = true;
     this.authState.next(true);
     this.userName = user.displayName || 'Guest';
     this.userEmail = user.email || 'not signed in';
     this.isVerified = user.emailVerified ?? false;
     this.userId = user.uid || '';
+    this.userRole = user.role || 'user';
   }
 
   // GoogleSign
@@ -221,7 +214,6 @@ export class AuthService {
             this.userName = value.displayName
             this.isVerified = res.user.emailVerified
             this.userEmail = res.user.email
-            this.userPassword = res.user.password
             this.regVerification = true
 
             loading.dismiss()
@@ -354,7 +346,7 @@ export class AuthService {
         email: user.email,
         displayName: user.displayName,
         emailVerified: user.emailVerified,
-        lastSignIn: serverTimestamp()
+        lastSignIn: serverTimestamp(),
       };
 
       await setDoc(userRef, mergePayload, { merge: true });
@@ -366,33 +358,9 @@ export class AuthService {
         email: user.email,
         displayName: user.displayName,
         emailVerified: user.emailVerified,
-        isSubscribed: false,
-        expiryDate: "",
-        lastSignIn: serverTimestamp()
+        lastSignIn: serverTimestamp(),
+        role: 'user',
       });
-    }
-  }
-
-  // update
-  async updateUser(uid: string, updatedInfo: [string, boolean]): Promise<void> {
-    const userRef = doc(this.db, 'users', uid);
-    const userDoc = await getDoc(userRef);
-    const existingData = userDoc.data();
-
-    if (updatedInfo[0] === "") {
-      updatedInfo[0] = existingData?.['expiryDate'] ?? "";
-    }
-
-    if (existingData?.['isSubscribed'] === true) {
-      updatedInfo[1] = true;
-    }
-
-    if(userDoc.exists()) 
-    {
-      await setDoc(userRef, {
-        expiryDate: updatedInfo[0],
-        isSubscribed: updatedInfo[1]
-      }, { merge: true });
     }
   }
 
@@ -401,8 +369,38 @@ export class AuthService {
   {
     const userRef = doc(this.db, 'users', uid);
     const userDoc = await getDoc(userRef);
-    var userId = JSON.stringify(userDoc.data())
+    var userId = JSON.stringify(userDoc.data());
+    this.userRole = JSON.parse(userId).role || 'user';
     return JSON.parse(userId)
+  }
+
+  async getCurrentUserRole(): Promise<string | null> {
+    const authInstance = getAuth(this.firebaseApp);
+    const user = authInstance.currentUser;
+
+    if (!user) {
+      this.userRole = 'user';
+      return null;
+    }
+
+    const userRef = doc(this.db, 'users', user.uid);
+    const userDoc = await getDoc(userRef);
+
+    if (!userDoc.exists()) {
+      this.userRole = 'user';
+      return 'user';
+    }
+
+    const role = (userDoc.data()?.['role'] as string | undefined) ?? 'user';
+    this.userRole = role;
+    this.userId = user.uid;
+    this.userEmail = user.email || 'not signed in';
+    return role;
+  }
+
+  async isCurrentUserAdmin(): Promise<boolean> {
+    const role = await this.getCurrentUserRole();
+    return role === 'admin';
   }
 
 }

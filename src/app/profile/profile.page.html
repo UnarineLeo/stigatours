@@ -62,20 +62,13 @@
           Change Password
         </button>
       }
-      <button
-        type="button"
-        class="tab-link"
-        [class.active]="activeTab === 'highSchoolSubjects'"
-        (click)="setTab('highSchoolSubjects')">
-        Your Trips
-      </button>
-      <button
+      <!-- <button
         type="button"
         class="tab-link"
         [class.active]="activeTab === 'documents'"
         (click)="setTab('documents')">
         Document Upload
-      </button>
+      </button> -->
       <button
         type="button"
         class="tab-link"
@@ -450,13 +443,7 @@
         </section>
       }
 
-      @if (activeTab === 'highSchoolSubjects') {
-        <section class="panel">
-          <h2>Your Trips</h2>
-          <p class="panel-subtitle">You have no trips yet.</p>
-        </section>
-      }
-
+      <!-- 
       @if (activeTab === 'documents') {
         <section class="panel">
           <h2>Document Upload</h2>
@@ -501,14 +488,9 @@
               {{ isUploadingDocuments ? (isFinalizingDocumentUpload ? 'Finalizing...' : 'Uploading...') : 'Upload Documents' }}
             </button>
           </div>
-
-          <!-- <div class="actions">
-            <button type="button" class="btn secondary" (click)="debugSupabaseConnection()">
-              Log Supabase Buckets
-            </button>
-          </div> -->
         </section>
       }
+      -->
 
       @if (activeTab === 'account') {
         <section class="panel account-panel">
@@ -527,21 +509,11 @@
                 Logout
               </button>
             </article>
-
-            <!-- <article class="account-action-card danger">
-              <h3>Delete Account</h3>
-              <p>Permanently delete your account and profile data. This cannot be undone.</p>
-              <button
-                type="button"
-                class="btn danger"
-                [disabled]="isDeletingAccount"
-                (click)="deleteAccountFromAccountSettings()">
-                {{ isDeletingAccount ? 'Deleting...' : 'Delete Account' }}
-              </button>
-            </article> -->
           </div>
         </section>
       }
     </div>
   </section>
+  
+  <app-footer></app-footer>
 </ion-content>

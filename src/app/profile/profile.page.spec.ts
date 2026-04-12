@@ -10,7 +10,7 @@ describe('ProfilePage', () => {
   let fixture: ComponentFixture<ProfilePage>;
 
   const authServiceMock = {
-    getUser: jasmine.createSpy('getUser').and.resolveTo({ subjects: [] }),
+    getUser: jasmine.createSpy('getUser').and.resolveTo({}),
     updateUser: jasmine.createSpy('updateUser').and.resolveTo(),
     presentToast: jasmine.createSpy('presentToast').and.resolveTo()
   };
