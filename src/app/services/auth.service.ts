@@ -229,22 +229,7 @@ export class AuthService {
             this.router.navigate(['/tabs/profile'])
             this.presentToast('Successfully registered, please check your email to verify your account')
 
-            const registrationInterest = typeof value.interest === 'string'
-              ? value.interest.trim()
-              : '';
-
-            const registrationCourseChoices = Array.isArray(value.courseChoices)
-              ? value.courseChoices
-                  .map((choice: unknown) => typeof choice === 'string' ? choice.trim() : '')
-                  .filter((choice: string) => choice !== '')
-                  .slice(0, 4)
-              : [];
-
-            this.addUser(res.user, {
-              currentStudyLevel: value.currentStudyLevel,
-              interest: registrationInterest,
-              courseChoices: registrationCourseChoices
-            })
+            this.addUser(res.user)
 
           })
           .catch((error) => 
@@ -359,14 +344,9 @@ export class AuthService {
 
   // Add user to firestore
 
-  async addUser(user: any, extraProfile?: {
-    currentStudyLevel?: string;
-    interest?: string;
-    courseChoices?: string[];
-  }): Promise<void> {
+  async addUser(user: any): Promise<void> {
     const userRef = doc(this.db, 'users', user.uid);
     const userDoc = await getDoc(userRef);
-    const studyAreas = extraProfile?.interest ? [extraProfile.interest] : [];
 
     if (userDoc.exists()) 
     {
@@ -376,18 +356,6 @@ export class AuthService {
         emailVerified: user.emailVerified,
         lastSignIn: serverTimestamp()
       };
-
-      if (typeof extraProfile?.currentStudyLevel === 'string') {
-        mergePayload['currentStudyLevel'] = extraProfile.currentStudyLevel;
-      }
-
-      if (extraProfile?.interest) {
-        mergePayload['studyAreas'] = studyAreas;
-      }
-
-      if (Array.isArray(extraProfile?.courseChoices) && extraProfile.courseChoices.length > 0) {
-        mergePayload['courseChoices'] = extraProfile.courseChoices;
-      }
 
       await setDoc(userRef, mergePayload, { merge: true });
     } 
@@ -400,17 +368,13 @@ export class AuthService {
         emailVerified: user.emailVerified,
         isSubscribed: false,
         expiryDate: "",
-        apsScore: 0,
-        lastSignIn: serverTimestamp(),
-        currentStudyLevel: extraProfile?.currentStudyLevel ?? '',
-        studyAreas,
-        courseChoices: extraProfile?.courseChoices ?? []
+        lastSignIn: serverTimestamp()
       });
     }
   }
 
   // update
-  async updateUser(uid: string, updatedInfo: [string, boolean, number, string[]]): Promise<void> {
+  async updateUser(uid: string, updatedInfo: [string, boolean]): Promise<void> {
     const userRef = doc(this.db, 'users', uid);
     const userDoc = await getDoc(userRef);
     const existingData = userDoc.data();
@@ -423,21 +387,11 @@ export class AuthService {
       updatedInfo[1] = true;
     }
 
-    if ((existingData?.['apsScore'] ?? 0) > updatedInfo[2]) {
-      updatedInfo[2] = existingData?.['apsScore'];
-    }
-
-    if ((!updatedInfo[3] || updatedInfo[3].length === 0) && Array.isArray(existingData?.['studyAreas'])) {
-      updatedInfo[3] = existingData?.['studyAreas'];
-    }
-
     if(userDoc.exists()) 
     {
       await setDoc(userRef, {
         expiryDate: updatedInfo[0],
-        isSubscribed: updatedInfo[1],
-        apsScore: updatedInfo[2],
-        studyAreas: updatedInfo[3]
+        isSubscribed: updatedInfo[1]
       }, { merge: true });
     }
   }

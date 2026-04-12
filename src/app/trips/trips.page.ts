@@ -20,7 +20,7 @@ import {
   IonChip,
   IonToggle,
 } from '@ionic/angular/standalone';
-import { getAllProducts, getCategorySections, getDiscountPercent, ProductItem } from '../shared/product-catalog';
+import { getAllProductsWithOptions, getCategorySections, getDiscountPercent, ProductItem } from '../shared/product-catalog';
 import { FooterComponent } from '../footer/footer.component';
 
 
@@ -173,9 +173,12 @@ export class TripsPage {
   }
 
   private refreshCatalog(): void {
-    this.allProducts = getAllProducts();
-    this.categories = ['all', ...getCategorySections().map((section) => section.name)];
-    this.maxPrice = Math.ceil(Math.max(...this.allProducts.map((item) => item.price)));
+    this.allProducts = getAllProductsWithOptions({ hidePastTrips: true });
+    this.categories = ['all', ...getCategorySections({ hidePastTrips: true }).map((section) => section.name)];
+    const highestPrice = this.allProducts.length > 0
+      ? Math.max(...this.allProducts.map((item) => item.price))
+      : 0;
+    this.maxPrice = Math.ceil(highestPrice);
 
     this.priceRange = {
       lower: 0,

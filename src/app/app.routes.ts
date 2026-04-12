@@ -57,10 +57,12 @@ export const routes: Routes = [
   },
   {
     path: 'admin-login',
-    loadComponent: () => import('./admin-login/admin-login.page').then((m) => m.AdminLoginPage)
+    redirectTo: '/tabs/admin-login',
+    pathMatch: 'full'
   },
   {
     path: 'admin-portal',
-    loadComponent: () => import('./admin-portal/admin-portal.page').then((m) => m.AdminPortalPage)
+    redirectTo: '/tabs/admin-portal',
+    pathMatch: 'full'
   },
 ];

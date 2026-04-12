@@ -25,7 +25,7 @@
         <div class="booking-items">
           @for (item of bookingItems; track item.product.id) {
             <article class="booking-item">
-              <img [src]="item.product.image" [alt]="item.product.name" class="item-image" />
+              <img [src]="item.product.images?.[0]" [alt]="item.product.name" class="item-image" />
 
               <div class="item-meta">
                 <h3>{{ item.product.name }}</h3>

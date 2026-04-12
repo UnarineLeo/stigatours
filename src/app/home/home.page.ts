@@ -150,7 +150,7 @@ export class HomePage implements OnInit, OnDestroy {
 
   private buildMonthSections(): MonthSection[] {
     const allItems: ProductItem[] = [];
-    for (const section of getCategorySections()) {
+    for (const section of getCategorySections({ hidePastTrips: true })) {
       allItems.push(...section.items);
     }
     const monthMap = new Map<string, ProductItem[]>();

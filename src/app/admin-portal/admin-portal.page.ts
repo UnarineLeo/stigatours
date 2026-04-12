@@ -3,13 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
-  IonHeader,
-  IonToolbar,
-  IonTitle,
   IonContent,
   IonButton,
-  IonSegment,
-  IonSegmentButton,
   IonItem,
   IonLabel,
   IonInput,
@@ -24,10 +19,11 @@ import {
   IonCardContent,
 } from '@ionic/angular/standalone';
 import { ToastController } from '@ionic/angular';
-import { CheckoutRecord, getCheckoutRecords, isAdminAuthenticated, setAdminAuthenticated } from '../shared/admin-storage';
-import { ProductItem, getCategorySections, getNextProductId, saveAdminEvent } from '../shared/product-catalog';
+import { CheckoutRecord, getCheckoutRecords, isAdminAuthenticated } from '../shared/admin-storage';
+import { ProductItem, getAllProducts, getCategorySections, getNextProductId, saveAdminEvent, updateCatalogItem } from '../shared/product-catalog';
+import { FooterComponent } from '../footer/footer.component';
 
-type AdminTab = 'events' | 'checkouts';
+type AdminTab = 'events' | 'checkouts' | 'trips';
 
 interface AdminEventForm {
   name: string;
@@ -53,13 +49,8 @@ interface AdminEventForm {
   imports: [
     CommonModule,
     FormsModule,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
     IonContent,
     IonButton,
-    IonSegment,
-    IonSegmentButton,
     IonItem,
     IonLabel,
     IonInput,
@@ -72,15 +63,19 @@ interface AdminEventForm {
     IonCardHeader,
     IonCardTitle,
     IonCardContent,
+    FooterComponent,
   ],
 })
 export class AdminPortalPage implements OnInit {
   activeTab: AdminTab = 'events';
   checkoutRecords: CheckoutRecord[] = [];
+  catalogTrips: ProductItem[] = [];
+  editingTripId: number | null = null;
   categories: string[] = [];
-  imagePreview = '';
+  eventImages: string[] = [];
 
   form: AdminEventForm = this.createEmptyForm();
+  editForm: AdminEventForm = this.createEmptyForm();
 
   constructor(
     private router: Router,
@@ -90,11 +85,13 @@ export class AdminPortalPage implements OnInit {
   ngOnInit(): void {
     this.guardAccess();
     this.categories = getCategorySections().map((section) => section.name);
+    this.refreshCatalogTrips();
     this.refreshCheckouts();
   }
 
   ionViewWillEnter(): void {
     this.guardAccess();
+    this.refreshCatalogTrips();
     this.refreshCheckouts();
   }
 
@@ -104,8 +101,8 @@ export class AdminPortalPage implements OnInit {
       return;
     }
 
-    if (!this.form.image.trim()) {
-      await this.presentToast('Please upload an image for the event.', 'warning');
+    if (this.eventImages.length === 0) {
+      await this.presentToast('Please upload at least one image for the event.', 'warning');
       return;
     }
 
@@ -119,7 +116,7 @@ export class AdminPortalPage implements OnInit {
       name: this.form.name.trim(),
       price: this.form.price,
       originalPrice: this.form.originalPrice ?? undefined,
-      image: this.form.image,
+      images: [...this.eventImages],
       description: this.form.description.trim(),
       category: this.form.category.trim(),
       location: this.form.location.trim() || undefined,
@@ -137,40 +134,123 @@ export class AdminPortalPage implements OnInit {
       this.categories = [...this.categories, eventItem.category];
     }
 
+    this.refreshCatalogTrips();
+
     this.form = this.createEmptyForm();
-    this.imagePreview = '';
+    this.eventImages = [];
     await this.presentToast('Event added successfully.', 'success');
   }
 
-  async logout(): Promise<void> {
-    setAdminAuthenticated(false);
-    await this.router.navigate(['/admin-login']);
+  goToHome(): void {
+    this.router.navigate(['/tabs/home']);
   }
 
-  onImageSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files && input.files[0];
+  goToTrips(): void {
+    this.router.navigate(['/tabs/trips']);
+  }
 
-    if (!file) {
+  goToBookings(): void {
+    this.router.navigate(['/tabs/bookings']);
+  }
+
+  goToAccount(): void {
+    this.router.navigate(['/tabs/account']);
+  }
+
+  async onImageSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const files = Array.from(input.files ?? []);
+
+    if (files.length === 0) {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = typeof reader.result === 'string' ? reader.result : '';
-      this.form.image = result;
-      this.imagePreview = result;
-    };
+    const encodedFiles = await Promise.all(files.map((file) => this.readFileAsDataUrl(file)));
+    const validImages = encodedFiles.filter((value) => value.length > 0);
+    this.eventImages = [...this.eventImages, ...validImages];
+    this.form.image = this.eventImages[0] ?? '';
+    input.value = '';
+  }
 
-    reader.readAsDataURL(file);
+  removeEventImage(index: number): void {
+    this.eventImages = this.eventImages.filter((_, imageIndex) => imageIndex !== index);
+    this.form.image = this.eventImages[0] ?? '';
   }
 
   formatRand(amount: number): string {
     return `R${amount.toLocaleString('en-ZA', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
   }
 
+  startEditTrip(item: ProductItem): void {
+    this.editingTripId = item.id;
+    this.editForm = {
+      name: item.name,
+      price: item.price,
+      originalPrice: item.originalPrice ?? null,
+      image: item.images?.[0] ?? '',
+      description: item.description,
+      category: item.category,
+      location: item.location ?? '',
+      duration: item.duration ?? '',
+      groupSize: item.groupSize ?? null,
+      ticketsLeft: item.ticketsLeft ?? null,
+      dateFrom: item.dateFrom ?? '',
+      dateTo: item.dateTo ?? '',
+      benefitsText: (item.benefits ?? []).join('\n'),
+    };
+  }
+
+  cancelTripEdit(): void {
+    this.editingTripId = null;
+    this.editForm = this.createEmptyForm();
+  }
+
+  async saveTripEdit(original: ProductItem): Promise<void> {
+    if (!this.editForm.name.trim() || !this.editForm.category.trim() || !this.editForm.description.trim()) {
+      await this.presentToast('Name, category, and description are required.', 'warning');
+      return;
+    }
+
+    if (!this.editForm.price || this.editForm.price <= 0) {
+      await this.presentToast('Please enter a valid price.', 'warning');
+      return;
+    }
+
+    if (!this.editForm.image.trim()) {
+      await this.presentToast('Image is required.', 'warning');
+      return;
+    }
+
+    const updatedItem: ProductItem = {
+      ...original,
+      name: this.editForm.name.trim(),
+      price: this.editForm.price,
+      originalPrice: this.editForm.originalPrice ?? undefined,
+      images: [this.editForm.image.trim()],
+      description: this.editForm.description.trim(),
+      category: this.editForm.category.trim(),
+      location: this.editForm.location.trim() || undefined,
+      duration: this.editForm.duration.trim() || undefined,
+      groupSize: this.editForm.groupSize ?? undefined,
+      ticketsLeft: this.editForm.ticketsLeft ?? undefined,
+      dateFrom: this.editForm.dateFrom || undefined,
+      dateTo: this.editForm.dateTo || undefined,
+      benefits: this.parseBenefits(this.editForm.benefitsText),
+    };
+
+    updateCatalogItem(updatedItem);
+    this.categories = getCategorySections().map((section) => section.name);
+    this.refreshCatalogTrips();
+    this.cancelTripEdit();
+    await this.presentToast('Trip updated successfully.', 'success');
+  }
+
   private refreshCheckouts(): void {
     this.checkoutRecords = getCheckoutRecords();
+  }
+
+  private refreshCatalogTrips(): void {
+    this.catalogTrips = getAllProducts();
   }
 
   private parseBenefits(value: string): string[] | undefined {
@@ -180,6 +260,17 @@ export class AdminPortalPage implements OnInit {
       .filter((line) => line.length > 0);
 
     return lines.length > 0 ? lines : undefined;
+  }
+
+  private readFileAsDataUrl(file: File): Promise<string> {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        resolve(typeof reader.result === 'string' ? reader.result : '');
+      };
+      reader.onerror = () => resolve('');
+      reader.readAsDataURL(file);
+    });
   }
 
   private createEmptyForm(): AdminEventForm {
@@ -202,7 +293,7 @@ export class AdminPortalPage implements OnInit {
 
   private guardAccess(): void {
     if (!isAdminAuthenticated()) {
-      this.router.navigate(['/admin-login']);
+      this.router.navigate(['/tabs/admin-login']);
     }
   }
 

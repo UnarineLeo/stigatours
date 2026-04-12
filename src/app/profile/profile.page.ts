@@ -26,19 +26,6 @@ interface SubjectMarkEntry {
   mark: number | null;
 }
 
-interface AcademicInformation {
-  currentOrLastSchool: string;
-  currentLevel: string;
-  schoolProvince: string;
-  matricYear: string;
-  hasWrittenNbt: string;
-  interest: string;
-  courseChoice1: string;
-  courseChoice2: string;
-  courseChoice3: string;
-  courseChoice4: string;
-}
-
 interface StreetAddressSuggestion {
   placeId: string;
   primaryText: string;
@@ -135,19 +122,6 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
 
   private unsubscribeAuth?: () => void;
 
-  interests = [
-    'Engineering',
-    'Medicine & Health Sciences',
-    'Business & Commerce',
-    'Law',
-    'Arts & Humanities',
-    'Natural Sciences',
-    'Education',
-    'Information Technology'
-  ];
-
-  selectedInterests: string[] = ['Information Technology', 'Business & Commerce'];
-
   streetAddressSuggestions: StreetAddressSuggestion[] = [];
   showStreetAddressSuggestions = false;
 
@@ -155,19 +129,6 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
     currentPassword: '',
     newPassword: '',
     confirmNewPassword: ''
-  };
-
-  academicInformation: AcademicInformation = {
-    currentOrLastSchool: '',
-    currentLevel: '',
-    schoolProvince: '',
-    matricYear: '',
-    hasWrittenNbt: '',
-    interest: '',
-    courseChoice1: '',
-    courseChoice2: '',
-    courseChoice3: '',
-    courseChoice4: ''
   };
 
   requiredDocuments: RequiredDocumentRequirement[] = [
@@ -268,15 +229,6 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
     }
   }
 
-  toggleInterest(interest: string) {
-    if (this.selectedInterests.includes(interest)) {
-      this.selectedInterests = this.selectedInterests.filter(item => item !== interest);
-      return;
-    }
-
-    this.selectedInterests = [...this.selectedInterests, interest];
-  }
-
   onProfileInputChange(field: keyof typeof this.profile, event: Event) {
     const inputValue = (event.target as HTMLInputElement).value;
     const value = field === 'saIdNumber'
@@ -363,67 +315,6 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
 
   canSaveProfile(): boolean {
     return this.getMissingMandatoryProfileFields().length === 0 && this.hasValidSaIdNumber();
-  }
-
-  canSaveAcademicInformation(): boolean {
-    return this.hasRequiredAcademicInformation();
-  }
-
-  async saveAcademicInformation() {
-    if (!this.userUid) {
-      await this.authService.presentToast('Please sign in to save your academic information.');
-      return;
-    }
-
-    if (!this.hasRequiredAcademicInformation()) {
-      await this.authService.presentToast('Please complete Current/Last School, Current Level, School Province, Matric Year, NBT, Interest, and course choices 1 to 3.');
-      return;
-    }
-
-    this.isSavingAcademicInfo = true;
-
-    try {
-      await setDoc(doc(this.authService.db, 'users', this.userUid), {
-        currentOrLastSchool: this.academicInformation.currentOrLastSchool,
-        currentLevel: this.academicInformation.currentLevel,
-        schoolProvince: this.academicInformation.schoolProvince,
-        matricYear: this.academicInformation.matricYear,
-        hasWrittenNbt: this.academicInformation.hasWrittenNbt,
-        studyAreas: [this.academicInformation.interest],
-        courseChoices: [
-          this.academicInformation.courseChoice1,
-          this.academicInformation.courseChoice2,
-          this.academicInformation.courseChoice3,
-          this.academicInformation.courseChoice4
-        ]
-      }, { merge: true });
-
-      await this.authService.presentToast('School background saved successfully.');
-    } catch {
-      await this.authService.presentToast('Could not save academic information right now. Please try again.');
-    } finally {
-      this.isSavingAcademicInfo = false;
-    }
-  }
-
-  async saveInterests() {
-    if (!this.userUid) {
-      await this.authService.presentToast('Please sign in to save changes.');
-      return;
-    }
-
-    this.isSavingProfile = true;
-
-    try {
-      await setDoc(doc(this.authService.db, 'users', this.userUid), {
-        studyAreas: this.selectedInterests
-      }, { merge: true });
-      await this.authService.presentToast('Interests saved successfully.');
-    } catch {
-      await this.authService.presentToast('Could not save right now. Please try again.');
-    } finally {
-      this.isSavingProfile = false;
-    }
   }
 
   shouldShowEmailVerificationBanner(): boolean {
@@ -686,14 +577,6 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
     });
   }
 
-  onAcademicInformationInputChange(field: keyof AcademicInformation, event: Event) {
-    const value = (event.target as HTMLInputElement | HTMLSelectElement).value;
-    this.academicInformation = {
-      ...this.academicInformation,
-      [field]: value
-    };
-  }
-
   onStreetAddressInput(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.profile = {
@@ -774,11 +657,6 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
       return;
     }
 
-    if (!this.hasRequiredAcademicInformation()) {
-      await this.authService.presentToast('Please complete Current/Last School, Current Level, School Province, Matric Year, and NBT before saving.');
-      return;
-    }
-
     const hasInvalidMark = this.subjectEntries.some((entry) => entry.mark !== null && (entry.mark < 0 || entry.mark > 100));
     if (hasInvalidMark) {
       await this.authService.presentToast('Each mark must be between 0 and 100.');
@@ -813,25 +691,13 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
 
     try {
       await setDoc(doc(this.authService.db, 'users', this.userUid), {
-        currentOrLastSchool: this.academicInformation.currentOrLastSchool,
-        currentLevel: this.academicInformation.currentLevel,
-        schoolProvince: this.academicInformation.schoolProvince,
-        matricYear: this.academicInformation.matricYear,
-        hasWrittenNbt: this.academicInformation.hasWrittenNbt,
-        studyAreas: [this.academicInformation.interest],
-        courseChoices: [
-          this.academicInformation.courseChoice1,
-          this.academicInformation.courseChoice2,
-          this.academicInformation.courseChoice3,
-          this.academicInformation.courseChoice4
-        ],
         highSchoolSubjects: completedEntries
       }, { merge: true });
 
       // Rehydrate from persisted payload so selects keep saved default values.
       this.subjectEntries = this.buildSubjectEntriesFromSavedData(completedEntries);
 
-      await this.authService.presentToast('Academic information saved successfully.');
+      await this.authService.presentToast('Subjects saved successfully.');
     } catch {
       await this.authService.presentToast('Could not save subjects right now. Please try again.');
     } finally {
@@ -840,10 +706,6 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
   }
 
   canSaveHighSchoolSubjects(): boolean {
-    if (!this.hasRequiredAcademicInformation()) {
-      return false;
-    }
-
     const hasInvalidMark = this.subjectEntries.some((entry) => entry.mark !== null && (entry.mark < 0 || entry.mark > 100));
     if (hasInvalidMark) {
       return false;
@@ -1070,14 +932,6 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
         race?: string;
         disabilityStatus?: string;
         highSchoolSubjects?: SubjectMarkEntry[];
-        studyAreas?: string[];
-        courseChoices?: string[];
-        academicInformation?: Partial<AcademicInformation>;
-        currentOrLastSchool?: string;
-        currentLevel?: string;
-        schoolProvince?: string;
-        matricYear?: string;
-        hasWrittenNbt?: string;
         documents?: Partial<Record<RequiredDocumentKey, string>>;
         documentFileNames?: Partial<Record<RequiredDocumentKey, string>>;
       };
@@ -1099,38 +953,6 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
         race: userData.race ?? this.profile.race,
         disabilityStatus: userData.disabilityStatus ?? this.profile.disabilityStatus
       };
-
-      if (userData.academicInformation && typeof userData.academicInformation === 'object') {
-        this.academicInformation = {
-          currentOrLastSchool: userData.academicInformation.currentOrLastSchool ?? '',
-          currentLevel: userData.academicInformation.currentLevel ?? '',
-          schoolProvince: userData.academicInformation.schoolProvince ?? '',
-          matricYear: userData.academicInformation.matricYear ?? '',
-          hasWrittenNbt: userData.academicInformation.hasWrittenNbt ?? '',
-          interest: userData.academicInformation.interest ?? '',
-          courseChoice1: userData.academicInformation.courseChoice1 ?? '',
-          courseChoice2: userData.academicInformation.courseChoice2 ?? '',
-          courseChoice3: userData.academicInformation.courseChoice3 ?? '',
-          courseChoice4: userData.academicInformation.courseChoice4 ?? ''
-        };
-      } else {
-        this.academicInformation = {
-          currentOrLastSchool: userData.currentOrLastSchool ?? '',
-          currentLevel: userData.currentLevel ?? '',
-          schoolProvince: userData.schoolProvince ?? '',
-          matricYear: userData.matricYear ?? '',
-          hasWrittenNbt: userData.hasWrittenNbt ?? '',
-          interest: Array.isArray(userData.studyAreas) ? (userData.studyAreas[0] ?? '') : '',
-          courseChoice1: Array.isArray(userData.courseChoices) ? (userData.courseChoices[0] ?? '') : '',
-          courseChoice2: Array.isArray(userData.courseChoices) ? (userData.courseChoices[1] ?? '') : '',
-          courseChoice3: Array.isArray(userData.courseChoices) ? (userData.courseChoices[2] ?? '') : '',
-          courseChoice4: Array.isArray(userData.courseChoices) ? (userData.courseChoices[3] ?? '') : ''
-        };
-      }
-
-      if (Array.isArray(userData.studyAreas) && userData.studyAreas.length > 0) {
-        this.selectedInterests = userData.studyAreas;
-      }
 
       if (userData.documents && typeof userData.documents === 'object') {
         this.uploadedDocumentUrls = { ...userData.documents };
@@ -1178,18 +1000,6 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
         race: '',
         disabilityStatus: ''
       };
-      this.academicInformation = {
-        currentOrLastSchool: '',
-        currentLevel: '',
-        schoolProvince: '',
-        matricYear: '',
-        hasWrittenNbt: '',
-        interest: '',
-        courseChoice1: '',
-        courseChoice2: '',
-        courseChoice3: '',
-        courseChoice4: ''
-      };
       this.passwordForm = {
         currentPassword: '',
         newPassword: '',
@@ -1222,18 +1032,6 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
       nationality: '',
       race: '',
       disabilityStatus: ''
-    };
-    this.academicInformation = {
-      currentOrLastSchool: '',
-      currentLevel: '',
-      schoolProvince: '',
-      matricYear: '',
-      hasWrittenNbt: '',
-      interest: '',
-      courseChoice1: '',
-      courseChoice2: '',
-      courseChoice3: '',
-      courseChoice4: ''
     };
     this.passwordForm = {
       currentPassword: '',
@@ -1404,18 +1202,6 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
   private isAllowedDocumentType(file: File): boolean {
     const extension = file.name.split('.').pop()?.toLowerCase() ?? '';
     return this.allowedDocumentMimeTypes.has(file.type) || this.allowedDocumentExtensions.has(extension);
-  }
-
-  private hasRequiredAcademicInformation(): boolean {
-    return this.academicInformation.currentOrLastSchool.trim() !== ''
-      && this.academicInformation.currentLevel.trim() !== ''
-      && this.academicInformation.schoolProvince.trim() !== ''
-      && this.academicInformation.matricYear.trim() !== ''
-      && this.academicInformation.hasWrittenNbt.trim() !== ''
-      && this.academicInformation.interest.trim() !== ''
-      && this.academicInformation.courseChoice1.trim() !== ''
-      && this.academicInformation.courseChoice2.trim() !== ''
-      && this.academicInformation.courseChoice3.trim() !== '';
   }
 
   private resolveSubjectOption(subject: string): string {

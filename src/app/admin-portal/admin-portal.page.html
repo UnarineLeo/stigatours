@@ -1,10 +1,3 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>Admin Portal</ion-title>
-    <ion-button slot="end" fill="clear" (click)="logout()">Logout</ion-button>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content [fullscreen]="true">
   <section class="admin-hero">
     <div class="admin-hero-inner">
@@ -15,17 +8,34 @@
   </section>
 
   <section class="admin-shell">
-    <div class="tabs-top-wrap">
-      <ion-segment [(ngModel)]="activeTab" value="events" class="admin-tabs">
-        <ion-segment-button value="events">Add Event</ion-segment-button>
-        <ion-segment-button value="checkouts">Checkout Details</ion-segment-button>
-      </ion-segment>
-    </div>
+    <aside class="tab-nav" aria-label="Admin sections">
+      <button
+        type="button"
+        class="tab-link"
+        [class.active]="activeTab === 'events'"
+        (click)="activeTab = 'events'">
+        Add Event
+      </button>
+      <button
+        type="button"
+        class="tab-link"
+        [class.active]="activeTab === 'trips'"
+        (click)="activeTab = 'trips'">
+        All Trips
+      </button>
+      <button
+        type="button"
+        class="tab-link"
+        [class.active]="activeTab === 'checkouts'"
+        (click)="activeTab = 'checkouts'">
+        Checkout Details
+      </button>
+    </aside>
 
-    <section class="admin-main">
+    <div class="tab-content">
 
     @if (activeTab === 'events') {
-      <ion-card class="admin-card">
+      <ion-card class="admin-card panel">
         <ion-card-header>
           <div class="section-head">
             <ion-card-title>Add New Event</ion-card-title>
@@ -34,104 +44,84 @@
         </ion-card-header>
         <ion-card-content>
           <div class="form-grid">
-            <ion-item lines="none" class="field-item">
-              <ion-label position="stacked">Event Name</ion-label>
-              <ion-input [(ngModel)]="form.name" placeholder="Kruger Safari Adventure"></ion-input>
-            </ion-item>
+            <label class="field">
+              <span>Event Name</span>
+              <input type="text" [(ngModel)]="form.name" placeholder="Kruger Safari Adventure" />
+            </label>
 
-            <ion-item lines="none" class="field-item">
-              <ion-label position="stacked">Category</ion-label>
-              <ion-select [(ngModel)]="form.category" interface="popover" placeholder="Select category">
+            <label class="field">
+              <span>Category</span>
+              <select [(ngModel)]="form.category">
+                <option value="" disabled>Select category</option>
                 @for (category of categories; track category) {
-                  <ion-select-option [value]="category">{{ category }}</ion-select-option>
+                  <option [value]="category">{{ category }}</option>
                 }
-              </ion-select>
-            </ion-item>
+              </select>
+            </label>
 
-            <ion-item lines="none" class="field-item">
-              <ion-label position="stacked">Price</ion-label>
-              <ion-input type="number" [(ngModel)]="form.price" placeholder="15999"></ion-input>
-            </ion-item>
+            <label class="field">
+              <span>Price</span>
+              <input type="number" [(ngModel)]="form.price" placeholder="15999" />
+            </label>
 
-            <ion-item lines="none" class="field-item">
-              <ion-label position="stacked">Original Price (Optional)</ion-label>
-              <ion-input type="number" [(ngModel)]="form.originalPrice" placeholder="18500"></ion-input>
-            </ion-item>
+            <label class="field">
+              <span>Original Price (Optional)</span>
+              <input type="number" [(ngModel)]="form.originalPrice" placeholder="18500" />
+            </label>
 
-            <ion-item lines="none" class="field-item">
-              <ion-label position="stacked">Location</ion-label>
-              <ion-input [(ngModel)]="form.location" placeholder="Cape Town, South Africa"></ion-input>
-            </ion-item>
+            <label class="field">
+              <span>Location</span>
+              <input type="text" [(ngModel)]="form.location" placeholder="Cape Town, South Africa" />
+            </label>
 
-            <ion-item lines="none" class="field-item">
-              <ion-label position="stacked">Duration</ion-label>
-              <ion-input [(ngModel)]="form.duration" placeholder="4 days / 3 nights"></ion-input>
-            </ion-item>
+            <label class="field">
+              <span>Duration</span>
+              <input type="text" [(ngModel)]="form.duration" placeholder="4 days / 3 nights" />
+            </label>
 
-            <ion-item lines="none" class="field-item">
-              <ion-label position="stacked">Group Size</ion-label>
-              <ion-input type="number" [(ngModel)]="form.groupSize" placeholder="20"></ion-input>
-            </ion-item>
+            <label class="field">
+              <span>Group Size</span>
+              <input type="number" [(ngModel)]="form.groupSize" placeholder="20" />
+            </label>
 
-            <ion-item lines="none" class="field-item">
-              <ion-label position="stacked">Tickets Left</ion-label>
-              <ion-input type="number" [(ngModel)]="form.ticketsLeft" placeholder="14"></ion-input>
-            </ion-item>
+            <label class="field">
+              <span>Tickets Left</span>
+              <input type="number" [(ngModel)]="form.ticketsLeft" placeholder="14" />
+            </label>
 
-            <ion-item lines="none" class="field-item date-item">
-              <ion-label position="stacked">Date From</ion-label>
-              <ion-input
-                [value]="form.dateFrom"
-                readonly
-                placeholder="Select start date">
-              </ion-input>
-              <ion-button id="open-date-from" fill="clear" size="small" class="pick-date-btn">Pick Date</ion-button>
-              <ion-modal trigger="open-date-from" [keepContentsMounted]="true">
-                <ng-template>
-                  <ion-datetime
-                    id="dateFromPicker"
-                    presentation="date"
-                    [(ngModel)]="form.dateFrom">
-                  </ion-datetime>
-                </ng-template>
-              </ion-modal>
-            </ion-item>
+            <label class="field">
+              <span>Date From</span>
+              <input type="date" [(ngModel)]="form.dateFrom" />
+            </label>
 
-            <ion-item lines="none" class="field-item date-item">
-              <ion-label position="stacked">Date To</ion-label>
-              <ion-input
-                [value]="form.dateTo"
-                readonly
-                placeholder="Select end date">
-              </ion-input>
-              <ion-button id="open-date-to" fill="clear" size="small" class="pick-date-btn">Pick Date</ion-button>
-              <ion-modal trigger="open-date-to" [keepContentsMounted]="true">
-                <ng-template>
-                  <ion-datetime
-                    id="dateToPicker"
-                    presentation="date"
-                    [(ngModel)]="form.dateTo">
-                  </ion-datetime>
-                </ng-template>
-              </ion-modal>
-            </ion-item>
+            <label class="field">
+              <span>Date To</span>
+              <input type="date" [(ngModel)]="form.dateTo" />
+            </label>
           </div>
 
-          <ion-item lines="none" class="field-item">
-            <ion-label position="stacked">Description</ion-label>
-            <ion-textarea [(ngModel)]="form.description" rows="4" placeholder="Describe the event..."></ion-textarea>
-          </ion-item>
+          <label class="field full">
+            <span>Description</span>
+            <textarea [(ngModel)]="form.description" rows="4" placeholder="Describe the event..."></textarea>
+          </label>
 
-          <ion-item lines="none" class="field-item">
-            <ion-label position="stacked">Benefits (one per line)</ion-label>
-            <ion-textarea [(ngModel)]="form.benefitsText" rows="4" placeholder="Guided game drives&#10;Airport transfer"></ion-textarea>
-          </ion-item>
+          <label class="field full">
+            <span>Benefits (one per line)</span>
+            <textarea [(ngModel)]="form.benefitsText" rows="4" placeholder="Guided game drives&#10;Airport transfer"></textarea>
+          </label>
 
           <div class="upload-box">
-            <label for="event-image" class="upload-label">Upload Event Image</label>
-            <input id="event-image" type="file" accept="image/*" (change)="onImageSelected($event)" />
-            @if (imagePreview) {
-              <img [src]="imagePreview" alt="Event preview" class="image-preview" />
+            <label for="event-image" class="upload-label">Upload Event Images</label>
+            <input id="event-image" type="file" accept="image/*" multiple (change)="onImageSelected($event)" />
+            @if (eventImages.length) {
+              <div class="preview-grid">
+                @for (image of eventImages; track $index) {
+                  <div class="preview-card">
+                    <img [src]="image" alt="Event preview" class="image-preview" />
+                    <button type="button" class="remove-image-btn" (click)="removeEventImage($index)">Remove</button>
+                  </div>
+                }
+              </div>
             }
           </div>
 
@@ -144,8 +134,121 @@
       </ion-card>
     }
 
+    @if (activeTab === 'trips') {
+      <ion-card class="admin-card panel">
+        <ion-card-header>
+          <div class="section-head">
+            <ion-card-title>All Trips Catalog</ion-card-title>
+            <p class="section-subtitle">Trips loaded from shared/product-catalog including admin-published events.</p>
+          </div>
+        </ion-card-header>
+        <ion-card-content>
+          @if (catalogTrips.length === 0) {
+            <p class="empty-state">No trips are available in the catalog yet.</p>
+          } @else {
+            <div class="trip-list">
+              @for (trip of catalogTrips; track trip.id) {
+                <article class="trip-item">
+                  <img [src]="trip.images?.[0]" [alt]="trip.name" class="trip-image" />
+                  <div class="trip-info">
+                    <p class="trip-category">{{ trip.category }}</p>
+                    <h3>{{ trip.name }}</h3>
+                    <p class="trip-meta"><strong>Price:</strong> {{ formatRand(trip.price) }}</p>
+                    @if (trip.dateFrom || trip.dateTo) {
+                      <p class="trip-meta"><strong>Dates:</strong> {{ trip.dateFrom || 'N/A' }} to {{ trip.dateTo || 'N/A' }}</p>
+                    }
+                    @if (trip.location) {
+                      <p class="trip-meta"><strong>Location:</strong> {{ trip.location }}</p>
+                    }
+
+                    <div class="trip-actions">
+                      <ion-button size="small" fill="outline" (click)="startEditTrip(trip)">Edit Trip</ion-button>
+                    </div>
+
+                    @if (editingTripId === trip.id) {
+                      <div class="trip-edit-grid">
+                        <ion-item lines="none" class="field-item">
+                          <ion-label position="stacked">Name</ion-label>
+                          <ion-input [(ngModel)]="editForm.name"></ion-input>
+                        </ion-item>
+
+                        <ion-item lines="none" class="field-item">
+                          <ion-label position="stacked">Category</ion-label>
+                          <ion-input [(ngModel)]="editForm.category"></ion-input>
+                        </ion-item>
+
+                        <ion-item lines="none" class="field-item">
+                          <ion-label position="stacked">Price</ion-label>
+                          <ion-input type="number" [(ngModel)]="editForm.price"></ion-input>
+                        </ion-item>
+
+                        <ion-item lines="none" class="field-item">
+                          <ion-label position="stacked">Original Price</ion-label>
+                          <ion-input type="number" [(ngModel)]="editForm.originalPrice"></ion-input>
+                        </ion-item>
+
+                        <ion-item lines="none" class="field-item">
+                          <ion-label position="stacked">Location</ion-label>
+                          <ion-input [(ngModel)]="editForm.location"></ion-input>
+                        </ion-item>
+
+                        <ion-item lines="none" class="field-item">
+                          <ion-label position="stacked">Duration</ion-label>
+                          <ion-input [(ngModel)]="editForm.duration"></ion-input>
+                        </ion-item>
+
+                        <ion-item lines="none" class="field-item">
+                          <ion-label position="stacked">Group Size</ion-label>
+                          <ion-input type="number" [(ngModel)]="editForm.groupSize"></ion-input>
+                        </ion-item>
+
+                        <ion-item lines="none" class="field-item">
+                          <ion-label position="stacked">Tickets Left</ion-label>
+                          <ion-input type="number" [(ngModel)]="editForm.ticketsLeft"></ion-input>
+                        </ion-item>
+
+                        <ion-item lines="none" class="field-item">
+                          <ion-label position="stacked">Date From</ion-label>
+                          <ion-input [(ngModel)]="editForm.dateFrom" placeholder="YYYY-MM-DD"></ion-input>
+                        </ion-item>
+
+                        <ion-item lines="none" class="field-item">
+                          <ion-label position="stacked">Date To</ion-label>
+                          <ion-input [(ngModel)]="editForm.dateTo" placeholder="YYYY-MM-DD"></ion-input>
+                        </ion-item>
+                      </div>
+
+                      <ion-item lines="none" class="field-item">
+                        <ion-label position="stacked">Image URL / Data URL</ion-label>
+                        <ion-input [(ngModel)]="editForm.image"></ion-input>
+                      </ion-item>
+
+                      <ion-item lines="none" class="field-item">
+                        <ion-label position="stacked">Description</ion-label>
+                        <ion-textarea [(ngModel)]="editForm.description" rows="3"></ion-textarea>
+                      </ion-item>
+
+                      <ion-item lines="none" class="field-item">
+                        <ion-label position="stacked">Benefits (one per line)</ion-label>
+                        <ion-textarea [(ngModel)]="editForm.benefitsText" rows="3"></ion-textarea>
+                      </ion-item>
+
+                      <div class="trip-edit-actions">
+                        <ion-button size="small" color="primary" (click)="saveTripEdit(trip)">Save Changes</ion-button>
+                        <ion-button size="small" fill="clear" (click)="cancelTripEdit()">Cancel</ion-button>
+                      </div>
+                    }
+                  </div>
+                </article>
+              }
+            </div>
+          }
+        </ion-card-content>
+      </ion-card>
+    }
+
     @if (activeTab === 'checkouts') {
-      <ion-card class="admin-card">
+      <ion-card class="admin-card panel">
         <ion-card-header>
           <div class="section-head">
             <ion-card-title>Checkout Records</ion-card-title>
@@ -171,6 +274,8 @@
         </ion-card-content>
       </ion-card>
     }
-    </section>
+    </div>
   </section>
+
+  <app-footer></app-footer>
 </ion-content>

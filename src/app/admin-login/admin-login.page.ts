@@ -56,7 +56,7 @@ export class AdminLoginPage {
 
     setAdminAuthenticated(true);
     localStorage.setItem('admin-email', this.email.trim());
-    await this.router.navigate(['/admin-portal']);
+    await this.router.navigate(['/tabs/admin-portal']);
   }
 
   async forgotPassword(): Promise<void> {
@@ -75,7 +75,7 @@ export class AdminLoginPage {
     if (currentEmail) {
       localStorage.setItem('admin-email', currentEmail);
     }
-    await this.router.navigate(['/admin-portal']);
+    await this.router.navigate(['/tabs/admin-portal']);
   }
 
   async openRegister(): Promise<void> {

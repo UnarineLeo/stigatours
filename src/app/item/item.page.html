@@ -109,7 +109,7 @@
           @for (item of recommendedItems; track item.id) {
             <article class="rec-card" (click)="openRecommendedItem(item.id)">
               <div class="rec-image-wrap">
-                <img [src]="item.image" [alt]="item.name" class="rec-image" />
+                <img [src]="item.images?.[0]" [alt]="item.name" class="rec-image" />
                 @if (item.duration) {
                   <span class="rec-duration">{{ item.duration }}</span>
                 }

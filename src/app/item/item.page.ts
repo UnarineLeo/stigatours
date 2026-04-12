@@ -47,7 +47,7 @@ export class ItemPage implements OnInit {
 
       this.product = foundProduct;
       this.galleryImages = this.buildGallery(foundProduct);
-      this.selectedImage = this.galleryImages[0] ?? foundProduct.image;
+      this.selectedImage = this.galleryImages[0] ?? '';
       this.isImageExpanded = false;
       this.recommendedItems = this.getRecommended(foundProduct);
     });
@@ -114,7 +114,7 @@ export class ItemPage implements OnInit {
 
   private buildGallery(item: ProductItem): string[] {
     return [
-      item.image,
+      ...(item.images ?? []),
       `https://picsum.photos/seed/item-${item.id}-angle-1/1000/800`,
       `https://picsum.photos/seed/item-${item.id}-angle-2/1000/800`,
       `https://picsum.photos/seed/item-${item.id}-angle-3/1000/800`,

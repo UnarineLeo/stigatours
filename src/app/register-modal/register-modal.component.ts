@@ -1,16 +1,15 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonToolbar, IonTitle, IonButton, IonItem, IonLabel, IonInput, IonSelect, IonSelectOption, IonText } from '@ionic/angular/standalone';
+import { IonContent, IonHeader, IonToolbar, IonTitle, IonButton, IonItem, IonLabel, IonInput, IonText } from '@ionic/angular/standalone';
 import { ModalController } from '@ionic/angular/standalone';
-import { INTEREST_OPTIONS, STUDY_LEVELS } from '../shared/app-data';
 
 @Component({
   selector: 'app-register-modal',
   templateUrl: './register-modal.component.html',
   styleUrls: ['./register-modal.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonContent, IonHeader, IonToolbar, IonTitle, IonButton, IonItem, IonLabel, IonInput, IonSelect, IonSelectOption, IonText, FormsModule]
+  imports: [CommonModule, IonContent, IonHeader, IonToolbar, IonTitle, IonButton, IonItem, IonLabel, IonInput, IonText, FormsModule]
 })
 export class RegisterModalComponent {
   firstName = '';
@@ -18,11 +17,6 @@ export class RegisterModalComponent {
   email = '';
   password = '';
   confirmPassword = '';
-  currentStudyLevel = '';
-  interests: string[] = [];
-
-  studyLevels = STUDY_LEVELS;
-  interestOptions = INTEREST_OPTIONS;
 
   constructor(private modalController: ModalController) {}
 
@@ -38,8 +32,6 @@ export class RegisterModalComponent {
         surname: this.surname,
         email: this.email,
         password: this.password,
-        currentStudyLevel: this.currentStudyLevel,
-        interests: this.interests
       }
     });
   }

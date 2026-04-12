@@ -121,15 +121,11 @@ export class TabsPage {
       const firstName = data.payload.firstName ?? '';
       const surname = data.payload.surname ?? '';
       const displayName = `${firstName} ${surname}`.trim();
-      const interests: string[] = Array.isArray(data.payload.interests) ? data.payload.interests : [];
 
       await this.authService.userRegistration({
         displayName,
         email: data.payload.email,
         password: data.payload.password,
-        currentStudyLevel: data.payload.currentStudyLevel ?? '',
-        interest: interests[0] ?? '',
-        courseChoices: interests,
       });
     }
   }

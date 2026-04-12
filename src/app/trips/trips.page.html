@@ -86,7 +86,7 @@
             }
 
             <div class="product-image-wrap">
-              <img [src]="item.image" [alt]="item.name" class="product-image" loading="lazy" />
+              <img [src]="item.images[0]" [alt]="item.name" class="product-image" loading="lazy" />
               @if (item.duration) {
                 <span class="product-duration">{{ item.duration }}</span>
               }
