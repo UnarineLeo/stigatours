@@ -27,6 +27,10 @@ export const routes: Routes = [
     loadComponent: () => import('./bookings/bookings.page').then((m) => m.BookingsPage)
   },
   {
+    path: 'checkout',
+    loadComponent: () => import('./checkout/checkout.page').then((m) => m.CheckoutPage)
+  },
+  {
     path: 'cart',
     redirectTo: '/tabs/bookings',
     pathMatch: 'full'

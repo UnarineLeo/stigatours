@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ToastController } from '@ionic/angular';
 import {
   IonHeader,
   IonToolbar,
@@ -22,6 +21,7 @@ import {
 } from '@ionic/angular/standalone';
 import { getAllProductsWithOptions, getCategorySections, getDiscountPercent, ProductItem } from '../shared/product-catalog';
 import { FooterComponent } from '../footer/footer.component';
+import { AuthService } from '../services/auth.service';
 
 
 type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'name-asc';
@@ -70,7 +70,7 @@ export class TripsPage {
 
   constructor(
     private router: Router,
-    private toastController: ToastController,
+    private authService: AuthService,
   ) {
     this.refreshCatalog();
   }
@@ -158,18 +158,7 @@ export class TripsPage {
     }
 
     localStorage.setItem('cart-items', JSON.stringify(cartItems));
-    await this.presentBookingToast(item.name);
-  }
-
-  private async presentBookingToast(itemName: string): Promise<void> {
-    const toast = await this.toastController.create({
-      message: `${itemName} has been added to your bookings.`,
-      duration: 1800,
-      color: 'success',
-      position: 'top',
-    });
-
-    await toast.present();
+    await this.authService.presentToast(`${item.name} has been added to your bookings.`);
   }
 
   private refreshCatalog(): void {

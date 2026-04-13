@@ -1,10 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonContent, IonButton } from '@ionic/angular/standalone';
-import { ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { FooterComponent } from '../footer/footer.component';
 import { getCategorySections, getDiscountPercent, ProductItem } from '../shared/product-catalog';
+import { AuthService } from '../services/auth.service';
 
 interface HeroSlide {
   title: string;
@@ -50,7 +50,7 @@ export class HomePage implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
-    private toastController: ToastController,
+    private authService: AuthService,
   ) {}
 
   ngOnInit(): void {
@@ -110,18 +110,7 @@ export class HomePage implements OnInit, OnDestroy {
     }
 
     localStorage.setItem('cart-items', JSON.stringify(cartItems));
-    await this.presentBookingToast(item.name);
-  }
-
-  private async presentBookingToast(itemName: string): Promise<void> {
-    const toast = await this.toastController.create({
-      message: `${itemName} has been added to your bookings.`,
-      duration: 1800,
-      color: 'success',
-      position: 'top',
-    });
-
-    await toast.present();
+    await this.authService.presentToast(`${item.name} has been added to your bookings.`);
   }
 
   pauseAutoplay(): void {

@@ -1,0 +1,145 @@
+.checkout-hero {
+  background: linear-gradient(135deg, #1e3a5f 0%, #2d5a7b 55%, #3d7a8f 100%);
+  color: #ffffff;
+  padding: 56px 20px 44px;
+}
+
+.checkout-hero-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+
+  h1 {
+    margin: 0;
+    font-size: 2.4rem;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    margin: 10px 0 0;
+    max-width: 760px;
+    color: rgba(255, 255, 255, 0.92);
+    line-height: 1.7;
+  }
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+  opacity: 0.9;
+}
+
+.checkout-shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px 20px 40px;
+}
+
+.panel,
+.auth-prompt {
+  background: #ffffff;
+  border: 1px solid #dbe4ef;
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.08);
+}
+
+.panel h2,
+.auth-prompt h2 {
+  margin: 0 0 8px;
+  color: #0f172a;
+  font-size: 1.45rem;
+  letter-spacing: -0.01em;
+}
+
+.panel-subtitle,
+.auth-prompt p {
+  margin: 8px 0 24px;
+  color: #64748b;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.field {
+  display: grid;
+  gap: 7px;
+
+  span {
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: #1e293b;
+    letter-spacing: 0.3px;
+  }
+
+  input {
+    width: 100%;
+    border: 1.5px solid #d1d9e6;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 0.95rem;
+    color: #1e293b;
+    background: #ffffff;
+    outline: none;
+  }
+
+  select {
+    width: 100%;
+    border: 1.5px solid #d1d9e6;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 0.95rem;
+    color: #1e293b;
+    background: #ffffff;
+    outline: none;
+  }
+
+  .readonly {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    color: #64748b;
+  }
+
+  &.full {
+    grid-column: 1 / -1;
+  }
+}
+
+.checkout-actions,
+.prompt-actions {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+@media (max-width: 860px) {
+  .checkout-hero {
+    padding: 42px 16px 34px;
+  }
+
+  .checkout-hero-inner h1 {
+    font-size: 2rem;
+  }
+
+  .checkout-shell {
+    padding: 16px;
+  }
+
+  .panel,
+  .auth-prompt {
+    padding: 20px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,132 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Checkout</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <section class="checkout-hero">
+    <div class="checkout-hero-inner">
+      <p class="eyebrow">Booking</p>
+      <h1>Checkout</h1>
+      <p>Review the details saved on your profile before you place your booking.</p>
+    </div>
+  </section>
+
+  <section class="checkout-shell">
+    @if (!isLoggedIn) {
+      <section class="auth-prompt" role="status" aria-live="polite">
+        <h2>Sign in to continue checkout</h2>
+        <p>Please log in or create an account to use your saved profile details for this booking.</p>
+        <div class="prompt-actions">
+          <ion-button routerLink="/login" shape="round">Log In</ion-button>
+          <ion-button routerLink="/register" fill="outline" shape="round">Create Account</ion-button>
+          <ion-button routerLink="/tabs/bookings" fill="clear" color="medium">Back to Bookings</ion-button>
+        </div>
+      </section>
+    } @else {
+      <section class="panel">
+        <h2>Traveler Details</h2>
+        <p class="panel-subtitle">These details are pulled from your profile settings.</p>
+
+        <div class="form-grid">
+          <label class="field">
+            <span>First Name</span>
+            <input type="text" [value]="checkoutProfile.firstName" (input)="onCheckoutInputChange('firstName', $event)" />
+          </label>
+
+          <label class="field">
+            <span>Last Name</span>
+            <input type="text" [value]="checkoutProfile.lastName" (input)="onCheckoutInputChange('lastName', $event)" />
+          </label>
+
+          <label class="field full">
+            <span>Email Address</span>
+            <input type="email" [value]="checkoutProfile.email" (input)="onCheckoutInputChange('email', $event)" />
+          </label>
+
+          <label class="field">
+            <span>Cellphone Number</span>
+            <input type="text" [value]="checkoutProfile.phone" (input)="onCheckoutInputChange('phone', $event)" />
+          </label>
+
+          <label class="field">
+            <span>SA ID Number / Passport Number</span>
+            <input type="text" [value]="checkoutProfile.saIdNumber" (input)="onCheckoutInputChange('saIdNumber', $event)" />
+          </label>
+
+          <label class="field full">
+            <span>Street Address</span>
+            <input type="text" [value]="checkoutProfile.streetAddress" (input)="onCheckoutInputChange('streetAddress', $event)" />
+          </label>
+
+          <label class="field">
+            <span>City/Town</span>
+            <input type="text" [value]="checkoutProfile.cityTown" (input)="onCheckoutInputChange('cityTown', $event)" />
+          </label>
+
+          <label class="field">
+            <span>Province</span>
+            <input type="text" [value]="checkoutProfile.provinceAddress" (input)="onCheckoutInputChange('provinceAddress', $event)" />
+          </label>
+
+          <label class="field">
+            <span>Postal Code</span>
+            <input type="text" [value]="checkoutProfile.postalCode" (input)="onCheckoutInputChange('postalCode', $event)" />
+          </label>
+
+          <label class="field">
+            <span>Date of Birth</span>
+            <input
+              type="date"
+              [value]="checkoutProfile.dateOfBirth"
+              (click)="openDatePicker($event)"
+              (focus)="openDatePicker($event)"
+              (input)="onCheckoutInputChange('dateOfBirth', $event)" />
+          </label>
+
+          <label class="field">
+            <span>Gender</span>
+            <select [value]="checkoutProfile.gender" (change)="onCheckoutInputChange('gender', $event)">
+              <option value="">Select gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+              <option value="prefer-not-to-say">Prefer not to say</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Nationality</span>
+            <select [value]="checkoutProfile.nationality" (change)="onCheckoutInputChange('nationality', $event)">
+              <option value="">Select nationality</option>
+              <option value="south-african">South African</option>
+              <option value="other">Other</option>
+            </select>
+          </label>
+
+          @if (checkoutProfile.nationality === 'other') {
+            <label class="field full">
+              <span>Specify Nationality</span>
+              <input
+                type="text"
+                [value]="checkoutProfile.otherNationality"
+                placeholder="Enter your nationality"
+                (input)="onCheckoutInputChange('otherNationality', $event)" />
+            </label>
+          }
+        </div>
+
+        <div class="checkout-actions">
+          <ion-button (click)="saveCheckoutDetails()" [disabled]="isSavingDetails" shape="round">
+            {{ isSavingDetails ? 'Saving...' : 'Save Details' }}
+          </ion-button>
+          <ion-button routerLink="/tabs/profile" fill="outline" shape="round">Update in Profile</ion-button>
+          <ion-button routerLink="/tabs/bookings" fill="clear" color="medium">Back to Bookings</ion-button>
+        </div>
+      </section>
+    }
+  </section>
+
+  <app-footer></app-footer>
+</ion-content>
