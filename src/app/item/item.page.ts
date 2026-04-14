@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { IonContent, IonButton } from '@ionic/angular/standalone';
+import { IonContent, IonButton, AlertController } from '@ionic/angular/standalone';
 import { FooterComponent } from '../footer/footer.component';
 import { findProductById, getAllProducts, getDiscountPercent, ProductItem } from '../shared/product-catalog';
 import { Subscription } from 'rxjs';
@@ -26,6 +26,7 @@ export class ItemPage implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private authService: AuthService,
+    private alertController: AlertController,
   ) {}
 
   ngOnInit(): void {
@@ -94,6 +95,16 @@ export class ItemPage implements OnInit {
 
     localStorage.setItem('cart-items', JSON.stringify(cartItems));
     await this.authService.presentToast(`${item.name} has been added to your bookings.`);
+    await this.showAddedAlert(item);
+  }
+
+  private async showAddedAlert(item: ProductItem) {
+    const alert = await this.alertController.create({
+      header: 'Trip Added',
+      message: `${item.name} has been successfully added to your bookings!`,
+      buttons: ['OK']
+    });
+    await alert.present();
   }
 
   async addRecommendedToCart(item: ProductItem, event: Event): Promise<void> {

@@ -38,19 +38,39 @@
         <ion-input type="email" [(ngModel)]="email" placeholder="username@domain.com"></ion-input>
       </ion-item>
 
+      <ion-text class="password-requirements">
+        <p><strong>Password Requirements:</strong></p>
+        <ul>
+          <li>At least 6 characters</li>
+          <li>At least 1 lowercase letter (a-z)</li>
+          <li>At least 1 uppercase letter (A-Z)</li>
+          <li>At least 1 number or special character (!@#$%^&*)</li>
+        </ul>
+      </ion-text>
+
       <div class="grid-two">
         <ion-item lines="none" class="field-item">
           <ion-label position="stacked">Password</ion-label>
-          <ion-input type="password" [(ngModel)]="password" placeholder="Create password"></ion-input>
+          <div class="field-actions">
+            <ion-input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="password" placeholder="Create password"></ion-input>
+            <button type="button" class="inline-link password-toggle" (click)="togglePasswordVisibility()">
+              {{ showPassword ? 'Hide' : 'Show' }}
+            </button>
+          </div>
         </ion-item>
 
         <ion-item lines="none" class="field-item">
           <ion-label position="stacked">Confirm Password</ion-label>
-          <ion-input type="password" [(ngModel)]="confirmPassword" placeholder="Confirm password"></ion-input>
+          <div class="field-actions">
+            <ion-input [type]="showConfirmPassword ? 'text' : 'password'" [(ngModel)]="confirmPassword" placeholder="Confirm password"></ion-input>
+            <button type="button" class="inline-link password-toggle" (click)="toggleConfirmPasswordVisibility()">
+              {{ showConfirmPassword ? 'Hide' : 'Show' }}
+            </button>
+          </div>
         </ion-item>
       </div>
 
-      <ion-button expand="block" class="primary-btn" (click)="register()">
+      <ion-button expand="block" class="primary-btn" (click)="register()" [disabled]="!isFormValid()">
         Create Account
       </ion-button>
 

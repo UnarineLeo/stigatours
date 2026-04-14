@@ -28,7 +28,12 @@
 
       <ion-item lines="none" class="field-item">
         <ion-label position="stacked">Password</ion-label>
-        <ion-input type="password" [(ngModel)]="password" placeholder="Enter your password"></ion-input>
+        <div class="field-actions">
+          <ion-input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="password" placeholder="Enter your password"></ion-input>
+          <button type="button" class="inline-link password-toggle" (click)="togglePasswordVisibility()">
+            {{ showPassword ? 'Hide' : 'Show' }}
+          </button>
+        </div>
       </ion-item>
 
       <div class="row-end">
@@ -37,7 +42,7 @@
         </ion-button>
       </div>
 
-      <ion-button expand="block" class="primary-btn" (click)="login()">
+      <ion-button expand="block" class="primary-btn" (click)="login()" [disabled]="!isFormValid()">
         Log In
       </ion-button>
 
