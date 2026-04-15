@@ -358,36 +358,6 @@ ion-content {
   font-size: 0.74rem;
 }
 
-.trip-status-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.status-pill {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  padding: 2px 8px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-
-.status-pill.is-published {
-  background: #e6f9ef;
-  color: #0f7a43;
-  border: 1px solid #b8efd1;
-}
-
-.status-pill.is-recent {
-  background: #eef2ff;
-  color: #3730a3;
-  border: 1px solid #c7d2fe;
-}
-
 .trip-meta {
   margin: 0;
   color: #334155;

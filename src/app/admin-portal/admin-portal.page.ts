@@ -56,7 +56,6 @@ export class AdminPortalPage implements OnInit {
   checkoutRecords: CheckoutRecord[] = [];
   catalogTrips: ProductItem[] = [];
   editingTripId: number | null = null;
-  lastPublishedTripId: number | null = null;
   categories: string[] = [];
   eventImages: string[] = [];
   tripsSearchQuery = '';
@@ -154,14 +153,7 @@ export class AdminPortalPage implements OnInit {
       benefits: this.parseBenefits(this.form.benefitsText),
     };
 
-    try {
-      await saveAdminEvent(eventItem);
-    } catch (error) {
-      await this.handleCatalogWriteError(error, 'publish this trip');
-      return;
-    }
-
-    this.lastPublishedTripId = eventItem.id;
+    await saveAdminEvent(eventItem);
 
     if (!this.categories.includes(eventItem.category)) {
       this.categories = [...this.categories, eventItem.category];
@@ -171,7 +163,7 @@ export class AdminPortalPage implements OnInit {
 
     this.form = this.createEmptyForm();
     this.eventImages = [];
-    await this.presentToast('Event published successfully.', 'success');
+    await this.presentToast('Event added successfully.', 'success');
   }
 
   goToHome(): void {
@@ -329,22 +321,11 @@ export class AdminPortalPage implements OnInit {
       benefits: this.parseBenefits(this.editForm.benefitsText),
     };
 
-    try {
-      await updateCatalogItem(updatedItem);
-    } catch (error) {
-      await this.handleCatalogWriteError(error, 'update this trip');
-      return;
-    }
-
-    this.lastPublishedTripId = updatedItem.id;
+    await updateCatalogItem(updatedItem);
     this.categories = getCategorySections().map((section) => section.name);
     this.refreshCatalogTrips();
     this.cancelTripEdit();
-    await this.presentToast('Trip updated and published successfully.', 'success');
-  }
-
-  isJustPublished(tripId: number): boolean {
-    return this.lastPublishedTripId === tripId;
+    await this.presentToast('Trip updated successfully.', 'success');
   }
 
   private refreshCheckouts(): void {
@@ -431,21 +412,5 @@ export class AdminPortalPage implements OnInit {
     });
 
     await toast.present();
-  }
-
-  private async handleCatalogWriteError(error: unknown, action: string): Promise<void> {
-    const code = typeof error === 'object' && error && 'code' in error
-      ? String((error as { code?: unknown }).code ?? '')
-      : '';
-
-    if (code.includes('permission-denied')) {
-      await this.presentToast(
-        'Missing permissions: your account is not allowed to publish trips. Please sign in with an admin account.',
-        'danger',
-      );
-      return;
-    }
-
-    await this.presentToast(`Unable to ${action}. Please try again.`, 'danger');
   }
 }

@@ -156,13 +156,7 @@
                 <article class="trip-item">
                   <img [src]="trip.images?.[0]" [alt]="trip.name" class="trip-image" />
                   <div class="trip-info">
-                    <div class="trip-status-row">
-                      <p class="trip-category">{{ trip.category }}</p>
-                      <span class="status-pill is-published">Published</span>
-                      @if (isJustPublished(trip.id)) {
-                        <span class="status-pill is-recent">Just published</span>
-                      }
-                    </div>
+                    <p class="trip-category">{{ trip.category }}</p>
                     <h3>{{ trip.name }}</h3>
                     <p class="trip-meta"><strong>Price:</strong> {{ formatRand(trip.price) }}</p>
                     @if (trip.dateFrom || trip.dateTo) {
