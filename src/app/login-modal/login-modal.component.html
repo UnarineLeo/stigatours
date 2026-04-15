@@ -42,7 +42,7 @@
         </ion-button>
       </div>
 
-      <ion-button expand="block" class="primary-btn" (click)="login()" [disabled]="!isFormValid()">
+      <ion-button expand="block" class="primary-btn" (click)="login()" [disabled]="!isFormValid() || isSubmitting">
         Log In
       </ion-button>
 

@@ -153,7 +153,7 @@ export class AdminPortalPage implements OnInit {
       benefits: this.parseBenefits(this.form.benefitsText),
     };
 
-    saveAdminEvent(eventItem);
+    await saveAdminEvent(eventItem);
 
     if (!this.categories.includes(eventItem.category)) {
       this.categories = [...this.categories, eventItem.category];
@@ -321,7 +321,7 @@ export class AdminPortalPage implements OnInit {
       benefits: this.parseBenefits(this.editForm.benefitsText),
     };
 
-    updateCatalogItem(updatedItem);
+    await updateCatalogItem(updatedItem);
     this.categories = getCategorySections().map((section) => section.name);
     this.refreshCatalogTrips();
     this.cancelTripEdit();

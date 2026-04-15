@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonHeader, IonToolbar, IonTitle, IonButton, IonItem, IonLabel, IonInput, IonText, AlertController } from '@ionic/angular/standalone';
 import { ModalController } from '@ionic/angular/standalone';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-login-modal',
@@ -14,8 +15,13 @@ export class LoginModalComponent {
   email = '';
   password = '';
   showPassword = false;
+  isSubmitting = false;
 
-  constructor(private modalController: ModalController, private alertController: AlertController) {}
+  constructor(
+    private modalController: ModalController,
+    private alertController: AlertController,
+    private authService: AuthService,
+  ) {}
 
   close() {
     this.modalController.dismiss();
@@ -28,26 +34,39 @@ export class LoginModalComponent {
     });
   }
 
-  login() {
+  async login() {
     // Validate required fields
     if (!this.email.trim() || !this.password) {
-      this.showAlert('Missing Information', 'Please enter both email and password.');
+      await this.showAlert('Missing Information', 'Please enter both email and password.');
       return;
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(this.email)) {
-      this.showAlert('Invalid Email', 'Please enter a valid email address.');
+      await this.showAlert('Invalid Email', 'Please enter a valid email address.');
       return;
     }
 
-    // All validations passed, proceed with login
-    this.modalController.dismiss({
-      action: 'login',
-      email: this.email,
-      password: this.password,
-    });
+    this.isSubmitting = true;
+
+    try {
+      await this.authService.loginFireAuth({
+        email: this.email.trim(),
+        password: this.password,
+      });
+
+      const isAuthenticated = await this.authService.isAuthenticated();
+      if (!isAuthenticated) {
+        return;
+      }
+
+      await this.modalController.dismiss({ action: 'login-success' });
+    } catch {
+      // Auth service presents detailed feedback; keep the modal open for corrections.
+    } finally {
+      this.isSubmitting = false;
+    }
   }
 
   private async showAlert(title: string, message: string) {

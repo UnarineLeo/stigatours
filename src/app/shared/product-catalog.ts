@@ -1,3 +1,8 @@
+import { getApp, getApps, initializeApp } from 'firebase/app';
+import { collection, doc, getDocs, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore';
+import { environment } from 'src/environments/environment';
+import tripsData from './trips.json';
+
 export interface ProductItem {
   id: number;
   productId?: string;
@@ -30,25 +35,34 @@ interface CatalogOptions {
   hidePastTrips?: boolean;
 }
 
-const ADMIN_EVENTS_KEY = 'admin-events';
-const ADMIN_CATALOG_UPDATES_KEY = 'admin-catalog-updates';
 const TRIPS_COLLECTION = 'trips';
+const firebaseApp = getApps().length ? getApp() : initializeApp(environment.firebaseConfig);
+const db = getFirestore(firebaseApp);
 
-// Import trips data from JSON
-import tripsData from './trips.json';
+let catalogLoadPromise: Promise<void> | null = null;
+let catalogTrips: ProductItem[] = normalizeTrips(tripsData as ProductItem[]);
+let categorySectionsCache: CategorySection[] = buildCategorySections(catalogTrips);
+let productIndexCache = buildProductIndex(catalogTrips);
 
-// Build category sections from trips data
-function buildCategorySections(): CategorySection[] {
+function normalizeTrip(trip: ProductItem): ProductItem {
+  return {
+    ...trip,
+    images: trip.images ?? [],
+    benefits: trip.benefits ?? trip.highlights,
+  };
+}
+
+function normalizeTrips(trips: ProductItem[]): ProductItem[] {
+  return trips.map((trip) => normalizeTrip(trip));
+}
+
+function buildCategorySections(trips: ProductItem[]): CategorySection[] {
   const grouped = new Map<string, ProductItem[]>();
   
-  for (const trip of tripsData as ProductItem[]) {
-    const normalizedTrip: ProductItem = {
-      ...trip,
-      benefits: trip.benefits ?? trip.highlights,
-    };
+  for (const trip of trips) {
     const category = trip.category || 'Other';
     const items = grouped.get(category) ?? [];
-    items.push(normalizedTrip);
+    items.push(trip);
     grouped.set(category, items);
   }
   
@@ -71,18 +85,116 @@ function buildCategorySections(): CategorySection[] {
   return result;
 }
 
-const CATEGORY_SECTIONS: CategorySection[] = buildCategorySections();
+function buildProductIndex(trips: ProductItem[]): Map<number, ProductItem> {
+  const productEntries: Array<[number, ProductItem]> = [];
 
-// Build product index from trips data
-const productEntries: Array<[number, ProductItem]> = [];
-for (const trip of tripsData as ProductItem[]) {
-  const normalizedTrip: ProductItem = {
-    ...trip,
-    benefits: trip.benefits ?? trip.highlights,
-  };
-  productEntries.push([normalizedTrip.id, normalizedTrip]);
+  for (const trip of trips) {
+    productEntries.push([trip.id, trip]);
+  }
+
+  return new Map<number, ProductItem>(productEntries);
 }
-const PRODUCT_INDEX = new Map<number, ProductItem>(productEntries);
+
+function refreshCatalogCaches(trips: ProductItem[]): void {
+  const normalized = normalizeTrips(trips);
+  catalogTrips = normalized;
+  categorySectionsCache = buildCategorySections(normalized);
+  productIndexCache = buildProductIndex(normalized);
+}
+
+function getFallbackTrips(): ProductItem[] {
+  return normalizeTrips(tripsData as ProductItem[]);
+}
+
+function buildTripWritePayload(item: ProductItem): Record<string, unknown> {
+  const payload: Record<string, unknown> = {
+    id: item.id,
+    name: item.name,
+    price: item.price,
+    images: [...(item.images ?? [])],
+    description: item.description,
+    category: item.category,
+  };
+
+  if (item.productId !== undefined) payload['productId'] = item.productId;
+  if (item.originalPrice !== undefined) payload['originalPrice'] = item.originalPrice;
+  if (item.duration !== undefined) payload['duration'] = item.duration;
+  if (item.groupSize !== undefined) payload['groupSize'] = item.groupSize;
+  if (item.ticketsLeft !== undefined) payload['ticketsLeft'] = item.ticketsLeft;
+  if (item.benefits !== undefined) payload['benefits'] = [...item.benefits];
+  if (item.highlights !== undefined) payload['highlights'] = [...item.highlights];
+  if (item.location !== undefined) payload['location'] = item.location;
+  if (item.dateFrom !== undefined) payload['dateFrom'] = item.dateFrom;
+  if (item.dateTo !== undefined) payload['dateTo'] = item.dateTo;
+  if (item.activityLevel !== undefined) payload['activityLevel'] = item.activityLevel;
+  if (item.guide !== undefined) payload['guide'] = item.guide;
+  if (item.inclusions !== undefined) payload['inclusions'] = [...item.inclusions];
+  if (item.exclusions !== undefined) payload['exclusions'] = [...item.exclusions];
+
+  // Never persist legacy singular image field; keep only images[] in Firestore.
+  delete payload['image'];
+
+  return payload;
+}
+
+function tripDocId(id: number): string {
+  return String(id);
+}
+
+async function seedTripsFromFallback(): Promise<void> {
+  const fallbackTrips = getFallbackTrips();
+  refreshCatalogCaches(fallbackTrips);
+
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  for (const trip of fallbackTrips) {
+    await setDoc(doc(db, TRIPS_COLLECTION, tripDocId(trip.id)), {
+      ...buildTripWritePayload(trip),
+      updatedAt: serverTimestamp(),
+    });
+  }
+}
+
+export async function initializeTripCatalog(): Promise<void> {
+  if (catalogLoadPromise) {
+    return catalogLoadPromise;
+  }
+
+  catalogLoadPromise = (async () => {
+    if (typeof window === 'undefined') {
+      refreshCatalogCaches(getFallbackTrips());
+      return;
+    }
+
+    try {
+      const snapshot = await getDocs(collection(db, TRIPS_COLLECTION));
+      const loadedTrips: ProductItem[] = [];
+
+      snapshot.forEach((tripDoc) => {
+        const data = tripDoc.data() as ProductItem;
+        loadedTrips.push(normalizeTrip(data));
+      });
+
+      if (loadedTrips.length > 0) {
+        loadedTrips.sort((a, b) => a.id - b.id);
+        refreshCatalogCaches(loadedTrips);
+        return;
+      }
+
+      try {
+        await seedTripsFromFallback();
+      } catch {
+        refreshCatalogCaches(getFallbackTrips());
+      }
+    } catch {
+      refreshCatalogCaches(getFallbackTrips());
+    }
+  })();
+
+  return catalogLoadPromise;
+}
 
 function parseDateOnly(value: string): Date | null {
   const parts = value.split('-');
@@ -124,107 +236,52 @@ function isVisibleByDate(item: ProductItem, hidePastTrips: boolean): boolean {
   return today.getTime() <= startDate.getTime();
 }
 
-function readAdminEvents(): ProductItem[] {
-  if (typeof window === 'undefined') {
-    return [];
-  }
+export async function saveAdminEvent(item: ProductItem): Promise<void> {
+  const normalized = normalizeTrip(item);
+  const nextTrips = [...catalogTrips.filter((trip) => trip.id !== normalized.id), normalized]
+    .sort((a, b) => a.id - b.id);
 
-  const raw = localStorage.getItem(ADMIN_EVENTS_KEY);
-  if (!raw) {
-    return [];
-  }
+  refreshCatalogCaches(nextTrips);
 
-  try {
-    const parsed = JSON.parse(raw) as ProductItem[];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  await setDoc(doc(db, TRIPS_COLLECTION, tripDocId(normalized.id)), {
+    ...buildTripWritePayload(normalized),
+    updatedAt: serverTimestamp(),
+  });
 }
 
-function readCatalogUpdates(): Record<string, ProductItem> {
-  if (typeof window === 'undefined') {
-    return {};
-  }
-
-  const raw = localStorage.getItem(ADMIN_CATALOG_UPDATES_KEY);
-  if (!raw) {
-    return {};
-  }
-
-  try {
-    const parsed = JSON.parse(raw) as Record<string, ProductItem>;
-    return parsed && typeof parsed === 'object' ? parsed : {};
-  } catch {
-    return {};
-  }
-}
-
-function writeCatalogUpdates(updates: Record<string, ProductItem>): void {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  localStorage.setItem(ADMIN_CATALOG_UPDATES_KEY, JSON.stringify(updates));
-}
-
-function applyCatalogUpdate(item: ProductItem, updates: Record<string, ProductItem>): ProductItem {
-  const updated = updates[String(item.id)];
-  if (!updated) {
-    return item;
-  }
-
-  return {
+export async function updateCatalogItem(item: ProductItem): Promise<void> {
+  const existing = catalogTrips.find((trip) => trip.id === item.id);
+  const merged = normalizeTrip({
+    ...(existing ?? item),
     ...item,
-    ...updated,
     id: item.id,
-  };
-}
+  });
 
-export function saveAdminEvent(item: ProductItem): void {
-  if (typeof window === 'undefined') {
-    return;
-  }
+  const nextTrips = [...catalogTrips.filter((trip) => trip.id !== item.id), merged]
+    .sort((a, b) => a.id - b.id);
 
-  const events = readAdminEvents();
-  events.push(item);
-  localStorage.setItem(ADMIN_EVENTS_KEY, JSON.stringify(events));
-}
+  refreshCatalogCaches(nextTrips);
 
-export function updateCatalogItem(item: ProductItem): void {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  const updates = readCatalogUpdates();
-  updates[String(item.id)] = { ...item };
-  writeCatalogUpdates(updates);
+  await setDoc(doc(db, TRIPS_COLLECTION, tripDocId(item.id)), {
+    ...buildTripWritePayload(merged),
+    updatedAt: serverTimestamp(),
+  });
 }
 
 export function getCategorySections(options: CatalogOptions = {}): CategorySection[] {
   const hidePastTrips = options.hidePastTrips ?? false;
-  const updates = readCatalogUpdates();
   const allItems: ProductItem[] = [];
 
-  for (const section of CATEGORY_SECTIONS) {
+  for (const section of categorySectionsCache) {
     for (const item of section.items) {
-      const resolved = applyCatalogUpdate(item, updates);
-      if (isVisibleByDate(resolved, hidePastTrips)) {
-        allItems.push(resolved);
+      if (isVisibleByDate(item, hidePastTrips)) {
+        allItems.push(item);
       }
     }
   }
 
-  const adminEvents = readAdminEvents();
-  for (const event of adminEvents) {
-    const resolved = applyCatalogUpdate(event, updates);
-    if (isVisibleByDate(resolved, hidePastTrips)) {
-      allItems.push(resolved);
-    }
-  }
-
   const orderedCategories: string[] = [];
-  for (const section of CATEGORY_SECTIONS) {
+  for (const section of categorySectionsCache) {
     orderedCategories.push(section.name);
   }
 
@@ -283,7 +340,7 @@ export function findProductById(id: number): ProductItem | undefined {
     return allProducts.find((item) => item.id === id);
   }
 
-  return PRODUCT_INDEX.get(id);
+  return productIndexCache.get(id);
 }
 
 export function getDiscountPercent(item: ProductItem): number {

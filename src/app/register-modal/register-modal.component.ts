@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonHeader, IonToolbar, IonTitle, IonButton, IonItem, IonLabel, IonInput, IonText, AlertController } from '@ionic/angular/standalone';
 import { ModalController } from '@ionic/angular/standalone';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-register-modal',
@@ -19,8 +20,13 @@ export class RegisterModalComponent {
   confirmPassword = '';
   showPassword = false;
   showConfirmPassword = false;
+  isSubmitting = false;
 
-  constructor(private modalController: ModalController, private alertController: AlertController) {}
+  constructor(
+    private modalController: ModalController,
+    private alertController: AlertController,
+    private authService: AuthService,
+  ) {}
 
   close() {
     this.modalController.dismiss();
@@ -56,16 +62,23 @@ export class RegisterModalComponent {
       return;
     }
 
-    // All validations passed, proceed with registration
-    this.modalController.dismiss({
-      action: 'register',
-      payload: {
-        firstName: this.firstName,
-        surname: this.surname,
-        email: this.email,
+    this.isSubmitting = true;
+
+    try {
+      const displayName = `${this.firstName.trim()} ${this.surname.trim()}`.trim();
+
+      await this.authService.userRegistration({
+        displayName,
+        email: this.email.trim(),
         password: this.password,
-      }
-    });
+      });
+
+      await this.modalController.dismiss({ action: 'register-success' });
+    } catch {
+      // Auth service presents detailed feedback; keep the modal open for corrections.
+    } finally {
+      this.isSubmitting = false;
+    }
   }
 
   private async showAlert(title: string, message: string) {
