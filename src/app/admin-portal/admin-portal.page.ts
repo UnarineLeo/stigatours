@@ -12,7 +12,7 @@ import {
 } from '@ionic/angular/standalone';
 import { ToastController } from '@ionic/angular';
 import { CheckoutRecord, getCheckoutRecords } from '../shared/admin-storage';
-import { ProductItem, getAllProducts, getCategorySections, getNextProductId, saveAdminEvent, updateCatalogItem } from '../shared/product-catalog';
+import { ProductItem, deleteCatalogItem, getAllProducts, getCategorySections, getNextProductId, saveAdminEvent, updateCatalogItem } from '../shared/product-catalog';
 import { FooterComponent } from '../footer/footer.component';
 import { AuthService } from '../services/auth.service';
 
@@ -21,14 +21,13 @@ type AdminTab = 'events' | 'checkouts' | 'trips';
 interface AdminEventForm {
   name: string;
   price: number | null;
-  originalPrice: number | null;
+  couplesPrice: number | null;
   image: string;
   description: string;
   category: string;
   location: string;
   duration: string;
-  groupSize: number | null;
-  ticketsLeft: number | null;
+  tickets: number | null;
   dateFrom: string;
   dateTo: string;
   benefitsText: string;
@@ -140,14 +139,14 @@ export class AdminPortalPage implements OnInit {
       id: getNextProductId(),
       name: this.form.name.trim(),
       price: this.form.price,
-      originalPrice: this.form.originalPrice ?? undefined,
+      couplesPrice: this.form.couplesPrice ?? undefined,
       images: [...this.eventImages],
       description: this.form.description.trim(),
       category: this.form.category.trim(),
       location: this.form.location.trim() || undefined,
       duration: this.form.duration.trim() || undefined,
-      groupSize: this.form.groupSize ?? undefined,
-      ticketsLeft: this.form.ticketsLeft ?? undefined,
+      tickets: this.form.tickets ?? undefined,
+      ticketsLeft: this.form.tickets ?? undefined,
       dateFrom: this.form.dateFrom || undefined,
       dateTo: this.form.dateTo || undefined,
       benefits: this.parseBenefits(this.form.benefitsText),
@@ -238,6 +237,14 @@ export class AdminPortalPage implements OnInit {
     });
   }
 
+  get activeCatalogTrips(): ProductItem[] {
+    return this.filteredCatalogTrips.filter((trip) => this.isTripActive(trip));
+  }
+
+  get inactiveCatalogTrips(): ProductItem[] {
+    return this.filteredCatalogTrips.filter((trip) => !this.isTripActive(trip));
+  }
+
   get filteredCheckoutRecords(): CheckoutRecord[] {
     const query = this.checkoutSearchQuery.trim().toLowerCase();
     if (!query) {
@@ -264,14 +271,13 @@ export class AdminPortalPage implements OnInit {
     this.editForm = {
       name: item.name,
       price: item.price,
-      originalPrice: item.originalPrice ?? null,
+      couplesPrice: item.couplesPrice ?? null,
       image: item.images?.[0] ?? '',
       description: item.description,
       category: item.category,
       location: item.location ?? '',
       duration: item.duration ?? '',
-      groupSize: item.groupSize ?? null,
-      ticketsLeft: item.ticketsLeft ?? null,
+      tickets: item.tickets ?? null,
       dateFrom: item.dateFrom ?? '',
       dateTo: item.dateTo ?? '',
       benefitsText: (item.benefits ?? []).join('\n'),
@@ -308,14 +314,14 @@ export class AdminPortalPage implements OnInit {
       ...original,
       name: this.editForm.name.trim(),
       price: this.editForm.price,
-      originalPrice: this.editForm.originalPrice ?? undefined,
+      couplesPrice: this.editForm.couplesPrice ?? undefined,
       images: [this.editForm.image.trim()],
       description: this.editForm.description.trim(),
       category: this.editForm.category.trim(),
       location: this.editForm.location.trim() || undefined,
       duration: this.editForm.duration.trim() || undefined,
-      groupSize: this.editForm.groupSize ?? undefined,
-      ticketsLeft: this.editForm.ticketsLeft ?? undefined,
+      tickets: this.editForm.tickets ?? undefined,
+      ticketsLeft: this.editForm.tickets ?? undefined,
       dateFrom: this.editForm.dateFrom || undefined,
       dateTo: this.editForm.dateTo || undefined,
       benefits: this.parseBenefits(this.editForm.benefitsText),
@@ -326,6 +332,23 @@ export class AdminPortalPage implements OnInit {
     this.refreshCatalogTrips();
     this.cancelTripEdit();
     await this.presentToast('Trip updated successfully.', 'success');
+  }
+
+  async deleteTrip(item: ProductItem): Promise<void> {
+    const confirmed = window.confirm(`Delete "${item.name}" from the catalog?`);
+    if (!confirmed) {
+      return;
+    }
+
+    await deleteCatalogItem(item.id);
+    this.categories = getCategorySections().map((section) => section.name);
+    this.refreshCatalogTrips();
+
+    if (this.editingTripId === item.id) {
+      this.cancelTripEdit();
+    }
+
+    await this.presentToast('Trip deleted successfully.', 'success');
   }
 
   private refreshCheckouts(): void {
@@ -374,6 +397,19 @@ export class AdminPortalPage implements OnInit {
     return date.getTime();
   }
 
+  private isTripActive(trip: ProductItem): boolean {
+    if (!trip.dateTo) {
+      return true;
+    }
+
+    const endDate = new Date(`${trip.dateTo}T23:59:59`);
+    if (Number.isNaN(endDate.getTime())) {
+      return true;
+    }
+
+    return endDate.getTime() >= Date.now();
+  }
+
   private readFileAsDataUrl(file: File): Promise<string> {
     return new Promise((resolve) => {
       const reader = new FileReader();
@@ -389,14 +425,13 @@ export class AdminPortalPage implements OnInit {
     return {
       name: '',
       price: null,
-      originalPrice: null,
+      couplesPrice: null,
       image: '',
       description: '',
       category: '',
       location: '',
       duration: '',
-      groupSize: null,
-      ticketsLeft: null,
+      tickets: null,
       dateFrom: '',
       dateTo: '',
       benefitsText: '',

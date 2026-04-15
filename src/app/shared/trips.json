@@ -1,10 +1,9 @@
 [
   {
     "id": 1,
-    "productId": "TRIP_1",
     "name": "Kruger Safari Adventure",
     "price": 15999,
-    "originalPrice": 18500,
+    "couplesPrice": 30000,
     "images": [
       "https://picsum.photos/seed/kruger-safari-wild/800/500"
     ],
@@ -12,8 +11,7 @@
     "category": "Safari",
     "location": "Kruger National Park, South Africa",
     "duration": "5 days / 4 nights",
-    "groupSize": 12,
-    "ticketsLeft": 8,
+    "tickets": 8,
     "dateFrom": "2026-05-15",
     "dateTo": "2026-05-20",
     "highlights": [
@@ -27,10 +25,9 @@
   },
   {
     "id": 2,
-    "productId": "TRIP_2",
     "name": "Cape Town Explorer",
     "price": 12500,
-    "originalPrice": 14800,
+    "couplesPrice": 23800,
     "images": [
       "https://picsum.photos/seed/cape-town-mountain/800/500"
     ],
@@ -38,8 +35,7 @@
     "category": "City & Coast",
     "location": "Cape Town, South Africa",
     "duration": "4 days / 3 nights",
-    "groupSize": 20,
-    "ticketsLeft": 14,
+    "tickets": 14,
     "dateFrom": "2026-04-10",
     "dateTo": "2026-04-14",
     "highlights": [
@@ -53,10 +49,9 @@
   },
   {
     "id": 3,
-    "productId": "TRIP_3",
     "name": "Victoria Falls Expedition",
     "price": 22800,
-    "originalPrice": 25500,
+    "couplesPrice": 43000,
     "images": [
       "https://picsum.photos/seed/victoria-falls-mist/800/500"
     ],
@@ -64,8 +59,7 @@
     "category": "Adventure",
     "location": "Victoria Falls, Zimbabwe / Zambia",
     "duration": "6 days / 5 nights",
-    "groupSize": 16,
-    "ticketsLeft": 11,
+    "tickets": 11,
     "dateFrom": "2026-07-01",
     "dateTo": "2026-07-07",
     "highlights": [
@@ -79,7 +73,6 @@
   },
   {
     "id": 5,
-    "productId": "TRIP_5",
     "name": "Okavango Delta Escape",
     "price": 28000,
     "images": [
@@ -89,8 +82,7 @@
     "category": "Safari",
     "location": "Okavango Delta, Botswana",
     "duration": "5 days / 4 nights",
-    "groupSize": 8,
-    "ticketsLeft": 5,
+    "tickets": 5,
     "dateFrom": "2026-06-10",
     "dateTo": "2026-06-15",
     "highlights": [

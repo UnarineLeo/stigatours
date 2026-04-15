@@ -81,7 +81,7 @@
       <div class="products-grid" [class.compact]="viewMode === 'compact'">
         @for (item of filteredProducts; track item.id) {
           <article class="product-card" (click)="openItem(item.id)">
-            @if (item.originalPrice && item.originalPrice > item.price) {
+            @if (item.couplesPrice && item.couplesPrice < (item.price * 2)) {
               <span class="discount-badge">Special Offer</span>
             }
 
@@ -101,8 +101,8 @@
               @if (item.dateFrom && item.dateTo) {
                 <p class="product-dates">📅 {{ item.dateFrom | date:'MMM d' }} - {{ item.dateTo | date:'MMM d, yyyy' }}</p>
               }
-              @if (item.ticketsLeft !== undefined) {
-                <p class="product-availability" [class.low-stock]="item.ticketsLeft <= 3">🎫 {{ item.ticketsLeft }} of {{ item.groupSize }} spots left</p>
+              @if (item.tickets !== undefined) {
+                <p class="product-availability" [class.low-stock]="item.tickets <= 3">🎫 {{ item.tickets }} tickets left</p>
               }
               <p class="desc">{{ item.description }}</p>
 
@@ -120,8 +120,8 @@
                   <strong class="trip-price">{{ formatRand(item.price) }}</strong>
                   <span class="per-label">/ person</span>
                 </div>
-                @if (item.originalPrice && item.originalPrice > item.price) {
-                  <span class="old-price">{{ formatRand(item.originalPrice) }}</span>
+                @if (item.couplesPrice) {
+                  <span class="old-price">Couples: {{ formatRand(item.couplesPrice) }}</span>
                 }
               </div>
 

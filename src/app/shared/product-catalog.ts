@@ -1,19 +1,18 @@
 import { getApp, getApps, initializeApp } from 'firebase/app';
-import { collection, doc, getDocs, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDocs, getFirestore, serverTimestamp, setDoc } from 'firebase/firestore';
 import { environment } from 'src/environments/environment';
 import tripsData from './trips.json';
 
 export interface ProductItem {
   id: number;
-  productId?: string;
   name: string;
   price: number;
   images: string[];
   description: string;
   category: string;
-  originalPrice?: number;
+  couplesPrice?: number;
   duration?: string;
-  groupSize?: number;
+  tickets?: number;
   ticketsLeft?: number;
   benefits?: string[];
   highlights?: string[];
@@ -23,7 +22,6 @@ export interface ProductItem {
   activityLevel?: string;
   guide?: string;
   inclusions?: string[];
-  exclusions?: string[];
 }
 
 export interface CategorySection {
@@ -45,8 +43,16 @@ let categorySectionsCache: CategorySection[] = buildCategorySections(catalogTrip
 let productIndexCache = buildProductIndex(catalogTrips);
 
 function normalizeTrip(trip: ProductItem): ProductItem {
+  const legacyTrip = trip as ProductItem & {
+    originalPrice?: number;
+    ticketsLeft?: number;
+  };
+
   return {
     ...trip,
+    couplesPrice: trip.couplesPrice ?? legacyTrip.originalPrice,
+    tickets: trip.tickets ?? legacyTrip.ticketsLeft,
+    ticketsLeft: trip.ticketsLeft ?? trip.tickets ?? legacyTrip.ticketsLeft,
     images: trip.images ?? [],
     benefits: trip.benefits ?? trip.highlights,
   };
@@ -116,10 +122,9 @@ function buildTripWritePayload(item: ProductItem): Record<string, unknown> {
     category: item.category,
   };
 
-  if (item.productId !== undefined) payload['productId'] = item.productId;
-  if (item.originalPrice !== undefined) payload['originalPrice'] = item.originalPrice;
+  if (item.couplesPrice !== undefined) payload['couplesPrice'] = item.couplesPrice;
   if (item.duration !== undefined) payload['duration'] = item.duration;
-  if (item.groupSize !== undefined) payload['groupSize'] = item.groupSize;
+  if (item.tickets !== undefined) payload['tickets'] = item.tickets;
   if (item.ticketsLeft !== undefined) payload['ticketsLeft'] = item.ticketsLeft;
   if (item.benefits !== undefined) payload['benefits'] = [...item.benefits];
   if (item.highlights !== undefined) payload['highlights'] = [...item.highlights];
@@ -129,10 +134,14 @@ function buildTripWritePayload(item: ProductItem): Record<string, unknown> {
   if (item.activityLevel !== undefined) payload['activityLevel'] = item.activityLevel;
   if (item.guide !== undefined) payload['guide'] = item.guide;
   if (item.inclusions !== undefined) payload['inclusions'] = [...item.inclusions];
-  if (item.exclusions !== undefined) payload['exclusions'] = [...item.exclusions];
 
   // Never persist legacy singular image field; keep only images[] in Firestore.
   delete payload['image'];
+  delete payload['productId'];
+  delete payload['originalPrice'];
+  delete payload['groupSize'];
+  delete payload['ticketsLeft'];
+  delete payload['exclusions'];
 
   return payload;
 }
@@ -268,6 +277,21 @@ export async function updateCatalogItem(item: ProductItem): Promise<void> {
   });
 }
 
+export async function deleteCatalogItem(itemId: number): Promise<void> {
+  const item = catalogTrips.find((trip) => trip.id === itemId);
+  if (!item) {
+    return;
+  }
+
+  const nextTrips = catalogTrips
+    .filter((trip) => trip.id !== itemId)
+    .sort((a, b) => a.id - b.id);
+
+  refreshCatalogCaches(nextTrips);
+
+  await deleteDoc(doc(db, TRIPS_COLLECTION, tripDocId(item.id)));
+}
+
 export function getCategorySections(options: CatalogOptions = {}): CategorySection[] {
   const hidePastTrips = options.hidePastTrips ?? false;
   const allItems: ProductItem[] = [];
@@ -344,9 +368,14 @@ export function findProductById(id: number): ProductItem | undefined {
 }
 
 export function getDiscountPercent(item: ProductItem): number {
-  if (!item.originalPrice || item.originalPrice <= item.price) {
+  if (!item.couplesPrice || item.couplesPrice <= 0) {
     return 0;
   }
 
-  return Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100);
+  const twoSingleTickets = item.price * 2;
+  if (item.couplesPrice >= twoSingleTickets) {
+    return 0;
+  }
+
+  return Math.round(((twoSingleTickets - item.couplesPrice) / twoSingleTickets) * 100);
 }

@@ -26,7 +26,7 @@
               (click)="openItem(item.id)"
               (keydown.enter)="openItem(item.id)"
               (keydown.space)="openItem(item.id)">
-              @if (item.originalPrice && item.originalPrice > item.price) {
+              @if (item.couplesPrice && item.couplesPrice < (item.price * 2)) {
                 <span class="discount-badge">Special Offer</span>
               }
               <div class="trip-image-wrap">
@@ -40,8 +40,8 @@
                 @if (item.dateFrom && item.dateTo) {
                   <p class="trip-dates">📅 {{ item.dateFrom | date:'MMM d' }} - {{ item.dateTo | date:'MMM d, yyyy' }}</p>
                 }
-                @if (item.ticketsLeft !== undefined) {
-                  <p class="trip-availability" [class.low-stock]="item.ticketsLeft <= 3">🎫 {{ item.ticketsLeft }} of {{ item.groupSize }} spots left</p>
+                @if (item.tickets !== undefined) {
+                  <p class="trip-availability" [class.low-stock]="item.tickets <= 3">🎫 {{ item.tickets }} tickets left</p>
                 }
                 <h3 class="trip-name">{{ item.name }}</h3>
                 <p class="trip-desc">{{ item.description }}</p>
@@ -62,8 +62,8 @@
                     <span class="price-label">From</span>
                     <span class="trip-price">{{ formatRand(item.price) }}</span>
                     <span class="price-unit">per person</span>
-                    @if (item.originalPrice && item.originalPrice > item.price) {
-                      <span class="trip-original-price">{{ formatRand(item.originalPrice) }}</span>
+                    @if (item.couplesPrice) {
+                      <span class="trip-original-price">Couples: {{ formatRand(item.couplesPrice) }}</span>
                     }
                   </div>
                   <ion-button size="small" shape="round" color="primary" (click)="openItem(item.id); $event.stopPropagation()">

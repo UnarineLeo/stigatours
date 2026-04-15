@@ -12,7 +12,7 @@
 
       <article class="item-layout">
         <div class="image-wrap">
-          @if (product.originalPrice && product.originalPrice > product.price) {
+          @if (product.couplesPrice && product.couplesPrice < (product.price * 2)) {
             <span class="discount-badge">Special Offer</span>
           }
 
@@ -54,10 +54,10 @@
                 <span>{{ product.dateFrom | date:'MMM d' }} - {{ product.dateTo | date:'MMM d, yyyy' }}</span>
               </div>
             }
-            @if (product.ticketsLeft !== undefined) {
-              <div class="meta-chip" [class.low-stock]="product.ticketsLeft <= 3">
+            @if (product.tickets !== undefined) {
+              <div class="meta-chip" [class.low-stock]="product.tickets <= 3">
                 <span class="meta-icon">🎫</span>
-                <span>{{ product.ticketsLeft }} of {{ product.groupSize }} spots left</span>
+                <span>{{ product.tickets }} tickets left</span>
               </div>
             }
           </div>
@@ -70,10 +70,10 @@
               <p class="item-price">{{ formatRand(product.price) }}</p>
               <span class="price-per">per person</span>
             </div>
-            @if (product.originalPrice && product.originalPrice > product.price) {
+            @if (product.couplesPrice) {
               <div class="was-price-block">
-                <span class="was-label">Was</span>
-                <p class="item-original-price">{{ formatRand(product.originalPrice) }}</p>
+                <span class="was-label">Couples</span>
+                <p class="item-original-price">{{ formatRand(product.couplesPrice) }}</p>
               </div>
             }
           </div>
@@ -123,8 +123,8 @@
                 @if (item.dateFrom && item.dateTo) {
                   <p class="rec-dates">📅 {{ item.dateFrom | date:'MMM d' }} - {{ item.dateTo | date:'MMM d, yyyy' }}</p>
                 }
-                @if (item.ticketsLeft !== undefined) {
-                  <p class="rec-availability" [class.low-stock]="item.ticketsLeft <= 3">🎫 {{ item.ticketsLeft }} spots left</p>
+                @if (item.tickets !== undefined) {
+                  <p class="rec-availability" [class.low-stock]="item.tickets <= 3">🎫 {{ item.tickets }} tickets left</p>
                 }
                 <div class="rec-footer">
                   <p class="rec-price">{{ formatRand(item.price) }} <span>/ person</span></p>

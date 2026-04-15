@@ -65,8 +65,8 @@
             </label>
 
             <label class="field">
-              <span>Original Price (Optional)</span>
-              <input type="number" [(ngModel)]="form.originalPrice" placeholder="18500" />
+              <span>Couples Price (Optional)</span>
+              <input type="number" [(ngModel)]="form.couplesPrice" placeholder="30000" />
             </label>
 
             <label class="field">
@@ -80,13 +80,8 @@
             </label>
 
             <label class="field">
-              <span>Group Size</span>
-              <input type="number" [(ngModel)]="form.groupSize" placeholder="20" />
-            </label>
-
-            <label class="field">
-              <span>Tickets Left</span>
-              <input type="number" [(ngModel)]="form.ticketsLeft" placeholder="14" />
+              <span>Tickets</span>
+              <input type="number" [(ngModel)]="form.tickets" placeholder="14" />
             </label>
 
             <label class="field">
@@ -151,102 +146,207 @@
           @if (filteredCatalogTrips.length === 0) {
             <p class="empty-state">No trips are available in the catalog yet.</p>
           } @else {
-            <div class="trip-list">
-              @for (trip of filteredCatalogTrips; track trip.id) {
-                <article class="trip-item">
-                  <img [src]="trip.images?.[0]" [alt]="trip.name" class="trip-image" />
-                  <div class="trip-info">
-                    <p class="trip-category">{{ trip.category }}</p>
-                    <h3>{{ trip.name }}</h3>
-                    <p class="trip-meta"><strong>Price:</strong> {{ formatRand(trip.price) }}</p>
-                    @if (trip.dateFrom || trip.dateTo) {
-                      <p class="trip-meta"><strong>Dates:</strong> {{ trip.dateFrom || 'N/A' }} to {{ trip.dateTo || 'N/A' }}</p>
-                    }
-                    @if (trip.location) {
-                      <p class="trip-meta"><strong>Location:</strong> {{ trip.location }}</p>
-                    }
+            <h3 class="trip-group-title">Active Trips</h3>
+            @if (activeCatalogTrips.length === 0) {
+              <p class="empty-state">No active trips match your search.</p>
+            } @else {
+              <div class="trip-list">
+                @for (trip of activeCatalogTrips; track trip.id) {
+                  <article class="trip-item">
+                    <img [src]="trip.images?.[0]" [alt]="trip.name" class="trip-image" />
+                    <div class="trip-info">
+                      <p class="trip-category">{{ trip.category }}</p>
+                      <h3>{{ trip.name }}</h3>
+                      <p class="trip-meta"><strong>Price:</strong> {{ formatRand(trip.price) }}</p>
+                      @if (trip.couplesPrice) {
+                        <p class="trip-meta"><strong>Couples Price:</strong> {{ formatRand(trip.couplesPrice) }}</p>
+                      }
+                      @if (trip.dateFrom || trip.dateTo) {
+                        <p class="trip-meta"><strong>Dates:</strong> {{ trip.dateFrom || 'N/A' }} to {{ trip.dateTo || 'N/A' }}</p>
+                      }
+                      @if (trip.location) {
+                        <p class="trip-meta"><strong>Location:</strong> {{ trip.location }}</p>
+                      }
 
-                    <div class="trip-actions">
-                      <ion-button size="small" fill="outline" (click)="startEditTrip(trip)">Edit Trip</ion-button>
+                      <div class="trip-actions">
+                        <ion-button size="small" fill="outline" (click)="startEditTrip(trip)">Edit Trip</ion-button>
+                      </div>
+
+                      @if (editingTripId === trip.id) {
+                        <div class="trip-edit-grid">
+                          <label class="field">
+                            <span>Name</span>
+                            <input type="text" [(ngModel)]="editForm.name" />
+                          </label>
+
+                          <label class="field">
+                            <span>Category</span>
+                            <input type="text" [(ngModel)]="editForm.category" />
+                          </label>
+
+                          <label class="field">
+                            <span>Price</span>
+                            <input type="number" [(ngModel)]="editForm.price" />
+                          </label>
+
+                          <label class="field">
+                            <span>Couples Price</span>
+                            <input type="number" [(ngModel)]="editForm.couplesPrice" />
+                          </label>
+
+                          <label class="field">
+                            <span>Location</span>
+                            <input type="text" [(ngModel)]="editForm.location" />
+                          </label>
+
+                          <label class="field">
+                            <span>Duration</span>
+                            <input type="text" [(ngModel)]="editForm.duration" />
+                          </label>
+
+                          <label class="field">
+                            <span>Tickets</span>
+                            <input type="number" [(ngModel)]="editForm.tickets" />
+                          </label>
+
+                          <label class="field">
+                            <span>Date From</span>
+                            <input type="date" [(ngModel)]="editForm.dateFrom" />
+                          </label>
+
+                          <label class="field">
+                            <span>Date To</span>
+                            <input type="date" [(ngModel)]="editForm.dateTo" [min]="editForm.dateFrom || null" />
+                          </label>
+                        </div>
+
+                        <label class="field full">
+                          <span>Image URL / Data URL</span>
+                          <input type="text" [(ngModel)]="editForm.image" />
+                        </label>
+
+                        <label class="field full">
+                          <span>Description</span>
+                          <textarea [(ngModel)]="editForm.description" rows="3"></textarea>
+                        </label>
+
+                        <label class="field full">
+                          <span>Benefits (one per line)</span>
+                          <textarea [(ngModel)]="editForm.benefitsText" rows="3"></textarea>
+                        </label>
+
+                        <div class="trip-edit-actions">
+                          <ion-button size="small" color="primary" (click)="saveTripEdit(trip)">Save Changes</ion-button>
+                          <ion-button size="small" color="danger" fill="outline" (click)="deleteTrip(trip)">Delete</ion-button>
+                          <ion-button size="small" fill="clear" (click)="cancelTripEdit()">Cancel</ion-button>
+                        </div>
+                      }
                     </div>
+                  </article>
+                }
+              </div>
+            }
 
-                    @if (editingTripId === trip.id) {
-                      <div class="trip-edit-grid">
-                        <label class="field">
-                          <span>Name</span>
-                          <input type="text" [(ngModel)]="editForm.name" />
-                        </label>
+            <h3 class="trip-group-title">Inactive Trips</h3>
+            @if (inactiveCatalogTrips.length === 0) {
+              <p class="empty-state">No inactive trips match your search.</p>
+            } @else {
+              <div class="trip-list">
+                @for (trip of inactiveCatalogTrips; track trip.id) {
+                  <article class="trip-item">
+                    <img [src]="trip.images?.[0]" [alt]="trip.name" class="trip-image" />
+                    <div class="trip-info">
+                      <p class="trip-category">{{ trip.category }}</p>
+                      <h3>{{ trip.name }}</h3>
+                      <p class="trip-meta"><strong>Price:</strong> {{ formatRand(trip.price) }}</p>
+                      @if (trip.couplesPrice) {
+                        <p class="trip-meta"><strong>Couples Price:</strong> {{ formatRand(trip.couplesPrice) }}</p>
+                      }
+                      @if (trip.dateFrom || trip.dateTo) {
+                        <p class="trip-meta"><strong>Dates:</strong> {{ trip.dateFrom || 'N/A' }} to {{ trip.dateTo || 'N/A' }}</p>
+                      }
+                      @if (trip.location) {
+                        <p class="trip-meta"><strong>Location:</strong> {{ trip.location }}</p>
+                      }
 
-                        <label class="field">
-                          <span>Category</span>
-                          <input type="text" [(ngModel)]="editForm.category" />
-                        </label>
-
-                        <label class="field">
-                          <span>Price</span>
-                          <input type="number" [(ngModel)]="editForm.price" />
-                        </label>
-
-                        <label class="field">
-                          <span>Original Price</span>
-                          <input type="number" [(ngModel)]="editForm.originalPrice" />
-                        </label>
-
-                        <label class="field">
-                          <span>Location</span>
-                          <input type="text" [(ngModel)]="editForm.location" />
-                        </label>
-
-                        <label class="field">
-                          <span>Duration</span>
-                          <input type="text" [(ngModel)]="editForm.duration" />
-                        </label>
-
-                        <label class="field">
-                          <span>Group Size</span>
-                          <input type="number" [(ngModel)]="editForm.groupSize" />
-                        </label>
-
-                        <label class="field">
-                          <span>Tickets Left</span>
-                          <input type="number" [(ngModel)]="editForm.ticketsLeft" />
-                        </label>
-
-                        <label class="field">
-                          <span>Date From</span>
-                          <input type="date" [(ngModel)]="editForm.dateFrom" />
-                        </label>
-
-                        <label class="field">
-                          <span>Date To</span>
-                          <input type="date" [(ngModel)]="editForm.dateTo" [min]="editForm.dateFrom || null" />
-                        </label>
+                      <div class="trip-actions">
+                        <ion-button size="small" fill="outline" (click)="startEditTrip(trip)">Edit Trip</ion-button>
                       </div>
 
-                      <label class="field full">
-                        <span>Image URL / Data URL</span>
-                        <input type="text" [(ngModel)]="editForm.image" />
-                      </label>
+                      @if (editingTripId === trip.id) {
+                        <div class="trip-edit-grid">
+                          <label class="field">
+                            <span>Name</span>
+                            <input type="text" [(ngModel)]="editForm.name" />
+                          </label>
 
-                      <label class="field full">
-                        <span>Description</span>
-                        <textarea [(ngModel)]="editForm.description" rows="3"></textarea>
-                      </label>
+                          <label class="field">
+                            <span>Category</span>
+                            <input type="text" [(ngModel)]="editForm.category" />
+                          </label>
 
-                      <label class="field full">
-                        <span>Benefits (one per line)</span>
-                        <textarea [(ngModel)]="editForm.benefitsText" rows="3"></textarea>
-                      </label>
+                          <label class="field">
+                            <span>Price</span>
+                            <input type="number" [(ngModel)]="editForm.price" />
+                          </label>
 
-                      <div class="trip-edit-actions">
-                        <ion-button size="small" color="primary" (click)="saveTripEdit(trip)">Save Changes</ion-button>
-                        <ion-button size="small" fill="clear" (click)="cancelTripEdit()">Cancel</ion-button>
-                      </div>
-                    }
-                  </div>
-                </article>
-              }
-            </div>
+                          <label class="field">
+                            <span>Couples Price</span>
+                            <input type="number" [(ngModel)]="editForm.couplesPrice" />
+                          </label>
+
+                          <label class="field">
+                            <span>Location</span>
+                            <input type="text" [(ngModel)]="editForm.location" />
+                          </label>
+
+                          <label class="field">
+                            <span>Duration</span>
+                            <input type="text" [(ngModel)]="editForm.duration" />
+                          </label>
+
+                          <label class="field">
+                            <span>Tickets</span>
+                            <input type="number" [(ngModel)]="editForm.tickets" />
+                          </label>
+
+                          <label class="field">
+                            <span>Date From</span>
+                            <input type="date" [(ngModel)]="editForm.dateFrom" />
+                          </label>
+
+                          <label class="field">
+                            <span>Date To</span>
+                            <input type="date" [(ngModel)]="editForm.dateTo" [min]="editForm.dateFrom || null" />
+                          </label>
+                        </div>
+
+                        <label class="field full">
+                          <span>Image URL / Data URL</span>
+                          <input type="text" [(ngModel)]="editForm.image" />
+                        </label>
+
+                        <label class="field full">
+                          <span>Description</span>
+                          <textarea [(ngModel)]="editForm.description" rows="3"></textarea>
+                        </label>
+
+                        <label class="field full">
+                          <span>Benefits (one per line)</span>
+                          <textarea [(ngModel)]="editForm.benefitsText" rows="3"></textarea>
+                        </label>
+
+                        <div class="trip-edit-actions">
+                          <ion-button size="small" color="primary" (click)="saveTripEdit(trip)">Save Changes</ion-button>
+                          <ion-button size="small" color="danger" fill="outline" (click)="deleteTrip(trip)">Delete</ion-button>
+                          <ion-button size="small" fill="clear" (click)="cancelTripEdit()">Cancel</ion-button>
+                        </div>
+                      }
+                    </div>
+                  </article>
+                }
+              </div>
+            }
           }
         </ion-card-content>
       </ion-card>
