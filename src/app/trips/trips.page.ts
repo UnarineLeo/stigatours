@@ -13,19 +13,16 @@ import {
   IonSelect,
   IonSelectOption,
   IonRange,
-  IonSegment,
-  IonSegmentButton,
   IonButton,
   IonChip,
   IonToggle,
 } from '@ionic/angular/standalone';
+import { AlertController } from '@ionic/angular';
 import { getAllProductsWithOptions, getCategorySections, getDiscountPercent, ProductItem } from '../shared/product-catalog';
 import { FooterComponent } from '../footer/footer.component';
-import { AuthService } from '../services/auth.service';
 
 
 type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'name-asc';
-type ViewMode = 'grid' | 'compact';
 
 @Component({
   selector: 'app-trips',
@@ -45,8 +42,6 @@ type ViewMode = 'grid' | 'compact';
     IonSelect,
     IonSelectOption,
     IonRange,
-    IonSegment,
-    IonSegmentButton,
     IonButton,
     IonChip,
     IonToggle,
@@ -61,8 +56,9 @@ export class TripsPage {
   searchTerm = '';
   selectedCategory = 'all';
   sortBy: SortOption = 'featured';
-  viewMode: ViewMode = 'grid';
   discountedOnly = false;
+  dateFromFilter = '';
+  dateToFilter = '';
   priceRange = {
     lower: 0,
     upper: this.maxPrice,
@@ -70,7 +66,7 @@ export class TripsPage {
 
   constructor(
     private router: Router,
-    private authService: AuthService,
+    private alertController: AlertController,
   ) {
     this.refreshCatalog();
   }
@@ -88,8 +84,9 @@ export class TripsPage {
       const matchesCategory = this.selectedCategory === 'all' || item.category === this.selectedCategory;
       const matchesPrice = item.price >= this.priceRange.lower && item.price <= this.priceRange.upper;
       const matchesDiscount = !this.discountedOnly || getDiscountPercent(item) > 0;
+      const matchesDate = this.matchesDateFilter(item);
 
-      return matchesSearch && matchesCategory && matchesPrice && matchesDiscount;
+      return matchesSearch && matchesCategory && matchesPrice && matchesDiscount && matchesDate;
     });
 
     if (this.sortBy === 'price-asc') {
@@ -135,8 +132,9 @@ export class TripsPage {
     this.searchTerm = '';
     this.selectedCategory = 'all';
     this.sortBy = 'featured';
-    this.viewMode = 'grid';
     this.discountedOnly = false;
+    this.dateFromFilter = '';
+    this.dateToFilter = '';
     this.priceRange = { lower: 0, upper: this.maxPrice };
   }
 
@@ -144,21 +142,23 @@ export class TripsPage {
     this.router.navigate(['/tabs/item', itemId]);
   }
 
-  async addToCart(item: ProductItem, event: Event): Promise<void> {
+  async addToCart(item: ProductItem, event: Event, packageType: 'single' | 'couples' = 'single'): Promise<void> {
     event.stopPropagation();
 
     const cartRaw = localStorage.getItem('cart-items');
-    const cartItems = cartRaw ? JSON.parse(cartRaw) as Array<{ id: number; qty: number }> : [];
-    const existingItem = cartItems.find((cartItem) => cartItem.id === item.id);
+    const cartItems = cartRaw ? JSON.parse(cartRaw) as Array<{ id: number; qty: number; packageType?: 'single' | 'couples' }> : [];
+    const existingItem = cartItems.find((cartItem) => cartItem.id === item.id && (cartItem.packageType ?? 'single') === packageType);
 
     if (existingItem) {
       existingItem.qty += 1;
     } else {
-      cartItems.push({ id: item.id, qty: 1 });
+      cartItems.push({ id: item.id, qty: 1, packageType });
     }
 
     localStorage.setItem('cart-items', JSON.stringify(cartItems));
-    await this.authService.presentToast(`${item.name} has been added to your bookings.`);
+
+    const packageLabel = packageType === 'couples' ? 'couple offer' : 'package';
+    await this.presentAddedAlert(`${item.name} ${packageLabel} has been added to your bookings.`);
   }
 
   private refreshCatalog(): void {
@@ -173,5 +173,40 @@ export class TripsPage {
       lower: 0,
       upper: this.maxPrice,
     };
+  }
+
+  private matchesDateFilter(item: ProductItem): boolean {
+    if (!this.dateFromFilter && !this.dateToFilter) {
+      return true;
+    }
+
+    if (!item.dateFrom || !item.dateTo) {
+      return false;
+    }
+
+    const itemFrom = new Date(`${item.dateFrom}T00:00:00`).getTime();
+    const itemTo = new Date(`${item.dateTo}T23:59:59`).getTime();
+    if (Number.isNaN(itemFrom) || Number.isNaN(itemTo)) {
+      return false;
+    }
+
+    const filterFrom = this.dateFromFilter
+      ? new Date(`${this.dateFromFilter}T00:00:00`).getTime()
+      : Number.NEGATIVE_INFINITY;
+    const filterTo = this.dateToFilter
+      ? new Date(`${this.dateToFilter}T23:59:59`).getTime()
+      : Number.POSITIVE_INFINITY;
+
+    return itemFrom <= filterTo && itemTo >= filterFrom;
+  }
+
+  private async presentAddedAlert(message: string): Promise<void> {
+    const alert = await this.alertController.create({
+      header: 'Added to Bookings',
+      message,
+      buttons: ['OK'],
+    });
+
+    await alert.present();
   }
 }

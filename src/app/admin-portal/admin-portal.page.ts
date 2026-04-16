@@ -57,6 +57,7 @@ export class AdminPortalPage implements OnInit {
   editingTripId: number | null = null;
   categories: string[] = [];
   eventImages: string[] = [];
+  editImages: string[] = [];
   tripsSearchQuery = '';
   checkoutSearchQuery = '';
 
@@ -267,12 +268,15 @@ export class AdminPortalPage implements OnInit {
   }
 
   startEditTrip(item: ProductItem): void {
+    const initialImages = (item.images ?? []).filter((image) => image.trim().length > 0);
+
     this.editingTripId = item.id;
+    this.editImages = [...initialImages];
     this.editForm = {
       name: item.name,
       price: item.price,
       couplesPrice: item.couplesPrice ?? null,
-      image: item.images?.[0] ?? '',
+      image: initialImages[0] ?? '',
       description: item.description,
       category: item.category,
       location: item.location ?? '',
@@ -286,7 +290,36 @@ export class AdminPortalPage implements OnInit {
 
   cancelTripEdit(): void {
     this.editingTripId = null;
+    this.editImages = [];
     this.editForm = this.createEmptyForm();
+  }
+
+  async onEditImageSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const files = Array.from(input.files ?? []);
+
+    if (files.length === 0) {
+      return;
+    }
+
+    const encodedFiles = await Promise.all(files.map((file) => this.readFileAsDataUrl(file)));
+    const validImages = encodedFiles.filter((value) => value.length > 0);
+
+    this.editImages = [...this.editImages, ...validImages];
+
+    if (!this.editForm.image.trim()) {
+      this.editForm.image = this.editImages[0] ?? '';
+    }
+
+    input.value = '';
+  }
+
+  removeEditImage(index: number): void {
+    this.editImages = this.editImages.filter((_, imageIndex) => imageIndex !== index);
+
+    if (index === 0 || !this.editForm.image.trim()) {
+      this.editForm.image = this.editImages[0] ?? '';
+    }
   }
 
   async saveTripEdit(original: ProductItem): Promise<void> {
@@ -300,8 +333,9 @@ export class AdminPortalPage implements OnInit {
       return;
     }
 
-    if (!this.editForm.image.trim()) {
-      await this.presentToast('Image is required.', 'warning');
+    const editImages = this.getEditImages();
+    if (editImages.length === 0) {
+      await this.presentToast('Please provide at least one image.', 'warning');
       return;
     }
 
@@ -315,7 +349,7 @@ export class AdminPortalPage implements OnInit {
       name: this.editForm.name.trim(),
       price: this.editForm.price,
       couplesPrice: this.editForm.couplesPrice ?? undefined,
-      images: [this.editForm.image.trim()],
+      images: editImages,
       description: this.editForm.description.trim(),
       category: this.editForm.category.trim(),
       location: this.editForm.location.trim() || undefined,
@@ -419,6 +453,19 @@ export class AdminPortalPage implements OnInit {
       reader.onerror = () => resolve('');
       reader.readAsDataURL(file);
     });
+  }
+
+  private getEditImages(): string[] {
+    const primary = this.editForm.image.trim();
+    const uploaded = this.editImages
+      .map((image) => image.trim())
+      .filter((image) => image.length > 0);
+
+    if (!primary) {
+      return uploaded;
+    }
+
+    return [primary, ...uploaded.filter((image) => image !== primary)];
   }
 
   private createEmptyForm(): AdminEventForm {

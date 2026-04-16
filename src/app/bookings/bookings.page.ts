@@ -11,11 +11,13 @@ import { FooterComponent } from '../footer/footer.component';
 interface StoredBookingItem {
   id: number;
   qty: number;
+  packageType?: 'single' | 'couples';
 }
 
 interface BookingItem {
   product: ProductItem;
   qty: number;
+  packageType: 'single' | 'couples';
 }
 
 @Component({
@@ -40,23 +42,27 @@ export class BookingsPage {
   }
 
   getItemTotal(item: BookingItem): number {
-    return item.product.price * item.qty;
+    const unitPrice = item.packageType === 'couples'
+      ? (item.product.couplesPrice ?? item.product.price * 2)
+      : item.product.price;
+
+    return unitPrice * item.qty;
   }
 
   getBookingSubtotal(): number {
     return this.bookingItems.reduce((sum, item) => sum + this.getItemTotal(item), 0);
   }
 
-  incrementQty(itemId: number): void {
-    this.updateQty(itemId, 1);
+  incrementQty(itemId: number, packageType: 'single' | 'couples' = 'single'): void {
+    this.updateQty(itemId, packageType, 1);
   }
 
-  decrementQty(itemId: number): void {
-    this.updateQty(itemId, -1);
+  decrementQty(itemId: number, packageType: 'single' | 'couples' = 'single'): void {
+    this.updateQty(itemId, packageType, -1);
   }
 
-  removeItem(itemId: number): void {
-    const stored = this.readStoredBookings().filter((item) => item.id !== itemId);
+  removeItem(itemId: number, packageType: 'single' | 'couples' = 'single'): void {
+    const stored = this.readStoredBookings().filter((item) => item.id !== itemId || (item.packageType ?? 'single') !== packageType);
     this.writeStoredBookings(stored);
     this.loadBookings();
   }
@@ -84,7 +90,7 @@ export class BookingsPage {
     const checkoutRecords: CheckoutRecord[] = this.bookingItems.map((item) => ({
       id: `${item.product.id}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       userEmail: email,
-      tripBooked: item.product.name,
+      tripBooked: `${item.product.name} (${item.packageType === 'couples' ? 'Couple Offer' : 'Single Package'})`,
       amountPaid: this.getItemTotal(item),
       qty: item.qty,
       bookedAt,
@@ -97,9 +103,9 @@ export class BookingsPage {
     await this.presentToast('Booking confirmed successfully.', 'success');
   }
 
-  private updateQty(itemId: number, delta: number): void {
+  private updateQty(itemId: number, packageType: 'single' | 'couples', delta: number): void {
     const stored = this.readStoredBookings();
-    const target = stored.find((item) => item.id === itemId);
+    const target = stored.find((item) => item.id === itemId && (item.packageType ?? 'single') === packageType);
 
     if (!target) {
       return;
@@ -115,11 +121,22 @@ export class BookingsPage {
   private loadBookings(): void {
     const stored = this.readStoredBookings();
     const mapped: BookingItem[] = [];
+    const grouped = new Map<string, BookingItem>();
 
     for (const item of stored) {
       const product = findProductById(item.id);
       if (product) {
-        mapped.push({ product, qty: item.qty });
+        const packageType = item.packageType === 'couples' ? 'couples' : 'single';
+        const key = `${item.id}:${packageType}`;
+        const existing = grouped.get(key);
+
+        if (existing) {
+          existing.qty += item.qty;
+        } else {
+          const bookingItem: BookingItem = { product, qty: item.qty, packageType };
+          grouped.set(key, bookingItem);
+          mapped.push(bookingItem);
+        }
       }
     }
 
@@ -134,7 +151,13 @@ export class BookingsPage {
 
     try {
       const parsed = JSON.parse(cartRaw) as StoredBookingItem[];
-      return Array.isArray(parsed) ? parsed : [];
+      return Array.isArray(parsed)
+        ? parsed.map((item) => ({
+            id: item.id,
+            qty: item.qty,
+            packageType: item.packageType === 'couples' ? 'couples' : 'single',
+          }))
+        : [];
     } catch {
       return [];
     }

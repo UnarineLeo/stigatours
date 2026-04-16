@@ -81,19 +81,21 @@ export class ItemPage implements OnInit {
     this.router.navigate(['/tabs/item', itemId]);
   }
 
-  async addToCart(item: ProductItem): Promise<void> {
+  async addToCart(item: ProductItem, packageType: 'single' | 'couples' = 'single'): Promise<void> {
     const cartRaw = localStorage.getItem('cart-items');
-    const cartItems = cartRaw ? JSON.parse(cartRaw) as Array<{ id: number; qty: number }> : [];
-    const existingItem = cartItems.find((cartItem) => cartItem.id === item.id);
+    const cartItems = cartRaw ? JSON.parse(cartRaw) as Array<{ id: number; qty: number; packageType?: 'single' | 'couples' }> : [];
+    const existingItem = cartItems.find((cartItem) => cartItem.id === item.id && (cartItem.packageType ?? 'single') === packageType);
 
     if (existingItem) {
       existingItem.qty += 1;
     } else {
-      cartItems.push({ id: item.id, qty: 1 });
+      cartItems.push({ id: item.id, qty: 1, packageType });
     }
 
     localStorage.setItem('cart-items', JSON.stringify(cartItems));
-    await this.authService.presentToast(`${item.name} has been added to your bookings.`);
+
+    const packageLabel = packageType === 'couples' ? 'couple offer' : 'package';
+    await this.authService.presentToast(`${item.name} ${packageLabel} has been added to your bookings.`);
   }
 
   async addRecommendedToCart(item: ProductItem, event: Event): Promise<void> {
@@ -111,7 +113,7 @@ export class ItemPage implements OnInit {
   }
 
   private getRecommended(currentItem: ProductItem): ProductItem[] {
-    const allProducts = getAllProducts();
+    const allProducts = getAllProducts().filter((item) => this.isTripActive(item));
 
     const sameCategory = allProducts.filter(
       (item) => item.category === currentItem.category && item.id !== currentItem.id
@@ -122,5 +124,18 @@ export class ItemPage implements OnInit {
     );
 
     return [...sameCategory, ...fallback].slice(0, 4);
+  }
+
+  private isTripActive(item: ProductItem): boolean {
+    if (!item.dateTo) {
+      return true;
+    }
+
+    const endDate = new Date(`${item.dateTo}T23:59:59`);
+    if (Number.isNaN(endDate.getTime())) {
+      return true;
+    }
+
+    return endDate.getTime() >= Date.now();
   }
 }

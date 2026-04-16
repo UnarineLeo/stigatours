@@ -12,8 +12,8 @@
 
       <article class="item-layout">
         <div class="image-wrap">
-          @if (product.couplesPrice && product.couplesPrice < (product.price * 2)) {
-            <span class="discount-badge">Special Offer</span>
+          @if (product.couplesPrice) {
+            <span class="discount-badge">Couple Offer</span>
           }
 
           <img [src]="selectedImage" [alt]="product.name" class="item-image" (click)="expandImage()" />
@@ -72,7 +72,7 @@
             </div>
             @if (product.couplesPrice) {
               <div class="was-price-block">
-                <span class="was-label">Couples</span>
+                <span class="was-label">Couple Offer</span>
                 <p class="item-original-price">{{ formatRand(product.couplesPrice) }}</p>
               </div>
             }
@@ -94,8 +94,13 @@
 
           <div class="book-actions">
             <ion-button color="primary" shape="round" expand="block" (click)="addToCart(product)">
-              Book This Trip
+              Book Single Package
             </ion-button>
+            @if (product.couplesPrice) {
+              <ion-button color="secondary" shape="round" expand="block" (click)="addToCart(product, 'couples')">
+                Book Couple Offer
+              </ion-button>
+            }
             <ion-button fill="outline" shape="round" expand="block" routerLink="/tabs/trips">
               Browse All Trips
             </ion-button>

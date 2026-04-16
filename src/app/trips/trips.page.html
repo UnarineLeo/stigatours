@@ -46,9 +46,21 @@
       </ion-item>
 
       <ion-item lines="none" class="filter-item">
-        <ion-label>Special Offers</ion-label>
+        <ion-label>Couple Offers</ion-label>
         <ion-toggle [(ngModel)]="discountedOnly"></ion-toggle>
       </ion-item>
+    </div>
+
+    <div class="date-filter-row">
+      <label class="date-filter-field">
+        <span>From Date</span>
+        <input type="date" [(ngModel)]="dateFromFilter" [max]="dateToFilter || null" />
+      </label>
+
+      <label class="date-filter-field">
+        <span>To Date</span>
+        <input type="date" [(ngModel)]="dateToFilter" [min]="dateFromFilter || null" />
+      </label>
     </div>
 
     <div class="range-wrap">
@@ -62,15 +74,11 @@
     <div class="quick-row">
       <ion-chip outline="true" (click)="setQuickFilter('all')">All Trips</ion-chip>
       <ion-chip outline="true" (click)="setQuickFilter('under-500')">Under R15,000</ion-chip>
-      <ion-chip outline="true" (click)="setQuickFilter('discounts')">Special Offers</ion-chip>
+      <ion-chip outline="true" (click)="setQuickFilter('discounts')">Couple Offers</ion-chip>
     </div>
 
     <div class="view-row">
       <span>{{ filteredProducts.length }} {{ filteredProducts.length === 1 ? 'trip' : 'trips' }} found</span>
-      <ion-segment [(ngModel)]="viewMode" value="grid">
-        <ion-segment-button value="grid">Grid</ion-segment-button>
-        <ion-segment-button value="compact">Compact</ion-segment-button>
-      </ion-segment>
     </div>
 
     @if (filteredProducts.length === 0) {
@@ -78,11 +86,11 @@
         <p>No trips match your filters. Try adjusting your search or resetting the filters.</p>
       </div>
     } @else {
-      <div class="products-grid" [class.compact]="viewMode === 'compact'">
+      <div class="products-grid">
         @for (item of filteredProducts; track item.id) {
           <article class="product-card" (click)="openItem(item.id)">
-            @if (item.couplesPrice && item.couplesPrice < (item.price * 2)) {
-              <span class="discount-badge">Special Offer</span>
+            @if (item.couplesPrice) {
+              <span class="discount-badge">Couple Offer</span>
             }
 
             <div class="product-image-wrap">
@@ -121,14 +129,28 @@
                   <span class="per-label">/ person</span>
                 </div>
                 @if (item.couplesPrice) {
-                  <span class="old-price">Couples: {{ formatRand(item.couplesPrice) }}</span>
+                  <span class="old-price">Couple Offer: {{ formatRand(item.couplesPrice) }}</span>
                 }
               </div>
 
-              <ion-button size="small" shape="round" color="primary" expand="block"
-                (click)="openItem(item.id); $event.stopPropagation()">
-                View Package
-              </ion-button>
+              <div class="product-actions">
+                <ion-button size="small" shape="round" color="primary" expand="block"
+                  (click)="openItem(item.id); $event.stopPropagation()">
+                  View Package
+                </ion-button>
+
+                <ion-button size="small" fill="outline" shape="round" expand="block"
+                  (click)="addToCart(item, $event)">
+                  Add Single Package
+                </ion-button>
+
+                @if (item.couplesPrice) {
+                  <ion-button size="small" color="secondary" shape="round" expand="block"
+                    (click)="addToCart(item, $event, 'couples')">
+                    Add Couple Offer
+                  </ion-button>
+                }
+              </div>
             </div>
           </article>
         }

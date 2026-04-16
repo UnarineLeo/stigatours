@@ -75,6 +75,37 @@
   border-radius: 12px;
 }
 
+.date-filter-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.date-filter-field {
+  display: grid;
+  gap: 6px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: #f8fafc;
+
+  span {
+    font-size: 0.82rem;
+    color: #475569;
+    font-weight: 600;
+  }
+
+  input {
+    border: 1px solid #dbe5ef;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 0.9rem;
+    color: #1f2937;
+    background: #ffffff;
+  }
+}
+
 .range-wrap {
   border: 1px solid #e2e8f0;
   border-radius: 12px;
@@ -118,11 +149,6 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
-}
-
-.products-grid.compact {
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 14px;
 }
 
 .product-card {
@@ -281,8 +307,12 @@
 .old-price {
   font-size: 0.9rem;
   color: #9ca3af;
-  text-decoration: line-through;
   align-self: flex-end;
+}
+
+.product-actions {
+  display: grid;
+  gap: 8px;
 }
 
 .discount-badge {
@@ -292,7 +322,7 @@
   z-index: 2;
   padding: 5px 12px;
   border-radius: 999px;
-  background: #b91c1c;
+  background: #0f766e;
   color: #fff;
   font-size: 0.78rem;
   font-weight: 700;
@@ -323,13 +353,16 @@
     grid-template-columns: 1fr;
   }
 
+  .date-filter-row {
+    grid-template-columns: 1fr;
+  }
+
   .view-row {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .products-grid,
-  .products-grid.compact {
+  .products-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 

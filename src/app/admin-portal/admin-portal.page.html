@@ -225,6 +225,21 @@
                           <input type="text" [(ngModel)]="editForm.image" />
                         </label>
 
+                        <div class="upload-box edit-upload-box">
+                          <label class="upload-label">Add More Trip Images</label>
+                          <input type="file" accept="image/*" multiple (change)="onEditImageSelected($event)" />
+                          @if (editImages.length) {
+                            <div class="preview-grid">
+                              @for (image of editImages; track $index) {
+                                <div class="preview-card">
+                                  <img [src]="image" alt="Trip preview" class="image-preview" />
+                                  <button type="button" class="remove-image-btn" (click)="removeEditImage($index)">Remove</button>
+                                </div>
+                              }
+                            </div>
+                          }
+                        </div>
+
                         <label class="field full">
                           <span>Description</span>
                           <textarea [(ngModel)]="editForm.description" rows="3"></textarea>
@@ -325,6 +340,21 @@
                           <span>Image URL / Data URL</span>
                           <input type="text" [(ngModel)]="editForm.image" />
                         </label>
+
+                        <div class="upload-box edit-upload-box">
+                          <label class="upload-label">Add More Trip Images</label>
+                          <input type="file" accept="image/*" multiple (change)="onEditImageSelected($event)" />
+                          @if (editImages.length) {
+                            <div class="preview-grid">
+                              @for (image of editImages; track $index) {
+                                <div class="preview-card">
+                                  <img [src]="image" alt="Trip preview" class="image-preview" />
+                                  <button type="button" class="remove-image-btn" (click)="removeEditImage($index)">Remove</button>
+                                </div>
+                              }
+                            </div>
+                          }
+                        </div>
 
                         <label class="field full">
                           <span>Description</span>

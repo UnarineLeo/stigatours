@@ -36,16 +36,19 @@
                 @if (item.product.duration) {
                   <p class="item-duration">{{ item.product.duration }}</p>
                 }
-                <p class="item-price">{{ formatRand(item.product.price) }} <span>/ person</span></p>
+                <p class="item-price">
+                  {{ formatRand(item.packageType === 'couples' ? (item.product.couplesPrice ?? item.product.price * 2) : item.product.price) }}
+                  <span>{{ item.packageType === 'couples' ? '/ couple offer' : '/ person' }}</span>
+                </p>
 
                 <div class="qty-row">
-                  <button type="button" (click)="decrementQty(item.product.id)" aria-label="Decrease guests">−</button>
+                  <button type="button" (click)="decrementQty(item.product.id, item.packageType)" aria-label="Decrease packages">−</button>
                   <span>{{ item.qty }}</span>
-                  <button type="button" (click)="incrementQty(item.product.id)" aria-label="Increase guests">+</button>
+                  <button type="button" (click)="incrementQty(item.product.id, item.packageType)" aria-label="Increase packages">+</button>
                 </div>
-                <p class="qty-label">guests</p>
+                <p class="qty-label">{{ item.packageType === 'couples' ? 'couple offers' : 'single packages' }}</p>
 
-                <button type="button" class="remove-btn" (click)="removeItem(item.product.id)">Remove</button>
+                <button type="button" class="remove-btn" (click)="removeItem(item.product.id, item.packageType)">Remove</button>
               </div>
 
               <p class="item-total">{{ formatRand(getItemTotal(item)) }}</p>
