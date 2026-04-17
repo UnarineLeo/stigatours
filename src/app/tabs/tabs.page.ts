@@ -93,10 +93,16 @@ export class TabsPage {
     }
 
     if (data.action === 'login' && data.email && data.password) {
-      await this.authService.loginFireAuth({
-        email: data.email,
-        password: data.password,
-      });
+      try {
+        console.log('Logging in user with email:', data.email);
+        await this.authService.loginFireAuth({
+          email: data.email,
+          password: data.password,
+        });
+        console.log('Login process completed for email:', data.email);
+      } catch (error: any) {
+        console.error('Login error:', error);
+      }
     }
   }
 
@@ -128,11 +134,17 @@ export class TabsPage {
       const surname = data.payload.surname ?? '';
       const displayName = `${firstName} ${surname}`.trim();
 
-      await this.authService.userRegistration({
-        displayName,
-        email: data.payload.email,
-        password: data.payload.password,
-      });
+      try {
+        console.log('Registering user with email:', data.payload.email);
+        await this.authService.userRegistration({
+          displayName,
+          email: data.payload.email,
+          password: data.payload.password,
+        });
+        console.log('Registration process completed for email:', data.payload.email);
+      } catch (error: any) {
+        console.error('Registration error:', error);
+      }
     }
   }
 }

@@ -191,6 +191,8 @@ export class AuthService {
     const authInstance = getAuth(this.firebaseApp);
     setPersistence(authInstance, browserLocalPersistence);
 
+    console.log('Starting registration process for email:', value.email);
+
     return new Promise<any>((resolve, reject) =>
     {  
       createUserWithEmailAndPassword(authInstance,value.email, value.password).then(
