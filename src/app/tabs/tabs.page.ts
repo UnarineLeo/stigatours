@@ -91,19 +91,6 @@ export class TabsPage {
       await this.authService.googleSignIn();
       return;
     }
-
-    if (data.action === 'login' && data.email && data.password) {
-      try {
-        console.log('Logging in user with email:', data.email);
-        await this.authService.loginFireAuth({
-          email: data.email,
-          password: data.password,
-        });
-        console.log('Login process completed for email:', data.email);
-      } catch (error: any) {
-        console.error('Login error:', error);
-      }
-    }
   }
 
   private async presentRegisterModal() {

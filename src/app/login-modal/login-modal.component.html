@@ -37,8 +37,8 @@
         </ion-button>
       </div>
 
-      <ion-button expand="block" class="primary-btn" (click)="login()">
-        Log In
+      <ion-button expand="block" class="primary-btn" (click)="login()" [disabled]="isLoginDisabled">
+        {{ isSubmitting ? 'Logging In...' : 'Log In' }}
       </ion-button>
 
       <ion-button expand="block" fill="outline" class="google-btn" (click)="continueWithGoogle()">

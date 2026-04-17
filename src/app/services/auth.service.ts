@@ -193,76 +193,42 @@ export class AuthService {
 
     console.log('Starting registration process for email:', value.email);
 
-    return new Promise<any>((resolve, reject) =>
-    {  
-      createUserWithEmailAndPassword(authInstance,value.email, value.password).then(
-        (res: any) => 
-        {
-          resolve(res)
-          // localStorage.setItem('token', JSON.stringify(res.user?.uid))
+    try {
+      const res: any = await createUserWithEmailAndPassword(authInstance, value.email, value.password);
 
-          updateProfile(
-            res.user,{
-            displayName: value.displayName, 
-          })
-          .then(async () => 
-          {
-            if (!res.user?.emailVerified) {
-              await sendEmailVerification(res.user)
-            }
+      await updateProfile(res.user, {
+        displayName: value.displayName,
+      });
 
-            this.isLoggedIn = true
-            this.authState.next(true)
-            this.userName = value.displayName
-            this.isVerified = res.user.emailVerified
-            this.userEmail = res.user.email
-            this.regVerification = true
+      if (!res.user?.emailVerified) {
+        await sendEmailVerification(res.user);
+      }
 
-            loading.dismiss()
+      this.isLoggedIn = true;
+      this.authState.next(true);
+      this.userName = value.displayName;
+      this.isVerified = res.user.emailVerified;
+      this.userEmail = res.user.email;
+      this.regVerification = true;
 
-            this.router.navigate(['/tabs/profile'])
-            this.presentToast('Successfully registered, please check your email to verify your account')
+      await this.router.navigate(['/tabs/profile']);
+      await this.presentToast('Successfully registered, please check your email to verify your account');
+      await this.addUser(res.user);
 
-            this.addUser(res.user)
+      return res;
+    } catch (error: any) {
+      if (error.code === 'auth/email-already-in-use' || error.code === 'auth/email-already-exists') {
+        this.presentToast('Email already in use');
+      } else if (error.code === 'auth/internal-error') {
+        this.presentToast('Problem from our end, please try again later');
+      } else {
+        this.presentToast('Error signing up, please try again or contact support');
+      }
 
-          })
-          .catch((error) => 
-          {
-            reject(error);
-            if(error.code === 'auth/internal-error')
-            {
-              loading.dismiss();
-              this.presentToast('Problem from our end, please try again later')
-            }
-            else
-            {
-              loading.dismiss();
-              this.presentToast(error.code)
-            }
-          });
-        },
-        (error: any) => 
-        {
-          reject(error)
-          if (error.code === 'auth/email-already-in-use' || error.code === 'auth/email-already-exists')
-          {
-            loading.dismiss();
-            this.presentToast('Email already in use')
-          }
-          else if(error.code === 'auth/internal-error')
-          {
-            loading.dismiss();
-            this.presentToast('Problem from our end, please try again later')
-          }
-          else
-          {
-            loading.dismiss();
-            this.presentToast('Error signing up, please try again or contact support')
-          }
-
-        }
-      )
-    })
+      throw error;
+    } finally {
+      loading.dismiss();
+    }
   }
 
   // forgot password

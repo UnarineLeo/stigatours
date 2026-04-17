@@ -50,8 +50,12 @@
         </ion-item>
       </div>
 
-      <ion-button expand="block" class="primary-btn" (click)="register()">
-        Create Account
+      <ion-text class="password-policy" [class.policy-ok]="isPasswordPolicyMet">
+        {{ passwordPolicyText }}
+      </ion-text>
+
+      <ion-button expand="block" class="primary-btn" (click)="register()" [disabled]="isRegisterDisabled">
+        {{ isSubmitting ? 'Creating Account...' : 'Create Account' }}
       </ion-button>
 
       <ion-button expand="block" fill="outline" class="google-btn" (click)="continueWithGoogle()">
