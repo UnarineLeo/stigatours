@@ -57,6 +57,8 @@ export class RegisterModalComponent {
     const firstName = this.firstName.trim();
     const surname = this.surname.trim();
 
+    console.log('Attempting registration with:', { email, firstName, surname });
+
     if (!email || !this.password || !firstName || !surname) {
       await this.authService.presentToast('Please complete all required fields.');
       return;
@@ -76,6 +78,7 @@ export class RegisterModalComponent {
 
     try {
       this.isSubmitting = true;
+      console.log('Registering user with email:', email);
       await this.authService.userRegistration({
         displayName,
         email,
