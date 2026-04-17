@@ -183,10 +183,13 @@ export class AuthService {
 
   async userRegistration(value: any)
   {
+    console.log('Received registration data:', value);
     const loading = await this.loader.create({
       cssClass: 'transparent-loader'
     });
     loading.present();
+
+    console.log('Firebase app initialized:', !!this.firebaseApp);
 
     const authInstance = getAuth(this.firebaseApp);
     setPersistence(authInstance, browserLocalPersistence);
