@@ -41,12 +41,40 @@
       <div class="grid-two">
         <ion-item lines="none" class="field-item">
           <ion-label position="stacked">Password</ion-label>
-          <ion-input type="password" [(ngModel)]="password" placeholder="Create password"></ion-input>
+          <ion-input
+            [type]="showPassword ? 'text' : 'password'"
+            [(ngModel)]="password"
+            placeholder="Create password"
+          ></ion-input>
+          <ion-button
+            slot="end"
+            fill="clear"
+            size="small"
+            class="password-toggle-btn"
+            type="button"
+            (click)="togglePasswordVisibility()"
+          >
+            {{ showPassword ? 'Hide' : 'Show' }}
+          </ion-button>
         </ion-item>
 
         <ion-item lines="none" class="field-item">
           <ion-label position="stacked">Confirm Password</ion-label>
-          <ion-input type="password" [(ngModel)]="confirmPassword" placeholder="Confirm password"></ion-input>
+          <ion-input
+            [type]="showConfirmPassword ? 'text' : 'password'"
+            [(ngModel)]="confirmPassword"
+            placeholder="Confirm password"
+          ></ion-input>
+          <ion-button
+            slot="end"
+            fill="clear"
+            size="small"
+            class="password-toggle-btn"
+            type="button"
+            (click)="toggleConfirmPasswordVisibility()"
+          >
+            {{ showConfirmPassword ? 'Hide' : 'Show' }}
+          </ion-button>
         </ion-item>
       </div>
 

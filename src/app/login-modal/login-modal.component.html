@@ -28,8 +28,26 @@
 
       <ion-item lines="none" class="field-item">
         <ion-label position="stacked">Password</ion-label>
-        <ion-input type="password" [(ngModel)]="password" placeholder="Enter your password"></ion-input>
+        <ion-input
+          [type]="showPassword ? 'text' : 'password'"
+          [(ngModel)]="password"
+          placeholder="Enter your password"
+        ></ion-input>
+        <ion-button
+          slot="end"
+          fill="clear"
+          size="small"
+          class="password-toggle-btn"
+          type="button"
+          (click)="togglePasswordVisibility()"
+        >
+          {{ showPassword ? 'Hide' : 'Show' }}
+        </ion-button>
       </ion-item>
+
+      <ion-text class="password-policy" [class.policy-ok]="isPasswordPolicyMet">
+        {{ passwordPolicyText }}
+      </ion-text>
 
       <div class="row-end">
         <ion-button fill="clear" size="small" class="link-btn" (click)="forgotPassword()">

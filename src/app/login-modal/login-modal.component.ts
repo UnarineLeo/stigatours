@@ -14,7 +14,9 @@ import { AuthService } from '../services/auth.service';
 export class LoginModalComponent {
   email = '';
   password = '';
+  showPassword = false;
   isSubmitting = false;
+  readonly passwordPolicyText = 'Use at least 8 characters, including an uppercase letter, a lowercase letter, a number, and a special character.';
 
   constructor(
     private modalController: ModalController,
@@ -27,6 +29,11 @@ export class LoginModalComponent {
 
   get isLoginDisabled(): boolean {
     return this.isSubmitting || !this.email.trim() || !this.password;
+  }
+
+  get isPasswordPolicyMet(): boolean {
+    const password = this.password ?? '';
+    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(password);
   }
 
   forgotPassword() {
@@ -64,6 +71,10 @@ export class LoginModalComponent {
 
   continueWithGoogle() {
     this.modalController.dismiss({ action: 'google-login' });
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
   }
 
   openRegister() {

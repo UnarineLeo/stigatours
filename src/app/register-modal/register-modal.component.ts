@@ -18,6 +18,8 @@ export class RegisterModalComponent {
   email = '';
   password = '';
   confirmPassword = '';
+  showPassword = false;
+  showConfirmPassword = false;
   isSubmitting = false;
   readonly passwordPolicyText = 'Use at least 8 characters, including an uppercase letter, a lowercase letter, a number, and a special character.';
 
@@ -95,6 +97,14 @@ export class RegisterModalComponent {
 
   continueWithGoogle() {
     this.modalController.dismiss({ action: 'google-register' });
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
+  }
+
+  toggleConfirmPasswordVisibility() {
+    this.showConfirmPassword = !this.showConfirmPassword;
   }
 
   openLogin() {

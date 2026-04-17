@@ -189,6 +189,7 @@ export class AuthService {
     });
     loading.present();
 
+    console.log("Now checking Firebase app initialization...");
     console.log('Firebase app initialized:', !!this.firebaseApp);
 
     const authInstance = getAuth(this.firebaseApp);
