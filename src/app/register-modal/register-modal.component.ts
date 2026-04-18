@@ -87,7 +87,10 @@ export class RegisterModalComponent {
         password: this.password,
       });
 
-      await this.modalController.dismiss({ action: 'registered' });
+      const topModal = await this.modalController.getTop();
+      if (topModal) {
+        await this.modalController.dismiss({ action: 'registered' });
+      }
     } catch (error) {
       console.error('Registration failed in modal:', error);
     } finally {

@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { LoadingController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { setDoc, getDoc, doc, getFirestore, serverTimestamp } from "firebase/firestore";
@@ -20,7 +21,8 @@ export class AuthService {
 
   constructor(public auth: AngularFireAuth, private router: Router,
     private toastController: ToastController, private firestore: AngularFirestore,
-    public loader: LoadingController) 
+    public loader: LoadingController,
+    private modalController: ModalController) 
   {
     this.initializeAuth()
   }
@@ -131,13 +133,15 @@ export class AuthService {
         this.authState.next(true)
         this.userEmail = res.user.email
         this.regVerification = false
+        this.userId = res.user?.uid
+
+        await this.dismissTopModal();
 
         // await loading.dismiss();
         await this.router.navigate(['/tabs/profile'])
         await this.presentToast('Successfully logged in')
 
         await this.addUser(res.user)
-        this.userId = res.user?.uid
       }
       else
       {
@@ -212,6 +216,9 @@ export class AuthService {
       this.isVerified = res.user.emailVerified;
       this.userEmail = res.user.email;
       this.regVerification = true;
+      this.userId = res.user?.uid;
+
+      await this.dismissTopModal();
 
       await this.router.navigate(['/tabs/profile']);
       await this.presentToast('Successfully registered, please check your email to verify your account');
@@ -371,6 +378,15 @@ export class AuthService {
   async isCurrentUserAdmin(): Promise<boolean> {
     const role = await this.getCurrentUserRole();
     return role === 'admin';
+  }
+
+  private async dismissTopModal(): Promise<void> {
+    const topModal = await this.modalController.getTop();
+    if (!topModal) {
+      return;
+    }
+
+    await this.modalController.dismiss();
   }
 
 }

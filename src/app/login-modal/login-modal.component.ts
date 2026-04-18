@@ -64,7 +64,10 @@ export class LoginModalComponent {
         password: this.password,
       });
 
-      await this.modalController.dismiss({ action: 'logged-in' });
+      const topModal = await this.modalController.getTop();
+      if (topModal) {
+        await this.modalController.dismiss({ action: 'logged-in' });
+      }
     } catch (error) {
       console.error('Login failed in modal:', error);
     } finally {
