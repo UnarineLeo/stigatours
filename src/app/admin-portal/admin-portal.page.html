@@ -153,7 +153,7 @@
               <div class="trip-list">
                 @for (trip of activeCatalogTrips; track trip.id) {
                   <article class="trip-item">
-                    <img [src]="trip.images?.[0]" [alt]="trip.name" class="trip-image" />
+                    <img [src]="trip.images[0]" [alt]="trip.name" class="trip-image" />
                     <div class="trip-info">
                       <p class="trip-category">{{ trip.category }}</p>
                       <h3>{{ trip.name }}</h3>
@@ -269,7 +269,7 @@
               <div class="trip-list">
                 @for (trip of inactiveCatalogTrips; track trip.id) {
                   <article class="trip-item">
-                    <img [src]="trip.images?.[0]" [alt]="trip.name" class="trip-image" />
+                    <img [src]="trip.images[0]" [alt]="trip.name" class="trip-image" />
                     <div class="trip-info">
                       <p class="trip-category">{{ trip.category }}</p>
                       <h3>{{ trip.name }}</h3>

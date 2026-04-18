@@ -370,16 +370,17 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
     const password = this.passwordForm.newPassword;
 
     return {
-      minLength: password.length >= 6,
+      minLength: password.length >= 8,
       hasUppercase: /[A-Z]/.test(password),
       hasLowercase: /[a-z]/.test(password),
+      hasNumber: /\d/.test(password),
       hasSpecialCharacter: /[^A-Za-z0-9]/.test(password)
     };
   }
 
   isNewPasswordPolicyCompliant(): boolean {
     const policy = this.passwordPolicyStatus;
-    return policy.minLength && policy.hasUppercase && policy.hasLowercase && policy.hasSpecialCharacter;
+    return policy.minLength && policy.hasUppercase && policy.hasLowercase && policy.hasNumber && policy.hasSpecialCharacter;
   }
 
   canUpdatePassword(): boolean {
@@ -406,7 +407,7 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
     }
 
     if (!this.isNewPasswordPolicyCompliant()) {
-      await this.authService.presentToast('Password must be at least 6 characters and include uppercase, lowercase, and a special character.');
+      await this.authService.presentToast('Use at least 8 characters, including an uppercase letter, a lowercase letter, a number, and a special character.');
       return;
     }
 

@@ -30,7 +30,7 @@
                 <span class="discount-badge">Couple Offer</span>
               }
               <div class="trip-image-wrap">
-                <img [src]="item.images?.[0]" [alt]="item.name" class="trip-image" loading="lazy" />
+                <img [src]="item.images[0]" [alt]="item.name" class="trip-image" loading="lazy" />
                 @if (item.duration) {
                   <span class="duration-badge">{{ item.duration }}</span>
                 }

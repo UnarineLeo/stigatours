@@ -387,13 +387,16 @@
             <p>Your new password must include all of the following:</p>
             <ul>
               <li [class.met]="passwordPolicyStatus.minLength">
-                At least 6 characters
+                At least 8 characters
               </li>
               <li [class.met]="passwordPolicyStatus.hasUppercase">
                 At least 1 uppercase letter
               </li>
               <li [class.met]="passwordPolicyStatus.hasLowercase">
                 At least 1 lowercase letter
+              </li>
+              <li [class.met]="passwordPolicyStatus.hasNumber">
+                At least 1 number
               </li>
               <li [class.met]="passwordPolicyStatus.hasSpecialCharacter">
                 At least 1 special character

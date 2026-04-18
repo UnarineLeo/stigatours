@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ToastController } from '@ionic/angular';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonItem, IonLabel, IonInput } from '@ionic/angular/standalone';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonButton,  } from '@ionic/angular/standalone';
 import { findProductById, ProductItem } from '../shared/product-catalog';
 import { appendCheckoutRecords, CheckoutRecord } from '../shared/admin-storage';
 import { FooterComponent } from '../footer/footer.component';
@@ -25,7 +25,7 @@ interface BookingItem {
   templateUrl: 'bookings.page.html',
   styleUrls: ['bookings.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonItem, IonLabel, IonInput, FooterComponent],
+  imports: [CommonModule, FormsModule, RouterLink, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, FooterComponent],
 })
 export class BookingsPage {
   bookingItems: BookingItem[] = [];

@@ -278,7 +278,7 @@ export class AuthService {
         return
       }
 
-      await this.router.navigate([options?.redirectTo ?? '/tabs/home'])
+      await this.router.navigate(['/tabs/home']);
     } catch (error: any) {
       if(error.code === 'auth/internal-error')
       {
