@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { ToastController } from '@ionic/angular';
+import { ToastController } from '@ionic/angular/standalone';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonButton,  } from '@ionic/angular/standalone';
 import { findProductById, ProductItem } from '../shared/product-catalog';
 import { appendCheckoutRecords, CheckoutRecord } from '../shared/admin-storage';

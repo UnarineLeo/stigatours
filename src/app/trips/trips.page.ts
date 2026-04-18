@@ -17,7 +17,7 @@ import {
   IonChip,
   IonToggle,
 } from '@ionic/angular/standalone';
-import { AlertController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular/standalone';
 import { getAllProductsWithOptions, getCategorySections, getDiscountPercent, ProductItem } from '../shared/product-catalog';
 import { FooterComponent } from '../footer/footer.component';
 
