@@ -181,7 +181,8 @@ export class AuthService {
     const loading = await this.loader.create({
       cssClass: 'transparent-loader'
     });
-    await loading.present();
+    loading.present();
+    
 
     console.log("Now checking Firebase app initialization...");
 
@@ -224,7 +225,7 @@ export class AuthService {
 
       throw error;
     } finally {
-      await loading.dismiss();
+      loading.dismiss();
     }
   }
 
