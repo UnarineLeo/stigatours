@@ -114,15 +114,19 @@ export class AuthService {
     //   cssClass: 'transparent-loader'
     // });
     // await loading.present();
+    console.log('Attempting login with email:', value.email);
 
     const authInstance = getAuth(firebase.initializeApp(environment.firebaseConfig));
     await setPersistence(authInstance, browserLocalPersistence);
+
+    console.log("Firebase app initialized, starting login process...");
 
     try {
       const res: any = await signInWithEmailAndPassword(authInstance, value.email, value.password);
 
       if(res.user?.emailVerified)
       {
+        console.log('Login successful, user email verified:', res.user.emailVerified);
         this.isLoggedIn = true
         this.authState.next(true)
         this.userEmail = res.user.email

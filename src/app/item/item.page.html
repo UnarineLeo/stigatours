@@ -11,27 +11,29 @@
       <a routerLink="/tabs/home" class="back-link">← Back to Trips</a>
 
       <article class="item-layout">
-        <div class="image-wrap">
-          @if (product.couplesPrice) {
-            <span class="discount-badge">Couple Offer</span>
-          }
-
-          <img [src]="selectedImage" [alt]="product.name" class="item-image" (click)="expandImage()" />
-
-          <button type="button" class="expand-btn" (click)="expandImage()" aria-label="Expand image">⤢</button>
-
-          <div class="thumb-row">
-            @for (image of galleryImages; track image) {
-              <button
-                type="button"
-                class="thumb-btn"
-                [class.active]="image === selectedImage"
-                (click)="selectImage(image)">
-                <img [src]="image" [alt]="product.name + ' view'" />
-              </button>
+        @if (galleryImages.length > 0 && selectedImage) {
+          <div class="image-wrap">
+            @if (product.couplesPrice) {
+              <span class="discount-badge">Couple Offer</span>
             }
+
+            <img [src]="selectedImage" [alt]="product.name" class="item-image" (click)="expandImage()" />
+
+            <button type="button" class="expand-btn" (click)="expandImage()" aria-label="Expand image">⤢</button>
+
+            <div class="thumb-row">
+              @for (image of galleryImages; track image) {
+                <button
+                  type="button"
+                  class="thumb-btn"
+                  [class.active]="image === selectedImage"
+                  (click)="selectImage(image)">
+                  <img [src]="image" [alt]="product.name + ' view'" />
+                </button>
+              }
+            </div>
           </div>
-        </div>
+        }
 
         <div class="item-content">
           <p class="item-category">{{ product.category }}</p>
@@ -142,7 +144,7 @@
       </section>
     </section>
 
-    @if (isImageExpanded) {
+    @if (isImageExpanded && selectedImage) {
       <div class="image-overlay" (click)="closeExpandedImage()">
         <button type="button" class="close-overlay" (click)="closeExpandedImage()" aria-label="Close image">✕</button>
         <img [src]="selectedImage" [alt]="product.name" class="expanded-image" (click)="$event.stopPropagation()" />

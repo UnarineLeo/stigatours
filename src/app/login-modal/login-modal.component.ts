@@ -44,6 +44,7 @@ export class LoginModalComponent {
   }
 
   async login() {
+    console.log('Login button clicked with email:', this.email);
     if (this.isSubmitting) {
       return;
     }
@@ -53,6 +54,8 @@ export class LoginModalComponent {
       await this.authService.presentToast('Please enter your email and password.');
       return;
     }
+
+    console.log('Attempting login with email:', email);
 
     try {
       this.isSubmitting = true;

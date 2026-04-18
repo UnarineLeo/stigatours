@@ -104,12 +104,7 @@ export class ItemPage implements OnInit {
   }
 
   private buildGallery(item: ProductItem): string[] {
-    return [
-      ...(item.images ?? []),
-      `https://picsum.photos/seed/item-${item.id}-angle-1/1000/800`,
-      `https://picsum.photos/seed/item-${item.id}-angle-2/1000/800`,
-      `https://picsum.photos/seed/item-${item.id}-angle-3/1000/800`,
-    ];
+    return (item.images ?? []).filter((image) => typeof image === 'string' && image.trim().length > 0);
   }
 
   private getRecommended(currentItem: ProductItem): ProductItem[] {
