@@ -110,10 +110,10 @@ export class AuthService {
 
   async loginFireAuth(value: any)
   {
-    const loading = await this.loader.create({
-      cssClass: 'transparent-loader'
-    });
-    await loading.present();
+    // const loading = await this.loader.create({
+    //   cssClass: 'transparent-loader'
+    // });
+    // await loading.present();
 
     const authInstance = getAuth(firebase.initializeApp(environment.firebaseConfig));
     await setPersistence(authInstance, browserLocalPersistence);
@@ -128,7 +128,7 @@ export class AuthService {
         this.userEmail = res.user.email
         this.regVerification = false
 
-        await loading.dismiss();
+        // await loading.dismiss();
         await this.router.navigate(['/tabs/profile'])
         await this.presentToast('Successfully logged in')
 
@@ -137,7 +137,7 @@ export class AuthService {
       }
       else
       {
-        await loading.dismiss()
+        // await loading.dismiss()
         this.regVerification = true
         await sendEmailVerification(res.user)
         await this.presentToast("Please verify your email address, check your inbox to complete the verification")
@@ -146,7 +146,7 @@ export class AuthService {
 
       return res;
     } catch (error: any) {
-      await loading.dismiss();
+      // await loading.dismiss();
 
       if(error.code === 'auth/user-not-found')
       {
@@ -178,10 +178,10 @@ export class AuthService {
   async userRegistration(value: any)
   {
     console.log('Received registration data:', value);
-    const loading = await this.loader.create({
-      cssClass: 'transparent-loader'
-    });
-    loading.present();
+    // const loading = await this.loader.create({
+    //   cssClass: 'transparent-loader'
+    // });
+    // loading.present();
     
 
     console.log("Now checking Firebase app initialization...");
@@ -225,7 +225,7 @@ export class AuthService {
 
       throw error;
     } finally {
-      loading.dismiss();
+      // loading.dismiss();
     }
   }
 
