@@ -35,3 +35,19 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 // @import '@ionic/angular/css/palettes/dark.system.css';
+
+/* Global overlay styles for shared AuthService UI feedback */
+ion-loading.transparent-loader {
+	--background: rgba(15, 23, 42, 0.75);
+	--spinner-color: #ffffff;
+	--border-radius: 14px;
+	--box-shadow: 0 12px 32px rgba(2, 6, 23, 0.35);
+}
+
+ion-toast.app-toast {
+	--background: #0f172a;
+	--color: #f8fafc;
+	--border-radius: 12px;
+	--box-shadow: 0 10px 30px rgba(2, 6, 23, 0.28);
+	--max-width: min(92vw, 520px);
+}

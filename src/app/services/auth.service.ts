@@ -76,33 +76,34 @@ export class AuthService {
 
   // GoogleSign
 
-  googleSignIn()
+  async googleSignIn()
   {
     const authInstance = getAuth(firebase.initializeApp(environment.firebaseConfig));
-    setPersistence(authInstance, browserLocalPersistence);
+    await setPersistence(authInstance, browserLocalPersistence);
 
-    return signInWithPopup(authInstance, new GoogleAuthProvider).then(
-     (res: any) =>
-     {
+    try {
+      const res: any = await signInWithPopup(authInstance, new GoogleAuthProvider);
+
       this.updateUserState(res.user)
 
-      this.router.navigate(['/tabs/profile'])
-      this.presentToast('Successfully logged in')
+      await this.router.navigate(['/tabs/profile'])
+      await this.presentToast('Successfully logged in')
 
-      this.addUser(res.user)
+      await this.addUser(res.user)
       // this.userId = res.user?.uid
-
-     }, err => 
-     {
+      return res;
+    } catch (err: any) {
       if(err.code === 'auth/internal-error')
       {
-        this.presentToast('Problem from our end, please try again later')
+        await this.presentToast('Problem from our end, please try again later')
       }
       else
       {
-        this.presentToast('Error signing in with Google, please try again or contact support')
+        await this.presentToast('Error signing in with Google, please try again or contact support')
       }
-     })
+
+      throw err;
+    }
   }
 
   // LogIn with email/password
@@ -112,72 +113,64 @@ export class AuthService {
     const loading = await this.loader.create({
       cssClass: 'transparent-loader'
     });
-    loading.present();
+    await loading.present();
 
     const authInstance = getAuth(firebase.initializeApp(environment.firebaseConfig));
-    setPersistence(authInstance, browserLocalPersistence);
+    await setPersistence(authInstance, browserLocalPersistence);
 
-    return new Promise<any>((resolve, reject) =>
-    {
-      signInWithEmailAndPassword(authInstance, value.email, value.password).then(
-        (res: any) => 
-        {
-          resolve(res)
-          if(res.user?.emailVerified)
-          {
-            this.isLoggedIn = true
-            this.authState.next(true)
-            this.userEmail = res.user.email
-            this.regVerification = false
+    try {
+      const res: any = await signInWithEmailAndPassword(authInstance, value.email, value.password);
 
-            loading.dismiss();
-            this.router.navigate(['/tabs/profile'])
-            this.presentToast('Successfully logged in')
+      if(res.user?.emailVerified)
+      {
+        this.isLoggedIn = true
+        this.authState.next(true)
+        this.userEmail = res.user.email
+        this.regVerification = false
 
-            this.addUser(res.user)
-            this.userId = res.user?.uid
-          }
-          else
-          {
-            loading.dismiss()
-            this.regVerification = true
-            this.logOut()
-            sendEmailVerification(res.user)
-            this.presentToast("Please verify your email address, check your inbox to complete the verification")
-          }
+        await loading.dismiss();
+        await this.router.navigate(['/tabs/profile'])
+        await this.presentToast('Successfully logged in')
 
-        },
-        (error: any) => 
-        {
-          reject(error)
-          if(error.code === 'auth/user-not-found')
-          {
-            loading.dismiss();
-            this.presentToast('Email doesn\'t exist, please register first')
-          }
-          else if(error.code === 'auth/wrong-password')
-          {
-            loading.dismiss();
-            this.presentToast('Incorrect password, please try again')
-          }
-          else if(error.code === 'auth/internal-error')
-          {
-            loading.dismiss();
-            this.presentToast('Problem from our end, please try again later')
-          }
-          else if(error.code === 'auth/invalid-credential')
-          {
-            loading.dismiss();
-            this.presentToast('Invalid credentials, please try again')  
-          }
-          else
-          {
-            loading.dismiss();
-            this.presentToast(error.code)
-          }
-        }
-      )
-    })
+        await this.addUser(res.user)
+        this.userId = res.user?.uid
+      }
+      else
+      {
+        await loading.dismiss()
+        this.regVerification = true
+        await sendEmailVerification(res.user)
+        await this.presentToast("Please verify your email address, check your inbox to complete the verification")
+        await this.logOut({ redirectTo: '/tabs/profile', forceReload: false })
+      }
+
+      return res;
+    } catch (error: any) {
+      await loading.dismiss();
+
+      if(error.code === 'auth/user-not-found')
+      {
+        await this.presentToast('Email doesn\'t exist, please register first')
+      }
+      else if(error.code === 'auth/wrong-password')
+      {
+        await this.presentToast('Incorrect password, please try again')
+      }
+      else if(error.code === 'auth/internal-error')
+      {
+        await this.presentToast('Problem from our end, please try again later')
+      }
+      else if(error.code === 'auth/invalid-credential')
+      {
+        await this.presentToast('Invalid credentials, please try again')
+      }
+      else
+      {
+        await this.presentToast(error.code)
+      }
+
+      throw error;
+    }
   }
 
   // Register with email/password
@@ -185,15 +178,15 @@ export class AuthService {
   async userRegistration(value: any)
   {
     console.log('Received registration data:', value);
-    // const loading = await this.loader.create({
-    //   cssClass: 'transparent-loader'
-    // });
-    // loading.present();
+    const loading = await this.loader.create({
+      cssClass: 'transparent-loader'
+    });
+    await loading.present();
 
     console.log("Now checking Firebase app initialization...");
 
     const authInstance = getAuth(firebase.initializeApp(environment.firebaseConfig));
-    setPersistence(authInstance, browserLocalPersistence);
+    await setPersistence(authInstance, browserLocalPersistence);
 
     console.log('Starting registration process for email:', value.email);
 
@@ -222,44 +215,44 @@ export class AuthService {
       return res;
     } catch (error: any) {
       if (error.code === 'auth/email-already-in-use' || error.code === 'auth/email-already-exists') {
-        this.presentToast('Email already in use');
+        await this.presentToast('Email already in use');
       } else if (error.code === 'auth/internal-error') {
-        this.presentToast('Problem from our end, please try again later');
+        await this.presentToast('Problem from our end, please try again later');
       } else {
-        this.presentToast('Error signing up, please try again or contact support');
+        await this.presentToast('Error signing up, please try again or contact support');
       }
 
       throw error;
     } finally {
-      // loading.dismiss();
+      await loading.dismiss();
     }
   }
 
   // forgot password
-  forgotPassword(email: any)
+  async forgotPassword(email: any)
   {
-    sendPasswordResetEmail(getAuth(firebase.initializeApp(environment.firebaseConfig)), email)
-    .then(() => {
-      this.presentToast('Password reset email sent, check your inbox')
-    })
-    .catch((error) => {
+    try {
+      await sendPasswordResetEmail(getAuth(firebase.initializeApp(environment.firebaseConfig)), email)
+      await this.presentToast('Password reset email sent, check your inbox')
+    }
+    catch (error: any) {
       if(error.code === 'auth/user-not-found')
       {
-        this.presentToast('Email doesn\'t exist, please register first')
+        await this.presentToast('Email doesn\'t exist, please register first')
       }
       else if(error.code === 'auth/wrong-password')
       {
-        this.presentToast('Incorrect password, please try again')
+        await this.presentToast('Incorrect password, please try again')
       }
       else if(error.code === 'auth/internal-error')
       {
-        this.presentToast('Problem from our end, please try again later')
+        await this.presentToast('Problem from our end, please try again later')
       }
       else
       {
-        this.presentToast(error.code)
+        await this.presentToast(error.code)
       }
-    });
+    }
   }
 
   //  Logout
@@ -277,7 +270,7 @@ export class AuthService {
         await this.presentToast(options.toastMessage)
       }
 
-      if (options?.forceReload || this.regVerification) {
+      if (options?.forceReload) {
         window.location.reload()
         return
       }
@@ -286,11 +279,11 @@ export class AuthService {
     } catch (error: any) {
       if(error.code === 'auth/internal-error')
       {
-        this.presentToast('Problem from our end, please try again later')
+        await this.presentToast('Problem from our end, please try again later')
       }
       else
       {
-        this.presentToast(error.code)
+        await this.presentToast(error.code)
       }
     }
   }
