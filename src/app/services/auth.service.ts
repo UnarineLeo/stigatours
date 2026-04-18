@@ -1,14 +1,16 @@
 import { Injectable } from '@angular/core';
-import { getApp, getApps, initializeApp } from 'firebase/app';
+import firebase from 'firebase/compat/app';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, signOut, updateProfile, sendEmailVerification,
   applyActionCode, sendPasswordResetEmail, setPersistence, browserLocalPersistence}
   from "firebase/auth";
 import { Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { LoadingController } from '@ionic/angular';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { environment } from 'src/environments/environment.prod';
+import { environment } from 'src/environments/environment';
 import { setDoc, getDoc, doc, getFirestore, serverTimestamp } from "firebase/firestore";
 
 @Injectable({
@@ -16,17 +18,11 @@ import { setDoc, getDoc, doc, getFirestore, serverTimestamp } from "firebase/fir
 })
 export class AuthService {
 
-  private readonly firebaseApp = getApps().length ? getApp() : initializeApp(environment.firebaseConfig);
-
-  constructor(
-    private router: Router,
-    private toastController: ToastController,
-    public loader: LoadingController,
-  ) 
+  constructor(public auth: AngularFireAuth, private router: Router,
+    private toastController: ToastController, private firestore: AngularFirestore,
+    public loader: LoadingController) 
   {
-
     this.initializeAuth()
-    
   }
 
   isLoggedIn = false;
@@ -37,10 +33,10 @@ export class AuthService {
   userId: string = ''
   userRole: string = 'user';
 
-  db = getFirestore(this.firebaseApp)
+  db = getFirestore(firebase.initializeApp(environment.firebaseConfig))
 
   private async initializeAuth() {
-    const authInstance = getAuth(this.firebaseApp);
+    const authInstance = getAuth(firebase.initializeApp(environment.firebaseConfig));
     await setPersistence(authInstance, browserLocalPersistence);
 
     authInstance.onAuthStateChanged(async (user) => {
@@ -51,7 +47,7 @@ export class AuthService {
 
   async isAuthenticated(): Promise<boolean> 
   {
-    const authInstance = getAuth(this.firebaseApp);
+    const authInstance = getAuth(firebase.initializeApp(environment.firebaseConfig));
     await setPersistence(authInstance, browserLocalPersistence);
     await new Promise(resolve => setTimeout(resolve, 500));
     const user = authInstance.currentUser;
@@ -82,7 +78,7 @@ export class AuthService {
 
   googleSignIn()
   {
-    const authInstance = getAuth(this.firebaseApp);
+    const authInstance = getAuth(firebase.initializeApp(environment.firebaseConfig));
     setPersistence(authInstance, browserLocalPersistence);
 
     return signInWithPopup(authInstance, new GoogleAuthProvider).then(
@@ -118,7 +114,7 @@ export class AuthService {
     });
     loading.present();
 
-    const authInstance = getAuth(this.firebaseApp);
+    const authInstance = getAuth(firebase.initializeApp(environment.firebaseConfig));
     setPersistence(authInstance, browserLocalPersistence);
 
     return new Promise<any>((resolve, reject) =>
@@ -169,6 +165,11 @@ export class AuthService {
             loading.dismiss();
             this.presentToast('Problem from our end, please try again later')
           }
+          else if(error.code === 'auth/invalid-credential')
+          {
+            loading.dismiss();
+            this.presentToast('Invalid credentials, please try again')  
+          }
           else
           {
             loading.dismiss();
@@ -190,9 +191,8 @@ export class AuthService {
     loading.present();
 
     console.log("Now checking Firebase app initialization...");
-    console.log('Firebase app initialized:', !!this.firebaseApp);
 
-    const authInstance = getAuth(this.firebaseApp);
+    const authInstance = getAuth(firebase.initializeApp(environment.firebaseConfig));
     setPersistence(authInstance, browserLocalPersistence);
 
     console.log('Starting registration process for email:', value.email);
@@ -238,7 +238,7 @@ export class AuthService {
   // forgot password
   forgotPassword(email: any)
   {
-    sendPasswordResetEmail(getAuth(this.firebaseApp), email)
+    sendPasswordResetEmail(getAuth(firebase.initializeApp(environment.firebaseConfig)), email)
     .then(() => {
       this.presentToast('Password reset email sent, check your inbox')
     })
@@ -266,7 +266,7 @@ export class AuthService {
 
   async logOut(options?: { toastMessage?: string; redirectTo?: string; forceReload?: boolean }) {
     try {
-      await signOut(getAuth(this.firebaseApp))
+      await signOut(getAuth(firebase.initializeApp(environment.firebaseConfig)))
 
       sessionStorage.clear()
       this.isLoggedIn = false
@@ -347,7 +347,7 @@ export class AuthService {
   }
 
   async getCurrentUserRole(): Promise<string | null> {
-    const authInstance = getAuth(this.firebaseApp);
+    const authInstance = getAuth(firebase.initializeApp(environment.firebaseConfig));
     const user = authInstance.currentUser;
 
     if (!user) {
