@@ -126,31 +126,22 @@ export class AuthService {
     try {
       const res: any = await signInWithEmailAndPassword(authInstance, value.email, value.password);
 
-      if(res.user?.emailVerified)
-      {
-        console.log('Login successful, user email verified:', res.user.emailVerified);
-        this.isLoggedIn = true
-        this.authState.next(true)
-        this.userEmail = res.user.email
-        this.regVerification = false
-        this.userId = res.user?.uid
+      console.log('Login successful, user email verified:', res.user?.emailVerified);
+      this.updateUserState(res.user);
+      this.regVerification = !res.user?.emailVerified;
 
-        await this.dismissTopModal();
+      await this.dismissTopModal();
 
-        // await loading.dismiss();
-        await this.router.navigate(['/tabs/profile'])
+      // await loading.dismiss();
+      await this.router.navigate(['/tabs/profile'])
+
+      if (res.user?.emailVerified) {
         await this.presentToast('Successfully logged in')
+      } else {
+        await this.presentToast('Successfully logged in. Please verify your email from your profile page.')
+      }
 
-        await this.addUser(res.user)
-      }
-      else
-      {
-        // await loading.dismiss()
-        this.regVerification = true
-        await sendEmailVerification(res.user)
-        await this.presentToast("Please verify your email address, check your inbox to complete the verification")
-        await this.logOut({ redirectTo: '/tabs/profile', forceReload: false })
-      }
+      await this.getUser(res.user.uid)
 
       return res;
     } catch (error: any) {
@@ -287,7 +278,7 @@ export class AuthService {
         return
       }
 
-      await this.router.navigate([options?.redirectTo ?? '/tabs/profile'])
+      await this.router.navigate([options?.redirectTo ?? '/tabs/home'])
     } catch (error: any) {
       if(error.code === 'auth/internal-error')
       {
@@ -346,9 +337,20 @@ export class AuthService {
   {
     const userRef = doc(this.db, 'users', uid);
     const userDoc = await getDoc(userRef);
-    var userId = JSON.stringify(userDoc.data());
-    this.userRole = JSON.parse(userId).role || 'user';
-    return JSON.parse(userId)
+
+    if (!userDoc.exists()) {
+      this.userRole = 'user';
+      return JSON.parse('{}');
+    }
+
+    const userData = userDoc.data() as Record<string, unknown>;
+    this.userRole = (userData['role'] as string | undefined) || 'user';
+
+    if (typeof userData['displayName'] === 'string' && userData['displayName']) {
+      this.userName = userData['displayName'];
+    }
+
+    return userData as unknown as JSON;
   }
 
   async getCurrentUserRole(): Promise<string | null> {
