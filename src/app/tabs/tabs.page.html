@@ -16,15 +16,19 @@
       <ion-button fill="clear" routerLink="/tabs/trips" routerLinkActive="active-tab" [routerLinkActiveOptions]="{ exact: true }" class="nav-link">Trips</ion-button>
       <ion-button fill="clear" routerLink="/tabs/bookings" routerLinkActive="active-tab" [routerLinkActiveOptions]="{ exact: true }" class="nav-link">Bookings</ion-button>
       <ion-button fill="clear" routerLink="/tabs/contact-us" routerLinkActive="active-tab" [routerLinkActiveOptions]="{ exact: true }" class="nav-link">Contact Us</ion-button>
-      <ion-button class="login-btn" *ngIf="!isAuthenticated" (click)="openLogin()">
-        Login
-      </ion-button>
-      <ion-button color="primary" fill="solid" shape="round" class="profile-btn" *ngIf="!isAuthenticated" (click)="openRegister()">
-        Register
-      </ion-button>
-      <ion-button color="primary" fill="solid" shape="round" class="profile-btn" *ngIf="isAuthenticated" routerLink="/tabs/profile" routerLinkActive="active-tab" [routerLinkActiveOptions]="{ exact: true }">
-        Profile
-      </ion-button>
+      @if (!isAuthenticated) {
+        <ion-button class="login-btn" (click)="openLogin()">
+          Login
+        </ion-button>
+        <ion-button color="primary" fill="solid" shape="round" class="profile-btn" (click)="openRegister()">
+          Register
+        </ion-button>
+      }
+      @if (isAuthenticated) {
+        <ion-button color="primary" fill="solid" shape="round" class="profile-btn" routerLink="/tabs/profile" routerLinkActive="active-tab" [routerLinkActiveOptions]="{ exact: true }">
+          Profile
+        </ion-button>
+      }
     </ion-buttons>
 
     <!-- Mobile Menu Button -->
@@ -58,20 +62,24 @@
         <ion-label>Contact Us</ion-label>
       </ion-item>
       
-      <ion-item button *ngIf="!isAuthenticated" (click)="openLogin()">
-        <ion-icon slot="start" name="log-in-outline"></ion-icon>
-        <ion-label>Login</ion-label>
-      </ion-item>
+      @if (!isAuthenticated) {
+        <ion-item button (click)="openLogin()">
+          <ion-icon slot="start" name="log-in-outline"></ion-icon>
+          <ion-label>Login</ion-label>
+        </ion-item>
 
-      <ion-item button *ngIf="!isAuthenticated" (click)="openRegister()">
-        <ion-icon slot="start" name="person-add-outline"></ion-icon>
-        <ion-label>Register</ion-label>
-      </ion-item>
+        <ion-item button (click)="openRegister()">
+          <ion-icon slot="start" name="person-add-outline"></ion-icon>
+          <ion-label>Register</ion-label>
+        </ion-item>
+      }
 
-      <ion-item button *ngIf="isAuthenticated" routerLink="/tabs/profile" routerLinkActive="active-mobile-tab" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">
-        <ion-icon slot="start" name="person-add-outline"></ion-icon>
-        <ion-label>Profile</ion-label>
-      </ion-item>
+      @if (isAuthenticated) {
+        <ion-item button routerLink="/tabs/profile" routerLinkActive="active-mobile-tab" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMenu()">
+          <ion-icon slot="start" name="person-add-outline"></ion-icon>
+          <ion-label>Profile</ion-label>
+        </ion-item>
+      }
     </ion-list>
   </div>
 </ion-header>

@@ -1,5 +1,4 @@
 import { Component, DestroyRef, EnvironmentInjector, OnInit, inject } from '@angular/core';
-import { NgIf } from '@angular/common';
 import { IonTabs, IonTabBar, IonTabButton, IonList, IonIcon, IonButtons, IonButton, IonToolbar, IonHeader, IonLabel, IonItem } from '@ionic/angular/standalone';
 import { ModalController } from '@ionic/angular/standalone';
 import { RouterLink, RouterLinkActive } from '@angular/router';
@@ -14,7 +13,7 @@ import { AuthService } from '../services/auth.service';
   selector: 'app-tabs',
   templateUrl: 'tabs.page.html',
   styleUrls: ['tabs.page.scss'],
-  imports: [NgIf, IonTabs, IonTabBar, IonTabButton, IonIcon, IonButtons, IonList, IonButton, IonToolbar, IonHeader, IonLabel, IonItem, RouterLink, RouterLinkActive],
+  imports: [IonTabs, IonTabBar, IonTabButton, IonIcon, IonButtons, IonList, IonButton, IonToolbar, IonHeader, IonLabel, IonItem, RouterLink, RouterLinkActive],
 })
 export class TabsPage {
   public environmentInjector = inject(EnvironmentInjector);
