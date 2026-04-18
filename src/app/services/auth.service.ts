@@ -185,10 +185,10 @@ export class AuthService {
   async userRegistration(value: any)
   {
     console.log('Received registration data:', value);
-    const loading = await this.loader.create({
-      cssClass: 'transparent-loader'
-    });
-    loading.present();
+    // const loading = await this.loader.create({
+    //   cssClass: 'transparent-loader'
+    // });
+    // loading.present();
 
     console.log("Now checking Firebase app initialization...");
 
@@ -231,7 +231,7 @@ export class AuthService {
 
       throw error;
     } finally {
-      loading.dismiss();
+      // loading.dismiss();
     }
   }
 

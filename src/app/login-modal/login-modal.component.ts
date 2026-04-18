@@ -36,11 +36,15 @@ export class LoginModalComponent {
     return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(password);
   }
 
-  forgotPassword() {
-    this.modalController.dismiss({
-      action: 'forgot-password',
-      email: this.email?.trim() ?? '',
-    });
+  async forgotPassword(): Promise<void> {
+    const email = this.email.trim();
+
+    if (!email) {
+      await this.authService.presentToast('Enter your email address to reset your password.');
+      return;
+    }
+
+    this.authService.forgotPassword(email);
   }
 
   async login() {
