@@ -591,7 +591,6 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
           const signedUrl = await this.supabaseStorageService.createSignedDocumentUrl(storedValue);
           return { key, storedValue, signedUrl, failed: false };
         } catch (error) {
-          console.warn(`Could not refresh signed URL for ${key}:`, error);
           return { key, storedValue, signedUrl: storedValue, failed: true };
         }
       })

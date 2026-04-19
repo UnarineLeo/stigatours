@@ -116,17 +116,14 @@ export class AuthService {
     //   cssClass: 'transparent-loader'
     // });
     // await loading.present();
-    console.log('Attempting login with email:', value.email);
 
     const authInstance = getAuth(firebase.initializeApp(environment.firebaseConfig));
     await setPersistence(authInstance, browserLocalPersistence);
 
-    console.log("Firebase app initialized, starting login process...");
 
     try {
       const res: any = await signInWithEmailAndPassword(authInstance, value.email, value.password);
 
-      console.log('Login successful, user email verified:', res.user?.emailVerified);
       this.updateUserState(res.user);
       this.regVerification = !res.user?.emailVerified;
 
@@ -176,19 +173,15 @@ export class AuthService {
 
   async userRegistration(value: any)
   {
-    console.log('Received registration data:', value);
     // const loading = await this.loader.create({
     //   cssClass: 'transparent-loader'
     // });
     // loading.present();
     
 
-    console.log("Now checking Firebase app initialization...");
-
     const authInstance = getAuth(firebase.initializeApp(environment.firebaseConfig));
     await setPersistence(authInstance, browserLocalPersistence);
 
-    console.log('Starting registration process for email:', value.email);
 
     try {
       const res: any = await createUserWithEmailAndPassword(authInstance, value.email, value.password);

@@ -44,7 +44,6 @@ export class LoginModalComponent {
   }
 
   async login() {
-    console.log('Login button clicked with email:', this.email);
     if (this.isSubmitting) {
       return;
     }
@@ -55,7 +54,6 @@ export class LoginModalComponent {
       return;
     }
 
-    console.log('Attempting login with email:', email);
 
     try {
       this.isSubmitting = true;
@@ -69,7 +67,6 @@ export class LoginModalComponent {
         await this.modalController.dismiss({ action: 'logged-in' });
       }
     } catch (error) {
-      console.error('Login failed in modal:', error);
     } finally {
       this.isSubmitting = false;
     }
