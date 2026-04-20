@@ -26,7 +26,7 @@
               (click)="openItem(item.id)"
               (keydown.enter)="openItem(item.id)"
               (keydown.space)="openItem(item.id)">
-              @if (item.couplesPrice) {
+              @if ((item.couplesPrice ?? 0) > 0) {
                 <span class="discount-badge">Couple Offer</span>
               }
               <div class="trip-image-wrap">
@@ -62,8 +62,8 @@
                     <span class="price-label">From</span>
                     <span class="trip-price">{{ formatRand(item.price) }}</span>
                     <span class="price-unit">per person</span>
-                    @if (item.couplesPrice) {
-                      <span class="trip-original-price">Couple Offer: {{ formatRand(item.couplesPrice) }}</span>
+                    @if ((item.couplesPrice ?? 0) > 0) {
+                      <span class="trip-original-price">Couple Offer: {{ formatRand(item.couplesPrice ?? 0) }}</span>
                     }
                   </div>
                   <ion-button size="small" shape="round" color="primary" (click)="openItem(item.id); $event.stopPropagation()">

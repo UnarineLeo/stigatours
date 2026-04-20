@@ -61,12 +61,12 @@
 
             <label class="field">
               <span>Price</span>
-              <input type="number" [(ngModel)]="form.price" placeholder="15999" />
+              <input type="number" [(ngModel)]="form.price" placeholder="15999" min="0" required />
             </label>
 
             <label class="field">
               <span>Couples Price (Optional)</span>
-              <input type="number" [(ngModel)]="form.couplesPrice" placeholder="30000" />
+              <input type="number" [(ngModel)]="form.couplesPrice" placeholder="30000" min="0" />
             </label>
 
             <label class="field">
@@ -155,8 +155,13 @@
                   <article class="trip-item">
                     <img [src]="trip.images[0]" [alt]="trip.name" class="trip-image" />
                     <div class="trip-info">
-                      <p class="trip-category">{{ trip.category }}</p>
-                      <h3>{{ trip.name }}</h3>
+                      <div class="trip-head-row">
+                        <div class="trip-title-stack">
+                          <p class="trip-category">{{ trip.category }}</p>
+                          <h3>{{ trip.name }}</h3>
+                        </div>
+                        <ion-chip class="trip-tag-chip" color="medium">{{ getTripTag(trip.name, trip.id) }}</ion-chip>
+                      </div>
                       <p class="trip-meta"><strong>Price:</strong> {{ formatRand(trip.price) }}</p>
                       @if (trip.couplesPrice) {
                         <p class="trip-meta"><strong>Couples Price:</strong> {{ formatRand(trip.couplesPrice) }}</p>
@@ -186,12 +191,12 @@
 
                           <label class="field">
                             <span>Price</span>
-                            <input type="number" [(ngModel)]="editForm.price" />
+                            <input type="number" [(ngModel)]="editForm.price" min="0" required />
                           </label>
 
                           <label class="field">
                             <span>Couples Price</span>
-                            <input type="number" [(ngModel)]="editForm.couplesPrice" />
+                            <input type="number" [(ngModel)]="editForm.couplesPrice" min="0" />
                           </label>
 
                           <label class="field">
@@ -271,8 +276,13 @@
                   <article class="trip-item">
                     <img [src]="trip.images[0]" [alt]="trip.name" class="trip-image" />
                     <div class="trip-info">
-                      <p class="trip-category">{{ trip.category }}</p>
-                      <h3>{{ trip.name }}</h3>
+                      <div class="trip-head-row">
+                        <div class="trip-title-stack">
+                          <p class="trip-category">{{ trip.category }}</p>
+                          <h3>{{ trip.name }}</h3>
+                        </div>
+                        <ion-chip class="trip-tag-chip" color="medium">{{ getTripTag(trip.name, trip.id) }}</ion-chip>
+                      </div>
                       <p class="trip-meta"><strong>Price:</strong> {{ formatRand(trip.price) }}</p>
                       @if (trip.couplesPrice) {
                         <p class="trip-meta"><strong>Couples Price:</strong> {{ formatRand(trip.couplesPrice) }}</p>

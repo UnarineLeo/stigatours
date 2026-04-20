@@ -89,7 +89,7 @@
       <div class="products-grid">
         @for (item of filteredProducts; track item.id) {
           <article class="product-card" (click)="openItem(item.id)">
-            @if (item.couplesPrice) {
+            @if ((item.couplesPrice ?? 0) > 0) {
               <span class="discount-badge">Couple Offer</span>
             }
 
@@ -128,8 +128,8 @@
                   <strong class="trip-price">{{ formatRand(item.price) }}</strong>
                   <span class="per-label">/ person</span>
                 </div>
-                @if (item.couplesPrice) {
-                  <span class="old-price">Couple Offer: {{ formatRand(item.couplesPrice) }}</span>
+                @if ((item.couplesPrice ?? 0) > 0) {
+                  <span class="old-price">Couple Offer: {{ formatRand(item.couplesPrice ?? 0) }}</span>
                 }
               </div>
 
@@ -144,7 +144,7 @@
                   Add Single Package
                 </ion-button>
 
-                @if (item.couplesPrice) {
+                @if ((item.couplesPrice ?? 0) > 0) {
                   <ion-button size="small" color="secondary" shape="round" expand="block"
                     (click)="addToCart(item, $event, 'couples')">
                     Add Couple Offer

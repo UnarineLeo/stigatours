@@ -13,7 +13,7 @@
       <article class="item-layout">
         @if (galleryImages.length > 0 && selectedImage) {
           <div class="image-wrap">
-            @if (product.couplesPrice) {
+            @if ((product.couplesPrice ?? 0) > 0) {
               <span class="discount-badge">Couple Offer</span>
             }
 
@@ -72,10 +72,10 @@
               <p class="item-price">{{ formatRand(product.price) }}</p>
               <span class="price-per">per person</span>
             </div>
-            @if (product.couplesPrice) {
+            @if ((product.couplesPrice ?? 0) > 0) {
               <div class="was-price-block">
                 <span class="was-label">Couple Offer</span>
-                <p class="item-original-price">{{ formatRand(product.couplesPrice) }}</p>
+                <p class="item-original-price">{{ formatRand(product.couplesPrice ?? 0) }}</p>
               </div>
             }
           </div>
@@ -98,7 +98,7 @@
             <ion-button color="primary" shape="round" expand="block" (click)="addToCart(product)">
               Book Single Package
             </ion-button>
-            @if (product.couplesPrice) {
+            @if ((product.couplesPrice ?? 0) > 0) {
               <ion-button color="secondary" shape="round" expand="block" (click)="addToCart(product, 'couples')">
                 Book Couple Offer
               </ion-button>

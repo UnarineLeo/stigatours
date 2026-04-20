@@ -9,10 +9,11 @@ import {
   IonCardHeader,
   IonCardTitle,
   IonCardContent,
+  IonChip,
 } from '@ionic/angular/standalone';
 import { ToastController } from '@ionic/angular';
 import { CheckoutRecord, getCheckoutRecords } from '../shared/admin-storage';
-import { ProductItem, deleteCatalogItem, getAllProducts, getCategorySections, getNextProductId, saveAdminEvent, updateCatalogItem } from '../shared/product-catalog';
+import { ProductItem, deleteCatalogItem, getAllProducts, getCategorySections, getNextProductId, getTripTag, saveAdminEvent, updateCatalogItem } from '../shared/product-catalog';
 import { FooterComponent } from '../footer/footer.component';
 import { AuthService } from '../services/auth.service';
 
@@ -47,6 +48,7 @@ interface AdminEventForm {
     IonCardHeader,
     IonCardTitle,
     IonCardContent,
+    IonChip,
     FooterComponent,
   ],
 })
@@ -60,6 +62,7 @@ export class AdminPortalPage implements OnInit {
   editImages: string[] = [];
   tripsSearchQuery = '';
   checkoutSearchQuery = '';
+  readonly getTripTag = getTripTag;
 
   form: AdminEventForm = this.createEmptyForm();
   editForm: AdminEventForm = this.createEmptyForm();
@@ -126,8 +129,13 @@ export class AdminPortalPage implements OnInit {
       return;
     }
 
-    if (!this.form.price || this.form.price <= 0) {
+    if (this.form.price === null || this.form.price < 0) {
       await this.presentToast('Please enter a valid event price.', 'warning');
+      return;
+    }
+
+    if (this.form.couplesPrice !== null && this.form.couplesPrice < 0) {
+      await this.presentToast('Couples price cannot be negative.', 'warning');
       return;
     }
 
@@ -140,7 +148,7 @@ export class AdminPortalPage implements OnInit {
       id: getNextProductId(),
       name: this.form.name.trim(),
       price: this.form.price,
-      couplesPrice: this.form.couplesPrice ?? undefined,
+      couplesPrice: this.form.couplesPrice !== null && this.form.couplesPrice > 0 ? this.form.couplesPrice : undefined,
       images: [...this.eventImages],
       description: this.form.description.trim(),
       category: this.form.category.trim(),
@@ -328,8 +336,13 @@ export class AdminPortalPage implements OnInit {
       return;
     }
 
-    if (!this.editForm.price || this.editForm.price <= 0) {
+    if (this.editForm.price === null || this.editForm.price < 0) {
       await this.presentToast('Please enter a valid price.', 'warning');
+      return;
+    }
+
+    if (this.editForm.couplesPrice !== null && this.editForm.couplesPrice < 0) {
+      await this.presentToast('Couples price cannot be negative.', 'warning');
       return;
     }
 
@@ -348,7 +361,7 @@ export class AdminPortalPage implements OnInit {
       ...original,
       name: this.editForm.name.trim(),
       price: this.editForm.price,
-      couplesPrice: this.editForm.couplesPrice ?? undefined,
+      couplesPrice: this.editForm.couplesPrice !== null && this.editForm.couplesPrice > 0 ? this.editForm.couplesPrice : undefined,
       images: editImages,
       description: this.editForm.description.trim(),
       category: this.editForm.category.trim(),

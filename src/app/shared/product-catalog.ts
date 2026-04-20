@@ -146,7 +146,30 @@ function buildTripWritePayload(item: ProductItem): Record<string, unknown> {
   return payload;
 }
 
-function tripDocId(id: number): string {
+function slugifyTripName(name: string): string {
+  const slug = name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+  return slug || 'trip';
+}
+
+function formatTripId(id: number): string {
+  const safeId = Number.isFinite(id) ? Math.max(0, Math.trunc(id)) : 0;
+  return safeId.toString().padStart(3, '0');
+}
+
+export function getTripTag(name: string, id: number): string {
+  return `${slugifyTripName(name)}-${formatTripId(id)}`;
+}
+
+function tripDocId(item: Pick<ProductItem, 'name' | 'id'>): string {
+  return getTripTag(item.name, item.id);
+}
+
+function legacyTripDocId(id: number): string {
   return String(id);
 }
 
@@ -159,10 +182,16 @@ async function seedTripsFromFallback(): Promise<void> {
   }
 
   for (const trip of fallbackTrips) {
-    await setDoc(doc(db, TRIPS_COLLECTION, tripDocId(trip.id)), {
+    const nextDocId = tripDocId(trip);
+    await setDoc(doc(db, TRIPS_COLLECTION, nextDocId), {
       ...buildTripWritePayload(trip),
       updatedAt: serverTimestamp(),
     });
+
+    const legacyDocId = legacyTripDocId(trip.id);
+    if (legacyDocId !== nextDocId) {
+      await deleteDoc(doc(db, TRIPS_COLLECTION, legacyDocId));
+    }
   }
 }
 
@@ -252,10 +281,16 @@ export async function saveAdminEvent(item: ProductItem): Promise<void> {
 
   refreshCatalogCaches(nextTrips);
 
-  await setDoc(doc(db, TRIPS_COLLECTION, tripDocId(normalized.id)), {
+  const nextDocId = tripDocId(normalized);
+  await setDoc(doc(db, TRIPS_COLLECTION, nextDocId), {
     ...buildTripWritePayload(normalized),
     updatedAt: serverTimestamp(),
   });
+
+  const legacyDocId = legacyTripDocId(normalized.id);
+  if (legacyDocId !== nextDocId) {
+    await deleteDoc(doc(db, TRIPS_COLLECTION, legacyDocId));
+  }
 }
 
 export async function updateCatalogItem(item: ProductItem): Promise<void> {
@@ -271,10 +306,27 @@ export async function updateCatalogItem(item: ProductItem): Promise<void> {
 
   refreshCatalogCaches(nextTrips);
 
-  await setDoc(doc(db, TRIPS_COLLECTION, tripDocId(item.id)), {
+  const nextDocId = tripDocId(merged);
+  await setDoc(doc(db, TRIPS_COLLECTION, nextDocId), {
     ...buildTripWritePayload(merged),
     updatedAt: serverTimestamp(),
   });
+
+  const staleDocIds = new Set<string>();
+  const previousDocId = existing ? tripDocId(existing) : '';
+  const legacyDocId = legacyTripDocId(item.id);
+
+  if (previousDocId && previousDocId !== nextDocId) {
+    staleDocIds.add(previousDocId);
+  }
+
+  if (legacyDocId !== nextDocId) {
+    staleDocIds.add(legacyDocId);
+  }
+
+  if (staleDocIds.size > 0) {
+    await Promise.all(Array.from(staleDocIds).map((staleDocId) => deleteDoc(doc(db, TRIPS_COLLECTION, staleDocId))));
+  }
 }
 
 export async function deleteCatalogItem(itemId: number): Promise<void> {
@@ -289,7 +341,8 @@ export async function deleteCatalogItem(itemId: number): Promise<void> {
 
   refreshCatalogCaches(nextTrips);
 
-  await deleteDoc(doc(db, TRIPS_COLLECTION, tripDocId(item.id)));
+  const docIdsToDelete = new Set<string>([tripDocId(item), legacyTripDocId(item.id)]);
+  await Promise.all(Array.from(docIdsToDelete).map((docIdToDelete) => deleteDoc(doc(db, TRIPS_COLLECTION, docIdToDelete))));
 }
 
 export function getCategorySections(options: CatalogOptions = {}): CategorySection[] {
