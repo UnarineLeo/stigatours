@@ -222,7 +222,13 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
     this.isSavingProfile = true;
 
     try {
-      await setDoc(doc(this.authService.db, 'users', this.userUid), {
+      const userDocId = this.authService.getUserDocId(this.profile.email, this.userUid);
+      if (!userDocId) {
+        await this.authService.presentToast('Could not resolve your account record. Please sign in again.');
+        return;
+      }
+
+      await setDoc(doc(this.authService.db, 'users', userDocId), {
         firstName: this.profile.firstName,
         lastName: this.profile.lastName,
         email: this.profile.email,
@@ -294,9 +300,12 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
       this.isEmailVerified = currentUser.emailVerified;
 
       if (this.userUid) {
-        await setDoc(doc(this.authService.db, 'users', this.userUid), {
-          emailVerified: this.isEmailVerified
-        }, { merge: true });
+        const userDocId = this.authService.getUserDocId(currentUser.email, this.userUid);
+        if (userDocId) {
+          await setDoc(doc(this.authService.db, 'users', userDocId), {
+            emailVerified: this.isEmailVerified
+          }, { merge: true });
+        }
       }
 
       if (this.isEmailVerified) {
@@ -337,7 +346,16 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
     this.isDeletingAccount = true;
 
     try {
-      await deleteDoc(doc(this.authService.db, 'users', this.userUid));
+      const emailDocId = this.authService.getUserDocId(currentUser.email, this.userUid);
+      const userDocIds = new Set<string>();
+      if (emailDocId) {
+        userDocIds.add(emailDocId);
+      }
+      if (this.userUid) {
+        userDocIds.add(this.userUid);
+      }
+
+      await Promise.all(Array.from(userDocIds).map((docId) => deleteDoc(doc(this.authService.db, 'users', docId))));
       await deleteUser(currentUser);
       await this.authService.logOut({
         toastMessage: 'Account deleted successfully.',
@@ -644,7 +662,13 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
 
       this.isFinalizingDocumentUpload = true;
 
-      await setDoc(doc(this.authService.db, 'users', this.userUid), {
+      const userDocId = this.authService.getUserDocId(this.profile.email, this.userUid);
+      if (!userDocId) {
+        await this.authService.presentToast('Could not resolve your account record. Please sign in again.');
+        return;
+      }
+
+      await setDoc(doc(this.authService.db, 'users', userDocId), {
         documents: nextDocumentUrls,
         documentFileNames: nextDocumentNames
       }, { merge: true });
@@ -680,9 +704,9 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
     await this.initializeStreetAddressAutocomplete();
   }
 
-  private async loadProfileData(uid: string) {
+  private async loadProfileData(uid: string, email?: string | null) {
     try {
-      const userData = await this.authService.getUser(uid) as {
+      const userData = await this.authService.getUser(uid, email) as {
         firstName?: string;
         lastName?: string;
         email?: string;
@@ -795,7 +819,7 @@ export class ProfilePage implements OnDestroy, AfterViewInit {
       this.activeTab = 'personal';
     }
 
-    await this.loadProfileData(user.uid);
+    await this.loadProfileData(user.uid, user.email);
   }
 
   private async initializeStreetAddressAutocomplete(): Promise<boolean> {

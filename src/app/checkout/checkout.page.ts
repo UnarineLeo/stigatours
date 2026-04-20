@@ -81,7 +81,13 @@ export class CheckoutPage implements OnDestroy {
     this.isSavingDetails = true;
 
     try {
-      await setDoc(doc(this.authService.db, 'users', this.userUid), {
+      const userDocId = this.authService.getUserDocId(this.checkoutProfile.email, this.userUid);
+      if (!userDocId) {
+        await this.authService.presentToast('Could not resolve your account record. Please sign in again.');
+        return;
+      }
+
+      await setDoc(doc(this.authService.db, 'users', userDocId), {
         firstName: this.checkoutProfile.firstName,
         lastName: this.checkoutProfile.lastName,
         email: this.checkoutProfile.email,
@@ -141,12 +147,12 @@ export class CheckoutPage implements OnDestroy {
       phone: user.phoneNumber ?? '',
     };
 
-    await this.loadStoredProfile(this.userUid);
+    await this.loadStoredProfile(this.userUid, user.email);
   }
 
-  private async loadStoredProfile(uid: string): Promise<void> {
+  private async loadStoredProfile(uid: string, email?: string | null): Promise<void> {
     try {
-      const userData = await this.authService.getUser(uid) as {
+      const userData = await this.authService.getUser(uid, email) as {
         firstName?: string;
         lastName?: string;
         email?: string;

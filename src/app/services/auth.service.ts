@@ -138,7 +138,7 @@ export class AuthService {
         await this.presentToast('Successfully logged in. Please verify your email from your profile page.')
       }
 
-      await this.getUser(res.user.uid)
+      await this.getUser(res.user.uid, res.user.email)
 
       return res;
     } catch (error: any) {
@@ -298,21 +298,33 @@ export class AuthService {
   // Add user to firestore
 
   async addUser(user: any): Promise<void> {
-    const userRef = doc(this.db, 'users', user.uid);
-    const userDoc = await getDoc(userRef);
+    const emailDocId = this.getEmailDocId(user?.email);
+    if (!emailDocId) {
+      return;
+    }
 
-    if (userDoc.exists()) 
+    const userRef = doc(this.db, 'users', emailDocId);
+    const legacyUserRef = doc(this.db, 'users', user.uid);
+    const [userDoc, legacyUserDoc] = await Promise.all([getDoc(userRef), getDoc(legacyUserRef)]);
+
+    const existingRole = (userDoc.data()?.['role'] as string | undefined)
+      ?? (legacyUserDoc.data()?.['role'] as string | undefined)
+      ?? 'user';
+
+    if (userDoc.exists())
     {
       const mergePayload: Record<string, unknown> = {
+        uid: user.uid,
         email: user.email,
         displayName: user.displayName,
         emailVerified: user.emailVerified,
         lastSignIn: serverTimestamp(),
+        role: existingRole,
       };
 
       await setDoc(userRef, mergePayload, { merge: true });
-    } 
-    else 
+    }
+    else
     {
       await setDoc(userRef, {
         uid: user.uid,
@@ -320,23 +332,30 @@ export class AuthService {
         displayName: user.displayName,
         emailVerified: user.emailVerified,
         lastSignIn: serverTimestamp(),
-        role: 'user',
+        role: existingRole,
       });
     }
   }
 
   // Get user from firestore
-  async getUser(uid: string) : Promise<JSON>
+  async getUser(uid: string, email?: string | null) : Promise<JSON>
   {
-    const userRef = doc(this.db, 'users', uid);
-    const userDoc = await getDoc(userRef);
+    const emailDocId = this.getEmailDocId(email);
+    const emailRef = emailDocId ? doc(this.db, 'users', emailDocId) : null;
+    const uidRef = doc(this.db, 'users', uid);
 
-    if (!userDoc.exists()) {
+    const userDoc = emailRef
+      ? await getDoc(emailRef)
+      : await getDoc(uidRef);
+
+    const resolvedDoc = userDoc.exists() ? userDoc : await getDoc(uidRef);
+
+    if (!resolvedDoc.exists()) {
       this.userRole = 'user';
       return JSON.parse('{}');
     }
 
-    const userData = userDoc.data() as Record<string, unknown>;
+    const userData = resolvedDoc.data() as Record<string, unknown>;
     this.userRole = (userData['role'] as string | undefined) || 'user';
 
     if (typeof userData['displayName'] === 'string' && userData['displayName']) {
@@ -355,8 +374,12 @@ export class AuthService {
       return null;
     }
 
-    const userRef = doc(this.db, 'users', user.uid);
-    const userDoc = await getDoc(userRef);
+    const emailDocId = this.getEmailDocId(user.email);
+    const emailRef = emailDocId ? doc(this.db, 'users', emailDocId) : null;
+    const uidRef = doc(this.db, 'users', user.uid);
+
+    const byEmailDoc = emailRef ? await getDoc(emailRef) : null;
+    const userDoc = byEmailDoc?.exists() ? byEmailDoc : await getDoc(uidRef);
 
     if (!userDoc.exists()) {
       this.userRole = 'user';
@@ -368,6 +391,21 @@ export class AuthService {
     this.userId = user.uid;
     this.userEmail = user.email || 'not signed in';
     return role;
+  }
+
+  getUserDocId(email: string | null | undefined, fallbackUid?: string | null): string | null {
+    const emailDocId = this.getEmailDocId(email);
+    if (emailDocId) {
+      return emailDocId;
+    }
+
+    const uid = fallbackUid?.trim();
+    return uid && uid.length > 0 ? uid : null;
+  }
+
+  private getEmailDocId(email: string | null | undefined): string | null {
+    const normalized = email?.trim().toLowerCase();
+    return normalized && normalized.length > 0 ? normalized : null;
   }
 
   async isCurrentUserAdmin(): Promise<boolean> {
